@@ -1,0 +1,14 @@
+{
+  "name": "gd1-frontend-root",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "cd app && npm run dev",
+    "build": "cd app && npm run build",
+    "install-app": "cd app && npm install"
+  },
+  "dependencies": {
+    "@react-oauth/google": "^0.13.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
