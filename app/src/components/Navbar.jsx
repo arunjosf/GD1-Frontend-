@@ -1,0 +1,107 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+
+export default function Navbar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <nav className="fixed top-0 left-0 w-full z-[100]">
+      {/* Expandable Glass Background */}
+      <div 
+        className={`absolute top-0 left-0 w-full bg-white/40 backdrop-blur-2xl border-b border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.05)] transition-all duration-300 -z-10 ${
+          isHovered ? 'h-[120px]' : 'h-12'
+        }`} 
+      />
+
+      <div className="w-full px-[6vw] h-12 flex items-center justify-between">
+        
+        {/* Logo / Brand */}
+        <div className="flex-shrink-0 flex items-center relative z-[110]">
+          <Link to="/" className="flex items-center outline-none">
+            <img src="/GD1 Logo.png" alt="GD1 Logo" className="h-[24px] md:h-[27px] w-auto object-contain" />
+          </Link>
+        </div>  
+
+        {/* Center Nav Links */}
+        <div className="hidden md:flex items-center justify-center gap-9 absolute left-1/2 -translate-x-1/2">
+          {['Home', 'About', 'Contact'].map((item) => (
+            <Link 
+              key={item} 
+              to={`/${item.toLowerCase().replace(/ /g, '-')}`}
+              className="text-[12px] font-medium tracking-wide text-gray-800 hover:text-black transition-colors no-underline"
+            >
+              {item}
+            </Link>
+          ))}
+
+          {/* Dropdown for Partner With Us */}
+          <div 
+            className="relative h-full flex items-center"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            <button className={`text-[12px] font-medium tracking-wide transition-colors no-underline py-4 outline-none ${isHovered ? 'text-[#111]' : 'text-gray-800 hover:text-black'}`}>
+              Partner With Us
+            </button>
+            
+            {/* Dropdown Menu */}
+            <div className={`absolute top-12  left-0 w-[220px] transition-all duration-300 flex flex-col pt-1 pb-4 z-50 ${isHovered ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
+              <Link to="/add-garage" className="py-1.5 text-[12px] font-medium text-[#111]/70 hover:text-[#111] transition-colors no-underline">
+                Add your Garage
+              </Link>
+              <Link to="/add-service-center" className="py-1.5 text-[12px] font-medium text-[#111]/70 hover:text-[#111] transition-colors no-underline">
+                Add your service center
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Actions */}
+        <div className="hidden md:flex items-center gap-5 flex-shrink-0">
+          <Link to="/login" className="text-[12px] font-medium tracking-wide text-gray-800 hover:text-black transition-colors no-underline">
+            Log in
+          </Link>
+          <Link to="/register" className="bg-[#111] text-white text-[12px] font-medium tracking-wide px-4 py-1.5 rounded-full hover:bg-[#333] transition-colors no-underline">
+            Sign up
+          </Link>
+        </div>
+
+        {/* Mobile Hamburger */}
+        <button 
+          className="md:hidden flex flex-col justify-center items-center w-8 h-8 space-y-1.5 z-[110]"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <span className={`block w-6 h-0.5 bg-[#111] transition-transform duration-300 ${isOpen ? 'rotate-45 translate-y-2' : ''}`} />
+          <span className={`block w-6 h-0.5 bg-[#111] transition-opacity duration-300 ${isOpen ? 'opacity-0' : ''}`} />
+          <span className={`block w-6 h-0.5 bg-[#111] transition-transform duration-300 ${isOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+        </button>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      <div className={`md:hidden fixed inset-0 z-[105] h-screen w-screen bg-white/95 backdrop-blur-3xl transition-all duration-500 flex flex-col pt-[120px] px-[6vw] ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+        <div className="flex flex-col items-start gap-8">
+          {['Home', 'About', 'Contact', 'Add your Garage', 'Add your service center'].map((item) => (
+            <Link 
+              key={item} 
+              to={`/${item.toLowerCase().replace(/ /g, '-')}`}
+              onClick={() => setIsOpen(false)}
+              className="text-[15px] font-medium text-[#111] no-underline"
+            >
+              {item}
+            </Link>
+          ))}
+          
+          <div className="w-full" /> {/* Spacer before auth links */}
+
+          <Link to="/login" onClick={() => setIsOpen(false)} className="text-[15px] font-medium text-[#111] no-underline">
+            Log in
+          </Link>
+          <Link to="/register" onClick={() => setIsOpen(false)} className="bg-[#111] text-white text-[15px] font-medium px-7 py-2.5 rounded-full no-underline shadow-md w-fit">
+            Sign up
+          </Link>
+        </div>
+      </div>
+    </nav>
+  );
+}

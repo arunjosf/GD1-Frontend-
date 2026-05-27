@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-export default function SecuritySection() {
+export default function ServiceSection() {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -48,29 +48,29 @@ export default function SecuritySection() {
         }}
       />
 
-      {/* ── PERFECT FOREGROUND VIDEO (Anchored top, slightly decreased size) ── */}
+      {/* ── PERFECT FOREGROUND VIDEO (Anchored top right, slightly decreased size) ── */}
       <div 
-        className="absolute top-0 left-0 h-[85vh] aspect-[16/9] z-0"
+        className="absolute top-0 right-0 h-[85vh] aspect-[16/9] z-0"
         style={{
-          /* The right edge of the video is masked to fade seamlessly into the room background */
-          maskImage: 'linear-gradient(to left, transparent 0%, transparent 15%, black 35%)',
-          WebkitMaskImage: 'linear-gradient(to left, transparent 0%, transparent 15%, black 35%)'
+          /* The left edge of the video is masked to fade seamlessly into the room background */
+          maskImage: 'linear-gradient(to right, transparent 0%, transparent 15%, black 35%)',
+          WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 15%, black 35%)'
         }}
       >
         <video
           ref={videoRef}
-          src="/section2.mp4"
+          src="/section3.mp4"
           muted
           playsInline
           className="w-full h-full object-cover"
           style={{
-            /* Shifted from -15% to -5% to move the car a little bit to the right */
-            transform: 'translateX(-5%)'
+            /* Shifted to 5% to move the car a little bit to the right, mirroring section 2 */
+            transform: 'translateX(5%)'
           }}
         />
       </div>
 
-      {/* ── TOP BLEND: Seamlessly blends the top of the video into the first section ── */}
+      {/* ── TOP BLEND: Seamlessly blends the top of the video into the second section ── */}
       <div 
         className="absolute top-0 left-0 w-full h-[20vh] z-30 pointer-events-none"
         style={{
@@ -87,38 +87,38 @@ export default function SecuritySection() {
         }}
       />
 
-      {/* ── RIGHT BLEND: Soft fade for text ── */}
+      {/* ── LEFT BLEND: Smoother, more gradual fade for text (Mirroring CinematicHero) ── */}
       <div 
         className="absolute inset-0 z-10 pointer-events-none"
         style={{
-          background: 'linear-gradient(to left, #ebeced 10%, rgba(235,236,237,0.7) 25%, transparent 38%)',
+          /* Even softer fade: almost invisible over the car, slowly building up to the text */
+          background: 'linear-gradient(to right, rgba(235,236,237,0.95) 0%, rgba(235,236,237,0.6) 20%, rgba(235,236,237,0.15) 45%, transparent 65%)',
         }} 
       />
 
-      {/* ── TEXT CONTENT on right (Elevated above all blends so it never fades) ── */}
-      <div className="absolute inset-0 z-40 flex justify-end items-center px-[6vw]">
+      {/* ── TEXT CONTENT on left (Elevated above all blends) ── */}
+      <div className="absolute inset-0 z-40 flex flex-col justify-center px-[6vw]">
         <div 
           className={`max-w-[500px] flex flex-col gap-7 -mt-[10vh] transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] delay-300 ${
-            isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[50vw]'
+            isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-[50vw]'
           }`}
         >
 
           <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-[#888] m-0">
-            Uncompromising Security
+            White-Glove Service
           </p>
 
           <h2 className="text-[clamp(2.6rem,4.2vw,4.8rem)] font-medium leading-[1.07] tracking-[-0.03em] text-[#111] m-0">
-            Impenetrable.<br />
-            Protected.<br />
-            <em className="italic font-light">Secure.</em>
+            Pristine.<br />
+            Maintained.<br />
+            <em className="italic font-light">Ready.</em>
           </h2>
 
           <p className="text-[15px] leading-[1.72] text-[#555] m-0 max-w-[360px]">
-            Military-grade security and 24/7 HD monitoring. The ultimate sanctuary for your automotive investments, keeping them safe from every threat.
+            Daily startup checks, weekly vehicle updates, smart diagnostics, and direct owner service booking with nearby service centers for on-site lot servicing.
           </p>
 
-          {/* Learn More button matching CinematicHero */}
-                <Link
+                         <Link
   to="/register"
   className="inline-flex items-center bg-[#2563eb] text-white no-underline rounded-full pl-6 pr-1.5 py-1.5 text-[14px] font-semibold w-fit shadow-[0_8px_30px_rgba(0,0,0,0.18)] transition-all duration-300  hover:shadow-[0_14px_40px_rgba(0,0,0,0.26)] group overflow-hidden"
 >
@@ -147,6 +147,7 @@ export default function SecuritySection() {
     </svg>
   </div>
 </Link>
+
         </div>
       </div>
     </div>

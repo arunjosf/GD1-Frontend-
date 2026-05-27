@@ -1,8 +1,46 @@
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function CinematicHero() {
+  const videoRef = useRef(null);
+  const containerRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            // Play video from beginning when it comes into view
+            if (videoRef.current) {
+              videoRef.current.currentTime = 0;
+              videoRef.current.play().catch(e => console.log("Auto-play prevented", e));
+            }
+          } else {
+            // Pause video when out of view to save resources and prepare for next scroll
+            if (videoRef.current) {
+              videoRef.current.pause();
+            }
+          }
+        });
+      },
+      { threshold: 0.3 } // Trigger when 30% of the section is visible
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      if (containerRef.current) {
+        observer.unobserve(containerRef.current);
+      }
+    };
+  }, []);
+
   return (
-    <div className="relative w-screen h-screen overflow-hidden font-sans bg-[#ebeced]">
+    <div ref={containerRef} className="relative w-screen h-screen overflow-hidden font-sans bg-[#ebeced]">
       {/* ── ROOM BACKGROUND (Mimics video lighting perfectly to hide any gaps) ── */}
       <div 
         className="absolute inset-0 z-0"
@@ -21,20 +59,20 @@ export default function CinematicHero() {
         }}
       >
         <video
+          ref={videoRef}
           src="/hero_video.mp4"
-          autoPlay
           muted
-          loop
           playsInline
           className="w-full h-full object-cover"
         />
       </div>
 
-      {/* ── LEFT BLEND: Classic soft fade for text ── */}
+      {/* ── LEFT BLEND: Smoother, more gradual fade for text ── */}
       <div 
         className="absolute inset-0 z-10 pointer-events-none"
         style={{
-          background: 'linear-gradient(to right, #ebeced 10%, rgba(235,236,237,0.7) 25%, transparent 38%)',
+          /* Even softer fade: almost invisible over the car, slowly building up to the text */
+          background: 'linear-gradient(to right, rgba(235,236,237,0.95) 0%, rgba(235,236,237,0.6) 20%, rgba(235,236,237,0.15) 45%, transparent 65%)',
         }} 
       />
 
@@ -48,7 +86,11 @@ export default function CinematicHero() {
 
       {/* ── TEXT CONTENT on left ── */}
       <div className="absolute inset-0 z-20 flex flex-col justify-center px-[6vw]">
-        <div className="max-w-[500px] flex flex-col gap-7 animate-[fadeSlideIn_1s_ease_both]">
+        <div 
+          className={`max-w-[500px] flex flex-col gap-7 transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] delay-300 ${
+            isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-[50vw]'
+          }`}
+        >
 
           <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-[#888] m-0">
             Grand Auto Depot One
@@ -65,45 +107,51 @@ export default function CinematicHero() {
           </p>
 
           {/* Book Your Lot button */}
-         <Link
-  to="/register"
-  className="inline-flex items-center bg-[#2563eb] text-white no-underline rounded-full pl-6 pr-1.5 py-1.5 text-[14px] font-semibold w-fit shadow-[0_8px_30px_rgba(0,0,0,0.18)] transition-all duration-300  hover:shadow-[0_14px_40px_rgba(0,0,0,0.26)] group overflow-hidden"
->
-  {/* Text + animated arrows */}
-  <div className="flex items-center">
-    <span>Book Your Space</span>
+          <Link
+            to="/register"
+            className="inline-flex items-center bg-[#2563eb] text-white no-underline rounded-full pl-6 pr-1.5 py-1.5 text-[14px] font-semibold w-fit shadow-[0_8px_30px_rgba(0,0,0,0.18)] transition-all duration-300  hover:shadow-[0_14px_40px_rgba(0,0,0,0.26)] group overflow-hidden"
+          >
+            {/* Text + animated arrows */}
+            <div className="flex items-center">
+              <span>Book Your Space</span>
 
-    {/* Hidden arrows initially */}
-    <div className="flex max-w-0 opacity-0 overflow-hidden transition-all duration-600 group-hover:max-w-[40px] group-hover:opacity-100">
-      <span className="ml-2 tracking-[1px] text-gray-300">&gt;&gt;</span>
-    </div>
-  </div>
+              {/* Hidden arrows initially */}
+              <div className="flex max-w-0 opacity-0 overflow-hidden transition-all duration-600 group-hover:max-w-[40px] group-hover:opacity-100">
+                <span className="ml-2 tracking-[1px] text-gray-300">&gt;&gt;</span>
+              </div>
+            </div>
 
-  {/* White circle */}
-  <div className="w-[36px] h-[36px] ml-3 group-hover:ml-0 group-hover:mr-2 rounded-full bg-white flex items-center justify-center shrink-0 transition-all duration-300 group-hover:translate-x-2">
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="#111"
-      strokeWidth="2.5"
-      className="transition-transform duration-300 "
-    >
-      <path d="M5 12h14M12 5l7 7-7 7" />
-    </svg>
-  </div>
-</Link>
+            {/* White circle */}
+            <div className="w-[36px] h-[36px] ml-3 group-hover:ml-0 group-hover:mr-2 rounded-full bg-white flex items-center justify-center shrink-0 transition-all duration-300 group-hover:translate-x-2">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#111"
+                strokeWidth="2.5"
+                className="transition-transform duration-300 "
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </div>
+          </Link>
+
+          {/* Social Proof Widget */}
+          <div className="flex items-center gap-2.5 mt-2">
+            <div className="flex -space-x-2">
+              <img className="w-7 h-7 rounded-full object-cover shadow-sm" src="/Ellipse 1.png" alt="Trusted User" />
+              <img className="w-7 h-7 rounded-full object-cover shadow-sm" src="/Ellipse 2.png" alt="Trusted User" />
+              <img className="w-7 h-7 rounded-full object-cover shadow-sm" src="/Ellipse 3.png" alt="Trusted User" />
+            </div>
+            <p className="text-[12px] text-[#555] m-0 italic">
+              <span className="font-bold text-[#111]">382+</span> trusted users
+            </p>
+          </div>
 
         </div>
       </div>
 
-      <style>{`
-        @keyframes fadeSlideIn {
-          from { opacity: 0; transform: translateX(-24px); }
-          to   { opacity: 1; transform: translateX(0); }
-        }
-      `}</style>
     </div>
   );
 }
