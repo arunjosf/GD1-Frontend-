@@ -38,7 +38,7 @@ export default function SecuritySection() {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative w-screen h-screen overflow-hidden font-sans bg-[#ebeced]">
+    <div ref={containerRef} className="relative w-screen h-screen max-md:h-[85svh] overflow-hidden font-sans bg-[#ebeced]">
       
       {/* ── ROOM BACKGROUND (Mimics video lighting perfectly to hide any gaps) ── */}
       <div 
@@ -50,23 +50,14 @@ export default function SecuritySection() {
 
       {/* ── PERFECT FOREGROUND VIDEO (Anchored top, slightly decreased size) ── */}
       <div 
-        className="absolute top-0 left-0 h-[85vh] aspect-[16/9] z-0"
-        style={{
-          /* The right edge of the video is masked to fade seamlessly into the room background */
-          maskImage: 'linear-gradient(to left, transparent 0%, transparent 15%, black 35%)',
-          WebkitMaskImage: 'linear-gradient(to left, transparent 0%, transparent 15%, black 35%)'
-        }}
+        className="absolute top-0 left-0 h-[85vh] aspect-[16/9] z-0 max-md:inset-0 max-md:w-full max-md:h-full max-md:aspect-auto md:[mask-image:linear-gradient(to_left,transparent_0%,transparent_15%,black_35%)] md:[-webkit-mask-image:linear-gradient(to_left,transparent_0%,transparent_15%,black_35%)]"
       >
         <video
           ref={videoRef}
           src="/section2.mp4"
           muted
           playsInline
-          className="w-full h-full object-cover"
-          style={{
-            /* Shifted from -15% to -5% to move the car a little bit to the right */
-            transform: 'translateX(-5%)'
-          }}
+          className="w-full h-full object-cover md:-translate-x-[5%]"
         />
       </div>
 
@@ -89,17 +80,20 @@ export default function SecuritySection() {
 
       {/* ── RIGHT BLEND: Soft fade for text ── */}
       <div 
-        className="absolute inset-0 z-10 pointer-events-none"
+        className="max-md:hidden absolute inset-0 z-10 pointer-events-none"
         style={{
           background: 'linear-gradient(to left, #ebeced 10%, rgba(235,236,237,0.7) 25%, transparent 38%)',
         }} 
       />
 
+      {/* ── MOBILE OVERLAY ── */}
+      <div className="md:hidden absolute inset-0 z-10 pointer-events-none bg-gradient-to-t from-[#ebeced] via-[#ebeced]/90 to-transparent" />
+
       {/* ── TEXT CONTENT on right (Elevated above all blends so it never fades) ── */}
-      <div className="absolute inset-0 z-40 flex justify-end items-center px-[6vw]">
+      <div className="absolute inset-0 z-40 flex justify-end items-center px-[6vw] max-md:flex-col max-md:justify-end max-md:items-start max-md:pb-[8vh]">
         <div 
-          className={`max-w-[500px] flex flex-col gap-7 -mt-[10vh] transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] delay-300 ${
-            isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-[50vw]'
+          className={`max-w-[500px] flex flex-col gap-7 max-md:gap-5 -mt-[10vh] max-md:mt-0 transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] delay-300 ${
+            isVisible ? 'opacity-100 translate-x-0 translate-y-0' : 'opacity-0 md:translate-x-[50vw] max-md:translate-y-[10vh]'
           }`}
         >
 

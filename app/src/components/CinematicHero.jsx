@@ -40,7 +40,7 @@ export default function CinematicHero() {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative w-screen h-screen overflow-hidden font-sans bg-[#ebeced]">
+    <div ref={containerRef} className="relative w-screen h-screen max-md:h-[85svh] overflow-hidden font-sans bg-[#ebeced]">
       {/* ── ROOM BACKGROUND (Mimics video lighting perfectly to hide any gaps) ── */}
       <div 
         className="absolute inset-0 z-0"
@@ -51,12 +51,7 @@ export default function CinematicHero() {
 
       {/* ── PERFECT FOREGROUND VIDEO (Car stays exactly on right) ── */}
       <div 
-        className="absolute top-0 right-0 h-full aspect-[16/9] z-0"
-        style={{
-          /* Smooth, wide blend: Starts after the worst vignette (6%) and fades softly to 25%, providing a much smoother transition without ever touching the car. */
-          maskImage: 'linear-gradient(to right, transparent 0%, transparent 6%, black 25%)',
-          WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 6%, black 25%)'
-        }}
+        className="absolute top-0 right-0 h-full aspect-[16/9] z-0 max-md:inset-0 max-md:w-full max-md:aspect-auto md:[mask-image:linear-gradient(to_right,transparent_0%,transparent_6%,black_25%)] md:[-webkit-mask-image:linear-gradient(to_right,transparent_0%,transparent_6%,black_25%)]"
       >
         <video
           ref={videoRef}
@@ -69,12 +64,15 @@ export default function CinematicHero() {
 
       {/* ── LEFT BLEND: Smoother, more gradual fade for text ── */}
       <div 
-        className="absolute inset-0 z-10 pointer-events-none"
+        className="max-md:hidden absolute inset-0 z-10 pointer-events-none"
         style={{
           /* Even softer fade: almost invisible over the car, slowly building up to the text */
           background: 'linear-gradient(to right, rgba(235,236,237,0.95) 0%, rgba(235,236,237,0.6) 20%, rgba(235,236,237,0.15) 45%, transparent 65%)',
         }} 
       />
+
+      {/* ── MOBILE OVERLAY ── */}
+      <div className="md:hidden absolute inset-0 z-10 pointer-events-none bg-gradient-to-t from-[#ebeced] via-[#ebeced]/80 to-transparent" />
 
       {/* ── BOTTOM BLEND: fades the bottom of the video into the page background ── */}
       <div 
@@ -85,10 +83,10 @@ export default function CinematicHero() {
       />
 
       {/* ── TEXT CONTENT on left ── */}
-      <div className="absolute inset-0 z-20 flex flex-col justify-center px-[6vw]">
+      <div className="absolute inset-0 z-20 flex flex-col justify-center px-[6vw] max-md:justify-end max-md:pb-[8vh]">
         <div 
-          className={`max-w-[500px] flex flex-col gap-7 transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] delay-300 ${
-            isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-[50vw]'
+          className={`max-w-[500px] flex flex-col gap-7 max-md:gap-5 transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] delay-300 ${
+            isVisible ? 'opacity-100 translate-x-0 translate-y-0' : 'opacity-0 md:-translate-x-[50vw] max-md:translate-y-[10vh]'
           }`}
         >
 
@@ -96,7 +94,7 @@ export default function CinematicHero() {
             Grand Auto Depot One
           </p>
 
-          <h1 className="text-[clamp(2.6rem,4.2vw,4.8rem)] font-medium leading-[1.07] tracking-[-0.03em] text-[#111] m-0">
+          <h1 className="text-[clamp(2.6rem,4.2vw,4.8rem)] max-md:text-[2.6rem] font-medium leading-[1.07] tracking-[-0.03em] text-[#111] m-0">
             The safest home<br />
             for your prized<br />
             <em className="italic font-light">vehicle.</em>
@@ -145,7 +143,7 @@ export default function CinematicHero() {
               <img className="w-7 h-7 rounded-full object-cover shadow-sm" src="/Ellipse 3.png" alt="Trusted User" />
             </div>
             <p className="text-[12px] text-[#555] m-0 italic">
-              <span className="font-bold text-[#111]">382+</span> trusted users
+              <span className="font-bold text-[#111]">27000+</span> trusted users
             </p>
           </div>
 

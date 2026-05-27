@@ -92,7 +92,7 @@ export default function Navbar() {
             </Link>
           ))}
           
-          <div className="w-full" /> {/* Spacer before auth links */}
+          <div className="w-full" />
 
           <Link to="/login" onClick={() => setIsOpen(false)} className="text-[15px] font-medium text-[#111] no-underline">
             Log in

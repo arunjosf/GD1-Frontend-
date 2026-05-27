@@ -38,7 +38,7 @@ export default function ServiceSection() {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative w-screen h-screen overflow-hidden font-sans bg-[#ebeced]">
+    <div ref={containerRef} className="relative w-screen h-screen max-md:h-[85svh] overflow-hidden font-sans bg-[#ebeced]">
       
       {/* ── ROOM BACKGROUND (Mimics video lighting perfectly to hide any gaps) ── */}
       <div 
@@ -50,23 +50,14 @@ export default function ServiceSection() {
 
       {/* ── PERFECT FOREGROUND VIDEO (Anchored top right, slightly decreased size) ── */}
       <div 
-        className="absolute top-0 right-0 h-[85vh] aspect-[16/9] z-0"
-        style={{
-          /* The left edge of the video is masked to fade seamlessly into the room background */
-          maskImage: 'linear-gradient(to right, transparent 0%, transparent 15%, black 35%)',
-          WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 15%, black 35%)'
-        }}
+        className="absolute top-0 right-0 h-[85vh] aspect-[16/9] z-0 max-md:inset-0 max-md:w-full max-md:h-full max-md:aspect-auto md:[mask-image:linear-gradient(to_right,transparent_0%,transparent_15%,black_35%)] md:[-webkit-mask-image:linear-gradient(to_right,transparent_0%,transparent_15%,black_35%)]"
       >
         <video
           ref={videoRef}
           src="/section3.mp4"
           muted
           playsInline
-          className="w-full h-full object-cover"
-          style={{
-            /* Shifted to 5% to move the car a little bit to the right, mirroring section 2 */
-            transform: 'translateX(5%)'
-          }}
+          className="w-full h-full object-cover md:translate-x-[5%]"
         />
       </div>
 
@@ -89,18 +80,21 @@ export default function ServiceSection() {
 
       {/* ── LEFT BLEND: Smoother, more gradual fade for text (Mirroring CinematicHero) ── */}
       <div 
-        className="absolute inset-0 z-10 pointer-events-none"
+        className="max-md:hidden absolute inset-0 z-10 pointer-events-none"
         style={{
           /* Even softer fade: almost invisible over the car, slowly building up to the text */
           background: 'linear-gradient(to right, rgba(235,236,237,0.95) 0%, rgba(235,236,237,0.6) 20%, rgba(235,236,237,0.15) 45%, transparent 65%)',
         }} 
       />
 
+      {/* ── MOBILE OVERLAY ── */}
+      <div className="md:hidden absolute inset-0 z-10 pointer-events-none bg-gradient-to-t from-[#ebeced] via-[#ebeced]/90 to-transparent" />
+
       {/* ── TEXT CONTENT on left (Elevated above all blends) ── */}
-      <div className="absolute inset-0 z-40 flex flex-col justify-center px-[6vw]">
+      <div className="absolute inset-0 z-40 flex flex-col justify-center px-[6vw] max-md:justify-end max-md:pb-[8vh]">
         <div 
-          className={`max-w-[500px] flex flex-col gap-7 -mt-[10vh] transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] delay-300 ${
-            isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-[50vw]'
+          className={`max-w-[500px] flex flex-col gap-7 max-md:gap-5 -mt-[10vh] max-md:mt-0 transition-all duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] delay-300 ${
+            isVisible ? 'opacity-100 translate-x-0 translate-y-0' : 'opacity-0 md:-translate-x-[50vw] max-md:translate-y-[10vh]'
           }`}
         >
 

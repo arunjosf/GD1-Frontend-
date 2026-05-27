@@ -2,6 +2,8 @@ import Navbar from '../components/Navbar';
 import CinematicHero from '../components/CinematicHero';
 import SecuritySection from '../components/SecuritySection';
 import ServiceSection from '../components/ServiceSection';
+import PartnerSection from '../components/PartnerSection';
+import Footer from '../components/Footer';
 
 export default function LandingPage() {
   return (
@@ -16,6 +18,12 @@ export default function LandingPage() {
       
       {/* ── SERVICE SECTION ── */}
       <ServiceSection />
+      
+      {/* ── PARTNER SECTION ── */}
+      <PartnerSection />
+
+      {/* ── FOOTER ── */}
+      <Footer />
     </div>
   );
 }

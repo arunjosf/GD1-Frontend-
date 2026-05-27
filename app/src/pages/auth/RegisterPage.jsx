@@ -396,10 +396,10 @@ rests in safety.
             <div className="text-center mt-4">
               <button 
                 type="button" 
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/login')}
                 className="text-[13px]"
               >
-                Back to <Link to="/register" className="font-medium"><span className="underline text-blue-800 hover:text-blue-500">Login</span></Link>
+                Already have an account? <Link to="/register" className="font-medium"><span className="underline text-blue-800 hover:text-blue-500">Login</span></Link>
               </button>
             </div>
 
