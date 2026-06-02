@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { authApi } from '../../api/auth';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { Eye, EyeOff, X } from "lucide-react";
 import { toast } from 'react-hot-toast';
 
@@ -25,7 +26,7 @@ const GoogleIcon = () => (
 
 
 // ── NEW: OTP Modal popup ───────────────────────────────────────────────────────
-function OtpModal({ email, onClose, onVerify, onResend }) {
+function OtpModal({ email, onClose, onVerify, onResend, onSuccess }) {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [verifyError, setVerifyError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -63,6 +64,7 @@ function OtpModal({ email, onClose, onVerify, onResend }) {
       if (result.success) {
         toast.success('Authenticated successfully!', { id: loadingToast });
         onClose();
+        if (onSuccess) onSuccess(result.user);
       } else {
         toast.dismiss(loadingToast);
         setVerifyError(result.message || 'Invalid OTP');
@@ -139,6 +141,7 @@ function OtpModal({ email, onClose, onVerify, onResend }) {
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const [form, setForm] = useState({ fullname: '', email: '', password: '', confirmpassword: '' });
   const handleGoogleLogin = useGoogleLogin({
@@ -148,13 +151,17 @@ export default function RegisterPage() {
         const result = await authApi.googleLogin(tokenResponse.access_token);
         if (result.success) {
           toast.success(result.isNewUser ? 'Registration successful!' : 'Login successful!', { id: loadingToast });
+          if (result.user) setUser(result.user);
+          else setUser(true);
+          localStorage.setItem('isAuthenticated', 'true');
+          navigate('/home');
         } else {
           toast.error(result.message || 'Google registration failed', { id: loadingToast });
           setErrors({ form: result.message || 'Google registration failed' });
         }
-      } catch (err) {
-        toast.error('Google registration failed. Please try again.', { id: loadingToast });
-        setErrors({ form: 'Google registration failed. Please try again.' });
+      } catch {
+        toast.error('Google registration failed.', { id: loadingToast });
+        setErrors({ form: 'Google registration failed.' });
       }
     },
     onError: () => toast.error('Google login was unsuccessful.')
@@ -219,6 +226,12 @@ export default function RegisterPage() {
           onClose={() => setShowOtpModal(false)}
           onVerify={(code) => authApi.verifyEmail(form.email, code)}
           onResend={() => authApi.sendOtp(form.email)}
+          onSuccess={(user) => {
+            if (user) setUser(user);
+            else setUser(true);
+            localStorage.setItem('isAuthenticated', 'true');
+            navigate('/home');
+          }}
         />
       )}
 

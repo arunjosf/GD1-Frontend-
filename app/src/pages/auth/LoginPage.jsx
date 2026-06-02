@@ -1,7 +1,8 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
-import { authApi } from '../../api/auth';
+import { authApi, getToken } from '../../api/auth';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from 'react-hot-toast';
 
@@ -26,6 +27,7 @@ const GoogleIcon = () => (
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
@@ -39,11 +41,33 @@ export default function LoginPage() {
         const result = await authApi.googleLogin(tokenResponse.access_token);
         if (result.success) {
           toast.success(result.isNewUser ? 'Registration successful!' : 'Login successful!', { id: loadingToast });
+          if (result.user) setUser(result.user);
+          else setUser(true);
+          localStorage.setItem('isAuthenticated', 'true');
+          
+          const token = getToken('AccessToken');
+          let isAdmin = false;
+          if (token) {
+            try {
+              const decoded = JSON.parse(atob(token.split('.')[1]));
+              if (decoded.roleId === '5' || decoded.roleId === 5) {
+                isAdmin = true;
+              }
+            } catch (e) {
+              console.error("Failed to parse token", e);
+            }
+          }
+          
+          if (isAdmin) {
+            navigate('/admin/dashboard');
+          } else {
+            navigate('/home');
+          }
         } else {
           toast.error(result.message || 'Google login failed', { id: loadingToast });
           setErrors({ form: result.message || 'Google login failed' });
         }
-      } catch (err) {
+      } catch {
         toast.error('Google login failed. Please try again.', { id: loadingToast });
         setErrors({ form: 'Google login failed. Please try again.' });
       }
@@ -77,6 +101,29 @@ export default function LoginPage() {
 
       if (result.success) {
         toast.success('Login successful!', { id: loadingToast });
+        if (result.user) setUser(result.user);
+        else setUser(true);
+        localStorage.setItem('isAuthenticated', 'true');
+        
+        // Check role in token
+        const token = getToken('AccessToken');
+        let isAdmin = false;
+        if (token) {
+          try {
+            const decoded = JSON.parse(atob(token.split('.')[1]));
+            if (decoded.roleId === '5' || decoded.roleId === 5) {
+              isAdmin = true;
+            }
+          } catch (e) {
+            console.error("Failed to parse token", e);
+          }
+        }
+        
+        if (isAdmin) {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/home');
+        }
       } else {
         toast.error(result.message || 'Login failed', { id: loadingToast });
         setErrors({ form: result.message || 'Login failed' });

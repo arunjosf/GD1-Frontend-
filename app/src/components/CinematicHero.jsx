@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function CinematicHero() {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -105,35 +108,25 @@ export default function CinematicHero() {
           </p>
 
           {/* Book Your Lot button */}
-          <Link
-            to="/register"
-            className="inline-flex items-center bg-[#2563eb] text-white no-underline rounded-full pl-6 pr-1.5 py-1.5 text-[14px] font-semibold w-fit shadow-[0_8px_30px_rgba(0,0,0,0.18)] transition-all duration-300  hover:shadow-[0_14px_40px_rgba(0,0,0,0.26)] group overflow-hidden"
+          <button
+            onClick={() => navigate(isAuthenticated ? '/home' : '/login')}
+            className="inline-flex items-center bg-[#2563eb] text-white no-underline rounded-full pl-6 pr-1.5 py-1.5 text-[14px] font-semibold w-fit shadow-[0_8px_30px_rgba(0,0,0,0.18)] transition-all duration-300 hover:shadow-[0_14px_40px_rgba(0,0,0,0.26)] group overflow-hidden cursor-pointer border-0"
           >
             {/* Text + animated arrows */}
             <div className="flex items-center">
               <span>Book Your Space</span>
-
               {/* Hidden arrows initially */}
               <div className="flex max-w-0 opacity-0 overflow-hidden transition-all duration-600 group-hover:max-w-[40px] group-hover:opacity-100">
                 <span className="ml-2 tracking-[1px] text-gray-300">&gt;&gt;</span>
               </div>
             </div>
-
             {/* White circle */}
             <div className="w-[36px] h-[36px] ml-3 group-hover:ml-0 group-hover:mr-2 rounded-full bg-white flex items-center justify-center shrink-0 transition-all duration-300 group-hover:translate-x-2">
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#111"
-                strokeWidth="2.5"
-                className="transition-transform duration-300 "
-              >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2.5" className="transition-transform duration-300">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
             </div>
-          </Link>
+          </button>
 
           {/* Social Proof Widget */}
           <div className="flex items-center gap-2.5 mt-2">

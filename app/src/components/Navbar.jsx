@@ -1,9 +1,68 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { Bell } from 'lucide-react';
+import NotificationSidebar from './NotificationSidebar';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifications, setNotifications] = useState([]);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
+
+  const handleOpenNotifications = () => {
+    setIsNotificationOpen(true);
+    setUnreadCount(0); // Immediately hide the count badge on the bell
+
+    // Mark unread notifications as read in the backend so the count doesn't return on next fetch,
+    // BUT do NOT update local state 'isRead: true' immediately, so the user can still see 
+    // the blue dots on the new notifications while the bar is open!
+    const unreadNotifs = notifications.filter(n => !n.isRead);
+    if (unreadNotifs.length > 0) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; AccessToken=`);
+      const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
+
+      if (token) {
+        unreadNotifs.forEach(notif => {
+          fetch(`https://localhost:7108/api/notifications/${notif.id}/mark-read`, {
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${token}` }
+          }).catch(() => { /* ignore */ });
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const fetchNotifications = async () => {
+        try {
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; AccessToken=`);
+          const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
+
+          if (!token) return;
+
+          const res = await fetch('https://localhost:7108/api/notifications', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            const result = await res.json();
+            const allNotifs = result.data || [];
+            setNotifications(allNotifs);
+            const unread = allNotifs.filter(n => !n.isRead).length;
+            setUnreadCount(unread);
+          }
+        } catch { /* ignore */ }
+      };
+      fetchNotifications();
+      const interval = setInterval(fetchNotifications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated]);
 
   return (
     <nav className="fixed top-0 left-0 w-full z-[100]">
@@ -59,23 +118,54 @@ export default function Navbar() {
 
         {/* Right Actions */}
         <div className="hidden md:flex items-center gap-5 flex-shrink-0">
-          <Link to="/login" className="text-[12px] font-medium tracking-wide text-gray-800 hover:text-black transition-colors no-underline">
-            Log in
-          </Link>
-          <Link to="/register" className="bg-[#111] text-white text-[12px] font-medium tracking-wide px-4 py-1.5 rounded-full hover:bg-[#333] transition-colors no-underline">
-            Sign up
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link to="/profile" className="text-[12px] font-medium tracking-wide text-gray-800 hover:text-black transition-colors no-underline">
+                Profile
+              </Link>
+
+                 <button onClick={handleOpenNotifications} className="relative text-gray-800 hover:text-black transition-colors outline-none cursor-pointer">
+                <Bell size={16} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-[#111] text-[8px] font-bold text-white">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="text-[12px] font-medium tracking-wide text-gray-800 hover:text-black transition-colors no-underline">
+                Log in
+              </Link>
+              <Link to="/register" className="bg-[#111] text-white text-[12px] font-medium tracking-wide px-4 py-1.5 rounded-full hover:bg-[#333] transition-colors no-underline">
+                Sign up
+              </Link>
+            </>
+          )}
         </div>
 
-        {/* Mobile Hamburger */}
-        <button 
-          className="md:hidden flex flex-col justify-center items-center w-8 h-8 space-y-1.5 z-[110]"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <span className={`block w-6 h-0.5 bg-[#111] transition-transform duration-300 ${isOpen ? 'rotate-45 translate-y-2' : ''}`} />
-          <span className={`block w-6 h-0.5 bg-[#111] transition-opacity duration-300 ${isOpen ? 'opacity-0' : ''}`} />
-          <span className={`block w-6 h-0.5 bg-[#111] transition-transform duration-300 ${isOpen ? '-rotate-45 -translate-y-2' : ''}`} />
-        </button>
+        {/* Mobile Actions (Bell + Hamburger) */}
+        <div className="md:hidden flex items-center gap-5 z-[110]">
+          {isAuthenticated && (
+            <button onClick={handleOpenNotifications} className="relative text-gray-800 hover:text-black transition-colors outline-none cursor-pointer">
+              <Bell size={20} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-[#111] text-[8px] font-bold text-white">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+          )}
+          <button 
+            className="flex flex-col justify-center items-center w-8 h-8 space-y-1"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            <span className={`block w-5 h-0.5 bg-[#111] transition-transform duration-300 ${isOpen ? 'rotate-45 translate-y-1.5' : ''}`} />
+            <span className={`block w-5 h-0.5 bg-[#111] transition-opacity duration-300 ${isOpen ? 'opacity-0' : ''}`} />
+            <span className={`block w-5 h-0.5 bg-[#111] transition-transform duration-300 ${isOpen ? '-rotate-45 -translate-y-1.5' : ''}`} />
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu Overlay */}
@@ -94,14 +184,33 @@ export default function Navbar() {
           
           <div className="w-full" />
 
-          <Link to="/login" onClick={() => setIsOpen(false)} className="text-[15px] font-medium text-[#111] no-underline">
-            Log in
-          </Link>
-          <Link to="/register" onClick={() => setIsOpen(false)} className="bg-[#111] text-white text-[15px] font-medium px-7 py-2.5 rounded-full no-underline shadow-md w-fit">
-            Sign up
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link to="/profile" onClick={() => setIsOpen(false)} className="flex items-center gap-2 text-[15px] font-medium text-[#111] no-underline">
+                Profile
+              </Link>
+
+
+              
+            </>
+          ) : (
+            <>
+              <Link to="/login" onClick={() => setIsOpen(false)} className="text-[15px] font-medium text-[#111] no-underline">
+                Log in
+              </Link>
+              <Link to="/register" onClick={() => setIsOpen(false)} className="bg-[#111] text-white text-[15px] font-medium px-7 py-2.5 rounded-full no-underline shadow-md w-fit">
+                Sign up
+              </Link>
+            </>
+          )}
         </div>
       </div>
+      {/* Notification Sidebar Component */}
+      <NotificationSidebar 
+        isOpen={isNotificationOpen} 
+        onClose={() => setIsNotificationOpen(false)} 
+        notifications={notifications} 
+      />
     </nav>
   );
 }

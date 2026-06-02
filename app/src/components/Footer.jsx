@@ -27,7 +27,7 @@ const slugify = (text) => text.toLowerCase().replace(/ /g, '-');
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-[#ebeced] font-sans">
+    <footer className="w-full bg-white font-sans">
       <div className="w-full max-w-[1200px] mx-auto px-[6vw] pt-14 pb-10">
 
         {/* Top Divider Line */}
