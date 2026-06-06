@@ -10,15 +10,17 @@ export default function AddVehiclePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const initialCity = queryParams.get('city') || '';
-  const initialDate = queryParams.get('date') || '';
+  const initialCity = queryParams.get('city') || localStorage.getItem('gd1_search_city') || '';
+  const initialDate = queryParams.get('date') || localStorage.getItem('gd1_search_date') || '';
 
   // Wizard state
   const [step, setStep] = useState(0); // 0 = VIN Popup, 1 = Specs, 2 = Docs, 3 = Photos
   
   // Form State matching DTO
   const [form, setForm] = useState({
-    vehicleId: 0,
+    brand: '',
+    model: '',
+    category: '',
     year: 2024,
     registrationNo: '',
     ownerIdProofUrl: '',
@@ -62,13 +64,12 @@ export default function AddVehiclePage() {
           ...f,
           year: vInfo.year || f.year,
           fuelType: vInfo.fuelType || f.fuelType
-          // Note: If decode-vin returns catalog VehicleId, we would set it here.
-          // For now, we just auto-fill what we have.
         }));
         
         if (vInfo.brand && vInfo.model) {
            setSelectedVehicleName(`${vInfo.brand} ${vInfo.model}`);
            setSearchTerm(`${vInfo.brand} ${vInfo.model}`);
+           setForm(f => ({ ...f, brand: vInfo.brand, model: vInfo.model, category: vInfo.category || 'Standard' }));
         }
         
         toast.success('VIN Decoded Successfully!');
@@ -111,7 +112,7 @@ export default function AddVehiclePage() {
   }, [searchTerm, selectedVehicleName]);
 
   const selectCatalogVehicle = (v) => {
-    setForm(f => ({ ...f, vehicleId: v.id }));
+    setForm(f => ({ ...f, brand: v.brand, model: v.model, category: v.category }));
     const name = `${v.brand} ${v.model}`;
     setSelectedVehicleName(name);
     setSearchTerm(name);
@@ -167,28 +168,15 @@ export default function AddVehiclePage() {
     }));
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step === 1) {
       const yearInt = parseInt(form.year, 10);
       
-      if (!form.vehicleId) return toast.error('Please select a vehicle from the catalog search');
+      if (!form.brand || !form.model) return toast.error('Please select a vehicle from the catalog search');
       if (!form.year) return toast.error('Year is required');
       
-      // Validate year against catalog validYearsCsv
-      if (selectedValidYearsCsv) {
-        let isYearValid = false;
-        const yearsStr = selectedValidYearsCsv.trim();
-        if (yearsStr.includes('-')) {
-          const [start, end] = yearsStr.split('-');
-          if (yearInt >= parseInt(start) && yearInt <= parseInt(end)) isYearValid = true;
-        } else if (yearsStr.includes(',')) {
-          const yearList = yearsStr.split(',').map(y => y.trim());
-          if (yearList.includes(yearInt.toString())) isYearValid = true;
-        } else {
-          if (yearsStr === yearInt.toString()) isYearValid = true;
-        }
-        if (!isYearValid) return toast.error(`The selected vehicle is only valid for year(s): ${selectedValidYearsCsv}`);
-      }
+      // Simple year range validation
+      if (yearInt > 2026) return toast.error('Vehicle model year cannot be greater than 2026.');
 
       if (!form.color) return toast.error('Color is required');
       if (form.color.length > 50) return toast.error('Color must be 50 characters or less');
@@ -331,17 +319,17 @@ export default function AddVehiclePage() {
                 <div className="relative">
                   <label className="block text-[11px] font-bold tracking-widest text-[#111] mb-2 uppercase">Vehicle Catalog Search *</label>
                   <div className="relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     <input 
                       value={searchTerm}
-                      onChange={(e) => { setSearchTerm(e.target.value); setSelectedVehicleName(''); setForm(f => ({...f, vehicleId: 0})) }}
-                      placeholder="Search Brand or Model..."
+                      onChange={(e) => { setSearchTerm(e.target.value); setSelectedVehicleName(''); setForm(f => ({...f, brand: '', model: ''})) }}
+                      placeholder="Search Brand or Model (e.g. 'Ford MPV', 'BMW Passenger Car')..."
                       className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-11 pr-4 py-3.5 text-[14px] font-medium outline-none focus:border-[#111] focus:ring-1 focus:ring-[#111] transition-all"
                     />
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    {isSearching && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 animate-spin" size={18} />}
                   </div>
+                  {isSearching && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 animate-spin" size={18} />}
                   
-                  {showDropdown && searchResults.length > 0 && (
+                  {searchResults.length > 0 && (
                     <div className="absolute z-20 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] max-h-60 overflow-y-auto">
                       {searchResults.map((v) => (
                         <button

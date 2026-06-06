@@ -9,6 +9,35 @@ export function AuthProvider({ children }) {
     return (localStorage.getItem('isAuthenticated') || hasToken) ? true : null;
   });
   const [loading, setLoading] = useState(false);
+  const [userVehicles, setUserVehicles] = useState(null);
+  const [vehiclesLoading, setVehiclesLoading] = useState(false);
+
+  const fetchUserVehicles = async () => {
+    const token = getToken('AccessToken');
+    if (!token) return;
+    setVehiclesLoading(true);
+    try {
+      const res = await fetch('https://localhost:7108/api/Vehicle/my-vehicle', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setUserVehicles(data.data || []);
+      }
+    } catch (err) {
+      console.error('Failed to prefetch vehicles', err);
+    } finally {
+      setVehiclesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user && user !== true) {
+      fetchUserVehicles();
+    } else if (!user) {
+      setUserVehicles(null);
+    }
+  }, [user]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -76,7 +105,10 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, loading, setUser, logout }}>
+    <AuthContext.Provider value={{ 
+      user, isAuthenticated: !!user, loading, setUser, logout,
+      userVehicles, setUserVehicles, vehiclesLoading, fetchUserVehicles
+    }}>
       {children}
     </AuthContext.Provider>
   );

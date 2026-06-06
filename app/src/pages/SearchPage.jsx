@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { useAuth } from '../context/AuthContext';
 import { getToken } from '../api/auth';
 import { MapContainer, TileLayer, Marker, Popup, useMap, Circle } from 'react-leaflet';
+import { MapPin, Search, Navigation, AlertCircle, ChevronDown, Calendar, Car, X } from "lucide-react";
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -85,59 +87,6 @@ function CalendarPopover({ value, onChange, onClose }) {
           </button>
         ))}
       </div>
-
-      {/* Vehicle Selection Modal */}
-      {showVehicleModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-200">
-            <h3 className="text-xl font-semibold mb-2">Select your vehicle</h3>
-            <p className="text-gray-500 text-sm mb-5">Which vehicle will you be parking?</p>
-            
-            <div className="space-y-3 max-h-[60vh] overflow-y-auto">
-              {userVehicles.map(v => (
-                <div 
-                  key={v.id} 
-                  onClick={() => {
-                    setVehicleId(v.id.toString());
-                    searchParams.set('vehicleId', v.id.toString());
-                    setSearchParams(searchParams);
-                    setShowVehicleModal(false);
-                  }}
-                  className={`p-4 border rounded-2xl cursor-pointer transition-colors flex items-center justify-between group ${activeVehicle?.id === v.id ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-black'}`}
-                >
-                  <div>
-                    <h4 className="font-medium text-[#111]">{v.brand} {v.model}</h4>
-                    <p className="text-xs text-gray-500 mt-0.5">{v.registrationNo} • {v.year}</p>
-                  </div>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${activeVehicle?.id === v.id ? 'bg-black text-white' : 'bg-gray-50 group-hover:bg-black group-hover:text-white'}`}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-5 pt-5 border-t border-gray-100 flex gap-3">
-              <button 
-                onClick={() => setShowVehicleModal(false)}
-                className="flex-1 py-3 px-4 rounded-xl font-medium text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={() => {
-                  const params = new URLSearchParams();
-                  if (city) params.set('city', city);
-                  if (date) params.set('date', date);
-                  navigate(`/add-vehicle?${params.toString()}`);
-                }}
-                className="flex-1 py-3 px-4 rounded-xl font-medium text-sm text-white bg-[#111] hover:bg-black transition-colors"
-              >
-                Add New Vehicle
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -145,11 +94,12 @@ function CalendarPopover({ value, onChange, onClose }) {
 const formatDate = (d) => d ? `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}` : '';
 
 export default function SearchPage() {
+  const { user, userVehicles, fetchUserVehicles, vehiclesLoading } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   
-  const city = searchParams.get('city') || '';
-  const date = searchParams.get('date') || '';
+  const city = searchParams.get('city') || localStorage.getItem('gd1_search_city') || '';
+  const date = searchParams.get('date') || localStorage.getItem('gd1_search_date') || '';
   const vehicleIdStr = searchParams.get('vehicleId');
   const [vehicleId, setVehicleId] = useState(vehicleIdStr);
 
@@ -172,35 +122,16 @@ export default function SearchPage() {
   const [priceRange, setPriceRange]   = useState([0, 2000]);
 
   // Vehicle states
-  const [userVehicles, setUserVehicles] = useState([]);
   const [showVehicleModal, setShowVehicleModal] = useState(false);
-  const activeVehicle = userVehicles.find(v => v.id.toString() === vehicleId?.toString());
+  const [showVehiclePreview, setShowVehiclePreview] = useState(false);
+  const activeVehicle = (userVehicles || []).find(v => v.id.toString() === vehicleId?.toString());
 
-  // Fetch user vehicles
+  // Ensure vehicles are loaded
   useEffect(() => {
-    let mounted = true;
-    const fetchVehicles = async () => {
-      try {
-        const token = getToken('AccessToken');
-        if (!token) return;
-        const res = await fetch('https://localhost:7108/api/Vehicle/my-vehicle', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
-        if (mounted && data.success && data.data) {
-          setUserVehicles(data.data);
-          // Auto-select if none selected
-          if (!vehicleId && data.data.length > 0) {
-            setVehicleId(data.data[0].id.toString());
-          }
-        }
-      } catch (err) {
-        console.error("Failed to fetch vehicles", err);
-      }
-    };
-    fetchVehicles();
-    return () => { mounted = false; };
-  }, [vehicleId]);
+    if (!vehiclesLoading && userVehicles === null) {
+      fetchUserVehicles();
+    }
+  }, [vehiclesLoading, userVehicles, fetchUserVehicles]);
 
   // Close calendar on outside click
   useEffect(() => {
@@ -270,7 +201,6 @@ export default function SearchPage() {
     return () => { mounted = false; };
   }, [city, date]);
 
-  // Apply client-side filters
   const filteredProperties = properties.filter(p => {
     const price = parseFloat(p.pricePerDay) || 0;
     if (price < priceRange[0] || price > priceRange[1]) return false;
@@ -294,18 +224,16 @@ export default function SearchPage() {
       if (a.isRecommendedByAi && !b.isRecommendedByAi) return -1;
       if (!a.isRecommendedByAi && b.isRecommendedByAi) return 1;
     }
-    return 0; // Default remains untouched (which is distance-sorted by backend)
+    return 0;
   });
 
   return (
     <div className="h-screen bg-[#fafafa] font-sans flex flex-col overflow-hidden">
       <Navbar />
 
-      {/* TOP FILTER BAR — same left margin as the list (pl-14 on md+) */}
       <div className="w-full bg-white border-b border-black/[0.06] z-40 pt-[62px] shrink-0">
         <div className="px-4 md:px-14 py-4 flex flex-col md:flex-row items-stretch md:items-center gap-4">
 
-          {/* Search bar */}
           <div className="flex flex-1 md:flex-none items-center bg-white border border-black/[0.06] rounded-full p-1 shadow-sm w-full md:w-auto">
             <input 
               type="text"
@@ -315,7 +243,6 @@ export default function SearchPage() {
               className="px-4 py-2 flex-1 md:flex-none md:w-[160px] bg-transparent outline-none border-r border-black/[0.04] text-[14px] font-semibold text-[#111] placeholder:text-gray-400 min-w-0"
             />
 
-            {/* Calendar date button */}
             <div className="relative" ref={calRef}>
               <button
                 onClick={() => setShowCal(s => !s)}
@@ -341,8 +268,15 @@ export default function SearchPage() {
             <button 
               onClick={() => {
                 const params = new URLSearchParams();
-                if (inputCity) params.set('city', inputCity);
-                if (inputDate) params.set('date', inputDate.toISOString().split('T')[0]);
+                if (inputCity) {
+                  params.set('city', inputCity);
+                  localStorage.setItem('gd1_search_city', inputCity);
+                }
+                if (inputDate) {
+                  const dateStr = `${inputDate.getFullYear()}-${String(inputDate.getMonth()+1).padStart(2, '0')}-${String(inputDate.getDate()).padStart(2, '0')}`;
+                  params.set('date', dateStr);
+                  localStorage.setItem('gd1_search_date', dateStr);
+                }
                 setSearchParams(params);
               }} 
               className=" w-9 h-9 rounded-full bg-[#2563eb] flex items-center justify-center hover:bg-[#2d6df0] transition-colors shrink-0"
@@ -351,26 +285,33 @@ export default function SearchPage() {
             </button>
           </div>
 
-          {/* Active Vehicle Chip */}
           {activeVehicle && (
             <div className="flex items-center bg-gray-50 border border-black/[0.08] rounded-full p-1 shrink-0 h-[46px]">
-              <div className="w-9 h-9 rounded-full overflow-hidden bg-white border border-black/[0.04] flex items-center justify-center shrink-0">
-                <img 
-                  src={`https://logo.clearbit.com/${(activeVehicle.brand || 'car').toLowerCase().replace(/\s+/g, '')}.com`} 
-                  onError={(e) => { 
-                    e.target.onerror = null; 
-                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(activeVehicle.brand || 'Car')}&background=random&color=fff`; 
-                  }}
-                  alt="Car Logo" 
-                  className="w-6 h-6 object-contain" 
-                />
+              <div 
+                className="w-9 h-9 rounded-full overflow-hidden bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 cursor-pointer"
+                onClick={() => setShowVehiclePreview(true)}
+              >
+                {activeVehicle.profileImageUrl ? (
+                  <img src={activeVehicle.profileImageUrl} alt="Vehicle" className="w-full h-full object-cover" />
+                ) : (
+                  <Car className="w-5 h-5 text-blue-600" />
+                )}
               </div>
-              <div className="px-3 flex flex-col justify-center">
+              <div 
+                className="px-3 flex flex-col justify-center cursor-pointer"
+                onClick={() => setShowVehiclePreview(true)}
+              >
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider leading-none mb-0.5">Parking</p>
                 <p className="text-[13px] font-semibold text-[#111] leading-none">{activeVehicle.brand} {activeVehicle.model}</p>
               </div>
               <button 
-                onClick={() => setShowVehicleModal(true)}
+                onClick={() => {
+                  if (userVehicles.length > 1) {
+                    setShowVehicleModal(true);
+                  } else {
+                    navigate('/add-vehicle');
+                  }
+                }}
                 className="h-full px-4 ml-1 text-[12px] font-semibold text-blue-600 bg-white border border-black/[0.04] rounded-full hover:bg-blue-50 transition-colors shadow-sm"
               >
                 Change
@@ -378,7 +319,6 @@ export default function SearchPage() {
             </div>
           )}
 
-          {/* Filter button */}
           <button
             onClick={() => setShowFilter(true)}
             className="flex items-center justify-center md:justify-start gap-2 px-4 py-2.5 border border-black/[0.1] rounded-full text-[13px] font-semibold text-[#111] hover:bg-gray-50 transition-colors shrink-0"
@@ -394,10 +334,8 @@ export default function SearchPage() {
         </div>
       </div>
 
-      {/* MAIN CONTENT AREA — flex-1 fills remaining height, map is sticky */}
       <div className="flex-1 flex w-full min-h-0">
 
-        {/* LIST VIEW (Left Side) — scrollable only */}
         <div className={`no-scrollbar overflow-y-auto px-4 md:px-14 py-8 transition-all duration-500 ease-in-out ${isMapExpanded ? 'w-0 opacity-0 overflow-hidden px-0' : 'flex-1'}`}>
           <h1 className="text-[28px] font-semibold text-[#111] mb-2 tracking-tight">
              Properties in {city || 'your area'}
@@ -439,7 +377,6 @@ export default function SearchPage() {
           ) : (
             <div className="flex flex-col gap-3 pb-12">
               {sortedProperties.map(p => {
-                // Amenities from backend only
                 const amenities = [
                   p.propertyDetails?.hasCCTV        && { key: 'cctv',     label: 'CCTV' },
                   p.propertyDetails?.hasSecurity    && { key: 'security', label: 'Security' },
@@ -460,10 +397,8 @@ export default function SearchPage() {
                 };
 
                 return (
-                  <div key={p.id} className="group flex flex-col md:flex-row bg-white rounded-2xl overflow-hidden hover:shadow-[0_6px_24px_rgba(0,0,0,0.07)] transition-all duration-300 cursor-pointer border border-black/[0.05]">
-
-                    {/* Image */}
-                    <div className="w-full h-[200px] md:h-auto md:w-[320px] shrink-0 relative overflow-hidden">
+                  <div key={p.id} onClick={() => navigate(`/garage/${p.id}`, { state: { property: p, activeVehicle: activeVehicle } })} className="group flex flex-col md:flex-row bg-white rounded-2xl overflow-hidden hover:shadow-[0_6px_24px_rgba(0,0,0,0.07)] transition-all duration-300 cursor-pointer border border-black/[0.05]">
+                    <div className="w-full h-[200px] md:h-auto md:w-[235px] shrink-0 relative overflow-hidden">
                       <img
                         src={p.img || p.propertyImages?.[0] || p.slots?.[0]?.imageUrl || 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80'}
                         alt={p.name}
@@ -480,24 +415,15 @@ export default function SearchPage() {
                       </div>
                     </div>
 
-                    {/* Details */}
                     <div className="px-5 py-4 flex flex-col flex-1 min-w-0 gap-1">
-
-                      {/* Row 1: tag + price */}
                       <div className="flex items-center justify-between">
                         <p className="text-[10px] font-semibold text-[#bf4800] tracking-widest uppercase">Secure Garage</p>
                         <span className="text-[16px] font-bold text-[#111]">&#8377;{p.pricePerDay || 150}<span className="text-[10px] text-[#999] font-normal ml-0.5">/day</span></span>
                       </div>
-
-                      {/* Row 2: name */}
                       <h3 className="text-[15px] font-semibold text-[#111] truncate leading-snug">{p.name}</h3>
-
-                      {/* Row 3: location */}
                       <p className="text-[11px] text-[#aaa] truncate">
                         {[p.city || city, p.state || 'Kerala', p.country || 'India'].filter(Boolean).join(', ')}
                       </p>
-
-                      {/* Row 4: amenity chips — max 4, single row, no wrap */}
                       {allChips.length > 0 && (
                         <div className="flex items-center gap-1.5 mt-1 overflow-hidden">
                           {allChips.slice(0, 4).map(label => (
@@ -510,17 +436,14 @@ export default function SearchPage() {
                           )}
                         </div>
                       )}
-
-                      {/* Row 5: View Details right-aligned (hidden on mobile) */}
                       <div className="hidden sm:flex justify-end mt-auto pt-1">
                         <button
-                          onClick={(e) => { e.stopPropagation(); navigate(`/garage/${p.id}`); }}
+                          onClick={(e) => { e.stopPropagation(); navigate(`/garage/${p.id}`, { state: { property: p, activeVehicle: activeVehicle } }); }}
                           className="bg-[#2563eb] text-white px-4 py-1.5 rounded-lg text-[12px] font-semibold hover:bg-blue-600 transition-colors"
                         >
                           View Details
                         </button>
                       </div>
-
                     </div>
                   </div>
                 );
@@ -529,7 +452,6 @@ export default function SearchPage() {
           )}
         </div>
 
-        {/* Floating Mobile Map Button */}
         <button
           onClick={() => setIsMapExpanded(true)}
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] lg:hidden bg-[#111] text-white shadow-[0_8px_30px_rgba(0,0,0,0.4)] rounded-full px-5 py-3 flex items-center gap-2 hover:bg-gray-800 transition-colors"
@@ -538,7 +460,6 @@ export default function SearchPage() {
           <span className="text-[14px] font-semibold">Map View</span>
         </button>
 
-        {/* MAP VIEW — fullscreen portal OR right-side panel */}
         {isMapExpanded ? (
           <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 300 }}>
             <MapContainer center={mapCenter} zoom={12} scrollWheelZoom={true} style={{ width: '100%', height: '100%' }}>
@@ -573,7 +494,6 @@ export default function SearchPage() {
             </button>
           </div>
         ) : (
-          /* Normal right-side panel */
           <div className="relative bg-gray-100 border-l border-black/[0.06] shrink-0 sticky top-0 self-start hidden lg:flex lg:w-[35%]" style={{ height: '100%' }}>
             <MapContainer center={mapCenter} zoom={12} scrollWheelZoom={true} className="w-full h-full z-0">
               <TileLayer
@@ -596,7 +516,6 @@ export default function SearchPage() {
                 </Marker>
               ))}
             </MapContainer>
-            {/* Expand Map button — top-right corner, away from Leaflet +/- zoom top-left */}
             <button
               onClick={() => setIsMapExpanded(true)}
               className="absolute top-6 right-6 z-[1000] bg-white border border-black/[0.08] shadow-[0_8px_30px_rgba(0,0,0,0.12)] rounded-full px-4 py-2 flex items-center gap-2 hover:bg-gray-50 transition-colors"
@@ -608,7 +527,130 @@ export default function SearchPage() {
         )}
       </div>
 
-      {/* FILTER SIDEBAR */}
+      {/* Vehicle Preview Modal */}
+      <AnimatePresence>
+        {showVehiclePreview && activeVehicle && (
+          <div className="fixed inset-0 z-[3000] flex items-center justify-center p-4 sm:p-0">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowVehiclePreview(false)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm cursor-pointer"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-lg bg-white rounded-3xl overflow-hidden shadow-2xl z-10"
+            >
+              <button
+                onClick={() => setShowVehiclePreview(false)}
+                className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-md transition-colors z-20"
+              >
+                <X size={20} />
+              </button>
+              
+              <div className="w-full aspect-[4/3] bg-gray-100 flex items-center justify-center relative">
+                {activeVehicle.profileImageUrl ? (
+                  <img src={activeVehicle.profileImageUrl} alt="Vehicle" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-gray-400">
+                    <Car size={64} className="mb-4 opacity-50" />
+                    <p className="text-sm font-medium">No image uploaded</p>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              </div>
+              
+              <div className="absolute bottom-0 left-0 w-full p-6 text-white">
+                <h3 className="text-2xl font-bold tracking-tight mb-1">
+                  {activeVehicle.brand} {activeVehicle.model}
+                </h3>
+                <div className="flex items-center gap-3 text-sm text-white/90 font-medium">
+                  <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+                    {activeVehicle.year}
+                  </span>
+                  <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+                    {activeVehicle.registrationNo}
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Vehicle Selection Modal */}
+      {showVehicleModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-200">
+            <h3 className="text-xl font-semibold mb-2">Select your vehicle</h3>
+            <p className="text-gray-500 text-sm mb-5">Which vehicle will you be parking?</p>
+            
+            <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+              {(userVehicles || []).map(v => (
+                <div 
+                  key={v.id} 
+                  onClick={() => {
+                    setVehicleId(v.id.toString());
+                    searchParams.set('vehicleId', v.id.toString());
+                    setSearchParams(searchParams);
+                    setShowVehicleModal(false);
+                  }}
+                  className={`p-4 border rounded-2xl cursor-pointer transition-colors flex items-center justify-between group ${activeVehicle?.id === v.id ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-black'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-black/5">
+                      {v.profileImageUrl ? (
+                        <img src={v.profileImageUrl} alt="Vehicle" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-[#111]">{v.brand} {v.model}</h4>
+                      <p className="text-xs text-gray-500 mt-0.5">{v.registrationNo} • {v.year}</p>
+                    </div>
+                  </div>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${activeVehicle?.id === v.id ? 'bg-black text-white' : 'bg-gray-50 group-hover:bg-black group-hover:text-white'}`}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-5 pt-5 border-t border-gray-100 flex gap-3">
+              <button 
+                onClick={() => setShowVehicleModal(false)}
+                className="flex-1 py-3 px-4 rounded-xl font-medium text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  const params = new URLSearchParams();
+                  if (city) {
+                    params.set('city', city);
+                    localStorage.setItem('gd1_search_city', city);
+                  }
+                  if (date) {
+                    params.set('date', date);
+                    localStorage.setItem('gd1_search_date', date);
+                  }
+                  navigate(`/add-vehicle?${params.toString()}`);
+                }}
+                className="flex-1 py-3 px-4 rounded-xl font-medium text-sm text-white bg-[#111] hover:bg-black transition-colors"
+              >
+                Add New Vehicle
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <AnimatePresence>
         {showFilter && (
           <div className="fixed inset-0 z-[2000] flex justify-end">

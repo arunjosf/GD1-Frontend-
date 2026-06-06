@@ -11,9 +11,20 @@ import ProfilePage from './pages/ProfilePage';
 import AddVehiclePage from './pages/AddVehiclePage';
 import TrackApplicationPage from './pages/TrackApplicationPage';
 import SearchPage from './pages/SearchPage';
+import UserBookingsPage from './pages/UserBookingsPage';
+import AdminPickupsPage from './pages/AdminPickupsPage';
+import LotOwnerDashboardPage from './pages/lot-owner/LotOwnerDashboardPage';
+import LotOwnerPropertiesPage from './pages/lot-owner/LotOwnerPropertiesPage';
+import LotOwnerLayout from './components/LotOwnerLayout';
+import PropertyDetailsPage from './pages/PropertyDetailsPage';
+import AgreementPage from './pages/AgreementPage';
+import PickupOptionsPage from './pages/PickupOptionsPage';
 import AdminLayout from './components/AdminLayout';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminApplicationsPage from './pages/AdminApplicationsPage';
+import LotOwnerBookingsPage from './pages/lot-owner/LotOwnerBookingsPage';
+import LotOwnerBookingDetailsPage from './pages/lot-owner/LotOwnerBookingDetailsPage';
+import VerificationPendingPage from './pages/VerificationPendingPage';
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -41,28 +52,31 @@ class ErrorBoundary extends Component {
   }
 }
 
+function getUserRole() {
+  const token = getToken('AccessToken');
+  if (token) {
+    try {
+      const decoded = JSON.parse(atob(token.split('.')[1]));
+      return parseInt(decoded.roleId, 10);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
   if (loading) return null;
   
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   
-  // Check if they are admin; if admin, they shouldn't access user routes (home, etc.)
-  const token = getToken('AccessToken');
-  let isAdmin = false;
-  if (token) {
-    try {
-      const decoded = JSON.parse(atob(token.split('.')[1]));
-      if (decoded.roleId === '5' || decoded.roleId === 5) {
-        isAdmin = true;
-      }
-    } catch {
-      // ignore
-    }
-  }
-
-  if (isAdmin) {
+  const role = getUserRole();
+  if (role === 5) {
     return <Navigate to="/admin/dashboard" replace />;
+  }
+  if (role === 2 || role === 4) {
+    return <Navigate to="/lot-owner/dashboard" replace />;
   }
   
   return children;
@@ -74,20 +88,18 @@ function AdminRoute({ children }) {
   
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   
-  const token = getToken('AccessToken');
-  let isAdmin = false;
-  if (token) {
-    try {
-      const decoded = JSON.parse(atob(token.split('.')[1]));
-      if (decoded.roleId === '5' || decoded.roleId === 5) {
-        isAdmin = true;
-      }
-    } catch {
-      // ignore
-    }
-  }
+  const role = getUserRole();
+  return role === 5 ? children : <Navigate to="/home" replace />;
+}
+
+function LotOwnerRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) return null;
   
-  return isAdmin ? children : <Navigate to="/home" replace />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  
+  const role = getUserRole();
+  return (role === 2 || role === 4) ? children : <Navigate to="/home" replace />;
 }
 
 function PublicRoute({ children }) {
@@ -95,19 +107,10 @@ function PublicRoute({ children }) {
   if (loading) return null;
   
   if (isAuthenticated) {
-    const token = getToken('AccessToken');
-    let isAdmin = false;
-    if (token) {
-      try {
-        const decoded = JSON.parse(atob(token.split('.')[1]));
-        if (decoded.roleId === '5' || decoded.roleId === 5) {
-          isAdmin = true;
-        }
-      } catch {
-        // ignore
-      }
-    }
-    return <Navigate to={isAdmin ? "/admin/dashboard" : "/home"} replace />;
+    const role = getUserRole();
+    if (role === 5) return <Navigate to="/admin/dashboard" replace />;
+    if (role === 2 || role === 4) return <Navigate to="/lot-owner/dashboard" replace />;
+    return <Navigate to="/home" replace />;
   }
   
   return children;
@@ -141,7 +144,22 @@ export default function App() {
         }>
           <Route path="dashboard" element={<AdminDashboardPage />} />
           <Route path="applications" element={<AdminApplicationsPage />} />
+          <Route path="bookings" element={<LotOwnerBookingsPage />} />
+          <Route path="bookings/:id" element={<LotOwnerBookingDetailsPage />} />
           <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+        </Route>
+
+        <Route path="/lot-owner" element={
+          <LotOwnerRoute>
+            <LotOwnerLayout />
+          </LotOwnerRoute>
+        }>
+          <Route path="dashboard" element={<LotOwnerDashboardPage />} />
+          <Route path="properties" element={<LotOwnerPropertiesPage />} />
+          <Route path="bookings" element={<LotOwnerBookingsPage />} />
+          <Route path="bookings/:id" element={<LotOwnerBookingDetailsPage />} />
+          <Route path="pickups" element={<AdminPickupsPage />} />
+          <Route path="*" element={<Navigate to="/lot-owner/dashboard" replace />} />
         </Route>
 
         <Route path="/home" element={
@@ -152,6 +170,26 @@ export default function App() {
         <Route path="/search" element={
           <ProtectedRoute>
             <SearchPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/garage/:id" element={
+          <ProtectedRoute>
+            <PropertyDetailsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/booking-verification/:id" element={
+          <ProtectedRoute>
+            <VerificationPendingPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/agreement/:id" element={
+          <ProtectedRoute>
+            <AgreementPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/pickup-options/:id" element={
+          <ProtectedRoute>
+            <PickupOptionsPage />
           </ProtectedRoute>
         } />
         <Route path="/add-garage" element={
@@ -172,6 +210,11 @@ export default function App() {
         <Route path="/track-application" element={
           <ProtectedRoute>
             <TrackApplicationPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/my-bookings" element={
+          <ProtectedRoute>
+            <UserBookingsPage />
           </ProtectedRoute>
         } />
         <Route path="*" element={<Navigate to="/" replace />} />

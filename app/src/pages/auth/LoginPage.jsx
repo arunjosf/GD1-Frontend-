@@ -3,7 +3,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 import { authApi, getToken } from '../../api/auth';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, X } from "lucide-react";
 import { toast } from 'react-hot-toast';
 
 
@@ -14,6 +14,188 @@ const EmailIcon = () => (
   </svg>
 );
 
+// ── Forgot Password Modal (3 steps: email → OTP → new password) ───────────────
+function ForgotPasswordModal({ onClose, email }) {
+  const [step, setStep] = useState(2); // start at OTP step directly
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPwd, setShowPwd] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Step 1: send OTP to email
+  const handleSendOtp = async () => {
+    if (!email) { setError('Email is required'); return; }
+    setError(''); setLoading(true);
+    const t = toast.loading('Sending OTP...');
+    try {
+      const res = await authApi.forgotPassword(email);
+      if (res.success) {
+        toast.success('OTP sent to your email!', { id: t });
+        setStep(2);
+      } else {
+        toast.dismiss(t);
+        setError(res.message || 'Failed to send OTP');
+      }
+    } catch {
+      toast.dismiss(t);
+      setError('Something went wrong. Try again.');
+    } finally { setLoading(false); }
+  };
+
+  // OTP box helpers
+  const handleOtpChange = (val, idx) => {
+    if (!/^\d*$/.test(val)) return;
+    const next = [...otp]; next[idx] = val.slice(-1); setOtp(next);
+    if (val && idx < 5) document.getElementById(`fp-otp-${idx + 1}`)?.focus();
+  };
+  const handleOtpKeyDown = (e, idx) => {
+    if (e.key === 'Backspace' && !otp[idx] && idx > 0)
+      document.getElementById(`fp-otp-${idx - 1}`)?.focus();
+  };
+  const handleOtpPaste = (e) => {
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (pasted.length === 6) { setOtp(pasted.split('')); document.getElementById('fp-otp-5')?.focus(); }
+    e.preventDefault();
+  };
+
+  // Step 2: verify OTP → move to step 3
+  const handleVerifyOtp = async () => {
+    const code = otp.join('');
+    if (code.length < 6) { setError('Please enter all 6 digits'); return; }
+    setError(''); setStep(3);
+  };
+
+  // Resend OTP
+  const handleResend = async () => {
+    const t = toast.loading('Resending OTP...');
+    try {
+      const res = await authApi.forgotPassword(email);
+      if (res.success) { toast.success('New OTP sent!', { id: t }); setOtp(['','','','','','']); setError(''); }
+      else { toast.dismiss(t); setError(res.message || 'Failed to resend'); }
+    } catch { toast.dismiss(t); setError('Failed to resend OTP.'); }
+  };
+
+  // Step 3: reset password
+  const handleResetPassword = async () => {
+    if (!newPassword) { setError('New password is required'); return; }
+    if (newPassword !== confirmPassword) { setError('Passwords do not match'); return; }
+    if (newPassword.length < 6) { setError('Password must be at least 6 characters'); return; }
+    setError(''); setLoading(true);
+    const t = toast.loading('Resetting password...');
+    try {
+      const res = await authApi.resetPassword(email, otp.join(''), newPassword, confirmPassword);
+      if (res.success) {
+        toast.success('Password reset successfully! Please log in.', { id: t });
+        onClose();
+      } else {
+        toast.dismiss(t);
+        setError(res.message || 'Failed to reset password');
+      }
+    } catch {
+      toast.dismiss(t);
+      setError('Something went wrong. Try again.');
+    } finally { setLoading(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="relative bg-white w-full max-w-sm mx-4 p-8 shadow-2xl">
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
+          <X size={18} />
+        </button>
+        <div className='flex gap-2 mb-6'>
+          <img src="/GD1 Logo.png" className="w-10 h-10" alt="GD1" />
+          <h2 className="text-[27px] tracking-loose text-black">GD1</h2>
+        </div>
+
+
+        {/* Step 2 — Enter OTP */}
+        {step === 2 && (
+          <>
+            <h3 className="text-[18px] font-medium text-black mb-2">Forgot password?</h3>
+            <p className="text-[13px] text-gray-500 mb-6">
+              We sent a 6-digit OTP to <strong>{email}</strong>. Enter it below to continue.
+            </p>
+            <div className="flex gap-2 justify-between mb-4" onPaste={handleOtpPaste}>
+              {otp.map((digit, idx) => (
+                <input
+                  key={idx}
+                  id={`fp-otp-${idx}`}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={digit}
+                  onChange={e => handleOtpChange(e.target.value, idx)}
+                  onKeyDown={e => handleOtpKeyDown(e, idx)}
+                  autoFocus={idx === 0}
+                  className="w-11 h-12 text-center text-[20px] font-semibold border border-gray-300
+                             outline-none focus:border-black focus:ring-1 focus:ring-black
+                             transition-all caret-transparent"
+                />
+              ))}
+            </div>
+            {error && <p className="text-[12px] text-red-500 mb-3">{error}</p>}
+            <button onClick={handleVerifyOtp}
+              className="w-full bg-[#2563eb] hover:bg-blue-700 text-white text-[13px] py-2 font-semibold transition-colors mb-3">
+              Verify OTP
+            </button>
+            <button onClick={handleResend} className="w-full text-[13px] text-blue-600 hover:underline">
+              Resend OTP
+            </button>
+          </>
+        )}
+
+        {/* Step 3 — New Password */}
+        {step === 3 && (
+          <>
+            <h3 className="text-[18px] font-medium text-black mb-2">Set new password</h3>
+            <p className="text-[13px] text-gray-500 mb-6">
+              Choose a strong new password for your account.
+            </p>
+            <div className="relative flex items-center border border-gray-300 overflow-hidden focus-within:border-black focus-within:ring-1 focus-within:ring-black transition-all mb-3">
+              <input
+                type={showPwd ? 'text' : 'password'}
+                value={newPassword}
+                onChange={e => { setNewPassword(e.target.value); setError(''); }}
+                className="w-full pl-2.5 pr-10 py-2 outline-none bg-transparent text-[13px] tracking-widest"
+                placeholder="New password"
+                autoFocus
+              />
+              <div className="absolute right-3">
+                <button type="button" onClick={() => setShowPwd(p => !p)}>
+                  {showPwd ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+            <div className="relative flex items-center border border-gray-300 overflow-hidden focus-within:border-black focus-within:ring-1 focus-within:ring-black transition-all mb-4">
+              <input
+                type={showPwd ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={e => { setConfirmPassword(e.target.value); setError(''); }}
+                className="w-full pl-2.5 pr-10 py-2 outline-none bg-transparent text-[13px] tracking-widest"
+                placeholder="Confirm new password"
+                onKeyDown={e => e.key === 'Enter' && handleResetPassword()}
+              />
+              <div className="absolute right-3">
+                <button type="button" onClick={() => setShowPwd(p => !p)}>
+                  {showPwd ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+            {error && <p className="text-[12px] text-red-500 mb-3">{error}</p>}
+            <button onClick={handleResetPassword} disabled={loading}
+              className="w-full bg-[#2563eb] hover:bg-blue-700 text-white text-[13px] py-2 font-semibold transition-colors">
+              {loading ? 'RESETTING...' : 'Reset Password'}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+// ── END Forgot Password Modal ─────────────────────────────────────────────────
 
 const GoogleIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -33,6 +215,28 @@ export default function LoginPage() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
+
+  const handleForgotPassword = async () => {
+    if (!form.email) {
+      setErrors(e => ({ ...e, email: 'Enter your email to reset password' }));
+      return;
+    }
+    const t = toast.loading('Sending OTP to your email...');
+    try {
+      const res = await authApi.forgotPassword(form.email);
+      if (res.success) {
+        toast.success('OTP sent!', { id: t });
+        setShowForgotModal(true);
+      } else {
+        toast.dismiss(t);
+        setErrors(e => ({ ...e, email: res.message || 'Failed to send OTP' }));
+      }
+    } catch {
+      toast.dismiss(t);
+      setErrors(e => ({ ...e, email: 'Something went wrong. Try again.' }));
+    }
+  };
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -47,11 +251,14 @@ export default function LoginPage() {
           
           const token = getToken('AccessToken');
           let isAdmin = false;
+          let isLotOwner = false;
           if (token) {
             try {
               const decoded = JSON.parse(atob(token.split('.')[1]));
               if (decoded.roleId === '5' || decoded.roleId === 5) {
                 isAdmin = true;
+              } else if (decoded.roleId === '2' || decoded.roleId === 2 || decoded.roleId === '4' || decoded.roleId === 4) {
+                isLotOwner = true;
               }
             } catch (e) {
               console.error("Failed to parse token", e);
@@ -60,6 +267,8 @@ export default function LoginPage() {
           
           if (isAdmin) {
             navigate('/admin/dashboard');
+          } else if (isLotOwner) {
+            navigate('/lot-owner/dashboard');
           } else {
             navigate('/home');
           }
@@ -108,11 +317,14 @@ export default function LoginPage() {
         // Check role in token
         const token = getToken('AccessToken');
         let isAdmin = false;
+        let isLotOwner = false;
         if (token) {
           try {
             const decoded = JSON.parse(atob(token.split('.')[1]));
             if (decoded.roleId === '5' || decoded.roleId === 5) {
               isAdmin = true;
+            } else if (decoded.roleId === '2' || decoded.roleId === 2 || decoded.roleId === '4' || decoded.roleId === 4) {
+              isLotOwner = true;
             }
           } catch (e) {
             console.error("Failed to parse token", e);
@@ -121,6 +333,8 @@ export default function LoginPage() {
         
         if (isAdmin) {
           navigate('/admin/dashboard');
+        } else if (isLotOwner) {
+          navigate('/lot-owner/dashboard');
         } else {
           navigate('/home');
         }
@@ -137,7 +351,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-screen w-full flex font-sans text-gray-900 bg-white overflow-hidden">
+    <>
+      {showForgotModal && <ForgotPasswordModal onClose={() => setShowForgotModal(false)} email={form.email} />}
+      <div className="h-screen w-full flex font-sans text-gray-900 bg-white overflow-hidden">
 
       <div className="relative hidden md:flex flex-col w-[100%] h-full bg-black">
 
@@ -257,7 +473,10 @@ rests in safety.
               </div>
               
               {errors.password && <p className="text-[11px] text-red-500 mt-1">{errors.password}</p>}
-              <span className="text-blue-800 hover:text-blue-600 cursor-pointer text-[12px] font-medium ml-51 ">Forgot password?</span>
+              <span
+                onClick={handleForgotPassword}
+                className="text-blue-800 hover:text-blue-600 cursor-pointer text-[12px] font-medium ml-51"
+              >Forgot password?</span>
             </div>
 
               {errors.form && (
@@ -290,5 +509,6 @@ rests in safety.
 
       </div>
     </div>
+    </>
   );
 }

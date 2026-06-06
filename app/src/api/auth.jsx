@@ -80,5 +80,11 @@ export const authApi = {
     } catch {
       return { success: false, message: 'Could not connect to the server' };
     }
-  }
+  },
+
+  forgotPassword: (email) =>
+    fetch(`${BASE}/forgot-password`, opts("POST", { email })).then(r => r.json()),
+
+  resetPassword: (email, otp, newPassword, confirmNewPassword) =>
+    fetch(`${BASE}/reset-password`, opts("POST", { email, otp, newPassword, confirmNewPassword })).then(r => r.json()),
 };

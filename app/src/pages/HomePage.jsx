@@ -132,7 +132,7 @@ const STATS = [
    HOME PAGE
 ──────────────────────────────────────── */
 export default function HomePage() {
-  const { user, logout } = useAuth();
+  const { user, logout, userVehicles, vehiclesLoading, fetchUserVehicles } = useAuth();
   const navigate = useNavigate();
 
   // Search state
@@ -143,7 +143,7 @@ export default function HomePage() {
   
   // Vehicle Selection Modal State
   const [showVehicleModal, setShowVehicleModal] = useState(false);
-  const [userVehicles, setUserVehicles] = useState([]);
+  const [localUserVehicles, setLocalUserVehicles] = useState([]);
   const [isFetchingVehicles, setIsFetchingVehicles] = useState(false);
   
   // Properties state
@@ -324,28 +324,38 @@ export default function HomePage() {
 
     setIsFetchingVehicles(true);
     try {
-      const token = getToken('AccessToken');
-      const res = await fetch('https://localhost:7108/api/Vehicle/my-vehicle', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      let vehicles = userVehicles;
       
-      if (res.status === 401) {
-        await logout();
-        navigate('/login');
-        return;
-      }
-
-      let vehicles = [];
-      try {
+      // If vehicles haven't been loaded yet, load them now
+      if (!vehicles) {
+        if (!vehiclesLoading) {
+          await fetchUserVehicles();
+        }
+        // Wait a tiny bit for the context state to catch up if needed, 
+        // or just fetch directly as fallback
+        const token = getToken('AccessToken');
+        const res = await fetch('https://localhost:7108/api/Vehicle/my-vehicle', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.status === 401) {
+          await logout();
+          navigate('/login');
+          return;
+        }
         const data = await res.json();
         vehicles = data.data || [];
-      } catch (jsonErr) {
-        console.warn("Failed to parse vehicle JSON", jsonErr);
       }
       
       const params = new URLSearchParams();
-      params.set('city', city);
-      params.set('date', date.toISOString().split('T')[0]);
+      const dateStr = date ? `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` : '';
+      if (city) {
+        params.set('city', city);
+        localStorage.setItem('gd1_search_city', city);
+      }
+      if (dateStr) {
+        params.set('date', dateStr);
+        localStorage.setItem('gd1_search_date', dateStr);
+      }
 
       if (vehicles.length === 0) {
         // Redirect to Add Vehicle page
@@ -356,16 +366,16 @@ export default function HomePage() {
         navigate(`/search?${params.toString()}`);
       } else {
         // Show modal to pick a vehicle
-        setUserVehicles(vehicles);
+        setLocalUserVehicles(vehicles); // We can just use the local state in HomePage
         setShowVehicleModal(true);
       }
     } catch (err) {
       console.error("Vehicle fetch error:", err);
-      // Fallback: if we totally fail to fetch due to network, just redirect to add-vehicle 
-      // so it doesn't freeze the screen.
+      // Fallback
       const params = new URLSearchParams();
+      const dateStr = date ? `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` : '';
       if (city) params.set('city', city);
-      if (date) params.set('date', date.toISOString().split('T')[0]);
+      if (dateStr) params.set('date', dateStr);
       navigate(`/add-vehicle?${params.toString()}`);
     } finally {
       setIsFetchingVehicles(false);
@@ -374,16 +384,30 @@ export default function HomePage() {
 
   const handleSelectVehicle = (vId) => {
     const params = new URLSearchParams();
-    if (city) params.set('city', city);
-    if (date) params.set('date', date.toISOString().split('T')[0]);
+    const dateStr = date ? `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` : '';
+    if (city) {
+      params.set('city', city);
+      localStorage.setItem('gd1_search_city', city);
+    }
+    if (dateStr) {
+      params.set('date', dateStr);
+      localStorage.setItem('gd1_search_date', dateStr);
+    }
     params.set('vehicleId', vId);
     navigate(`/search?${params.toString()}`);
   };
 
   const handleAddNewVehicle = () => {
     const params = new URLSearchParams();
-    if (city) params.set('city', city);
-    if (date) params.set('date', date.toISOString().split('T')[0]);
+    const dateStr = date ? `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` : '';
+    if (city) {
+      params.set('city', city);
+      localStorage.setItem('gd1_search_city', city);
+    }
+    if (dateStr) {
+      params.set('date', dateStr);
+      localStorage.setItem('gd1_search_date', dateStr);
+    }
     navigate(`/add-vehicle?${params.toString()}`);
   };
 
@@ -632,17 +656,28 @@ export default function HomePage() {
             <p className="text-gray-500 text-sm mb-5">Which vehicle will you be parking?</p>
             
             <div className="space-y-3 max-h-[60vh] overflow-y-auto">
-              {userVehicles.map(v => (
+              {localUserVehicles.map(v => (
                 <div 
                   key={v.id} 
                   onClick={() => handleSelectVehicle(v.id)}
                   className="p-4 border border-gray-200 rounded-2xl hover:border-black cursor-pointer transition-colors flex items-center justify-between group"
                 >
-                  <div>
-                    <h4 className="font-medium text-[#111]">{v.brand} {v.model}</h4>
-                    <p className="text-xs text-gray-500 mt-0.5">{v.registrationNo} • {v.year}</p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-black/5">
+                      {v.profileImageUrl ? (
+                        <img src={v.profileImageUrl} alt="Vehicle" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-[#111]">{v.brand} {v.model}</h4>
+                      <p className="text-xs text-gray-500 mt-0.5">{v.registrationNo} • {v.year}</p>
+                    </div>
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors">
+                  <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors shrink-0">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                   </div>
                 </div>

@@ -1,5 +1,6 @@
 import { X, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 export default function NotificationSidebar({ isOpen, onClose, notifications = [] }) {
   const navigate = useNavigate();
@@ -109,7 +110,10 @@ export default function NotificationSidebar({ isOpen, onClose, notifications = [
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   onClose();
-                                  navigate(notif.actionUrl || '/track-application');
+                                  let url = notif.actionUrl;
+                                  // Fix old legacy notification links
+                                  if (url === '/user/bookings') url = '/my-bookings';
+                                  navigate(url || '/track-application');
                                 }}
                                 className="px-4 py-1.5 bg-[#2563eb] text-white text-[12px] font-bold rounded-lg hover:bg-[#2d6df0] transition-all shadow-sm"
                               >

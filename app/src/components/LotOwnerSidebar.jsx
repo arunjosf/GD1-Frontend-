@@ -12,71 +12,41 @@ import {
   Truck
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { getToken } from '../api/auth';
 
-export default function AdminSidebar({ isMobileOpen, setIsMobileOpen }) {
+export default function LotOwnerSidebar({ isMobileOpen, setIsMobileOpen }) {
   const { logout } = useAuth();
-  const [appCount, setAppCount] = useState(0);
-  const [pendingBookingCount, setPendingBookingCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
 
   useEffect(() => {
-    // Fetch pending applications count
-    const fetchAppCount = async () => {
+    const fetchPendingCount = async () => {
       try {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; AccessToken=`);
-        const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
+        const token = getToken('AccessToken');
         if (!token) return;
-
-        const [franchiseRes, scRes, bookingsRes] = await Promise.all([
-          fetch('https://localhost:7108/api/admin/franchise/applications', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          }).catch(() => null),
-          fetch('https://localhost:7108/api/admin/service-centers/applications', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          }).catch(() => null),
-          fetch('https://localhost:7108/api/LotBooking/bookings', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          }).catch(() => null)
-        ]);
-
-        let pendingCount = 0;
-        
-        if (franchiseRes && franchiseRes.ok) {
-          const result = await franchiseRes.json();
-          pendingCount += (result.data || []).filter(app => app.status === 'Pending').length;
+        const res = await fetch('https://localhost:7108/api/LotBooking/bookings', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const bookings = data.data || data;
+          const pending = bookings.filter(b => String(b.status) === 'PendingVerification' || String(b.status) === '13').length;
+          setPendingCount(pending);
         }
-
-        if (scRes && scRes.ok) {
-          const result = await scRes.json();
-          pendingCount += (result.data || []).filter(app => app.status === 'Pending').length;
-        }
-
-        setAppCount(pendingCount);
-
-        if (bookingsRes && bookingsRes.ok) {
-          const result = await bookingsRes.json();
-          const bookings = result.data || result;
-          const pbCount = bookings.filter(b => String(b.status) === 'PendingVerification' || String(b.status) === '13').length;
-          setPendingBookingCount(pbCount);
-        }
-      } catch {
-        // ignore
+      } catch (e) {
+        // fail silently for sidebar
       }
     };
-    fetchAppCount();
-    const interval = setInterval(fetchAppCount, 60000); // Check every minute
+    fetchPendingCount();
+    // Poll every 30 seconds for new bookings
+    const interval = setInterval(fetchPendingCount, 30000);
     return () => clearInterval(interval);
   }, []);
 
   const navItems = [
-    { name: 'Dashboard', path: '/admin/dashboard', icon: <LayoutDashboard size={20} /> },
-    { name: 'Analytics', path: '/admin/analytics', icon: <BarChart3 size={20} /> },
-    { name: 'Bookings', path: '/admin/bookings', icon: <Calendar size={20} />, count: pendingBookingCount },
-    { name: 'Pickups', path: '/admin/pickups', icon: <Truck size={20} /> },
-    { name: 'Applications', path: '/admin/applications', icon: <FileText size={20} />, count: appCount },
-    { name: 'Properties', path: '/admin/properties', icon: <Building2 size={20} /> },
-    { name: 'Users', path: '/admin/users', icon: <Users size={20} /> },
-    { name: 'Settings', path: '/admin/settings', icon: <Settings size={20} /> },
+    { name: 'Dashboard', path: '/lot-owner/dashboard', icon: <LayoutDashboard size={20} /> },
+    { name: 'Properties', path: '/lot-owner/properties', icon: <Building2 size={20} /> },
+    { name: 'Bookings', path: '/lot-owner/bookings', icon: <Calendar size={20} />, count: pendingCount },
+    { name: 'Pickups', path: '/lot-owner/pickups', icon: <Truck size={20} /> },
   ];
 
   return (
@@ -101,7 +71,7 @@ export default function AdminSidebar({ isMobileOpen, setIsMobileOpen }) {
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
             </svg>
           </div>
-          <span className="font-bold text-xl text-[#111] tracking-tight">GD1 Admin</span>
+          <span className="font-bold text-xl text-[#111] tracking-tight">Lot Owner</span>
         </div>
 
         <nav className="flex flex-col gap-2 w-full px-4 overflow-y-auto flex-1">
