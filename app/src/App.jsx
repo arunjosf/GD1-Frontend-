@@ -1,7 +1,9 @@
 import { Component } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+import { CallProvider } from './context/CallContext';
 import { getToken } from './api/auth';
+import CallOverlay from './components/CallOverlay';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
@@ -10,9 +12,10 @@ import AddGaragePage from './pages/AddGaragePage';
 import ProfilePage from './pages/ProfilePage';
 import AddVehiclePage from './pages/AddVehiclePage';
 import TrackApplicationPage from './pages/TrackApplicationPage';
+import TrackPickupPage from './pages/TrackPickupPage';
 import SearchPage from './pages/SearchPage';
 import UserBookingsPage from './pages/UserBookingsPage';
-import AdminPickupsPage from './pages/AdminPickupsPage';
+import LotOwnerPickupsPage from './pages/lot-owner/LotOwnerPickupsPage';
 import LotOwnerDashboardPage from './pages/lot-owner/LotOwnerDashboardPage';
 import LotOwnerPropertiesPage from './pages/lot-owner/LotOwnerPropertiesPage';
 import LotOwnerLayout from './components/LotOwnerLayout';
@@ -24,7 +27,10 @@ import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminApplicationsPage from './pages/AdminApplicationsPage';
 import LotOwnerBookingsPage from './pages/lot-owner/LotOwnerBookingsPage';
 import LotOwnerBookingDetailsPage from './pages/lot-owner/LotOwnerBookingDetailsPage';
+import LotOwnerPickupDetailsPage from './pages/lot-owner/LotOwnerPickupDetailsPage';
+import LotOwnerManagersPage from './pages/lot-owner/LotOwnerManagersPage';
 import VerificationPendingPage from './pages/VerificationPendingPage';
+import MessagesPage from './pages/MessagesPage';
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -119,6 +125,7 @@ function PublicRoute({ children }) {
 export default function App() {
   return (
     <ErrorBoundary>
+      <CallOverlay />
       <Routes>
         <Route path="/" element={
           <PublicRoute>
@@ -156,9 +163,12 @@ export default function App() {
         }>
           <Route path="dashboard" element={<LotOwnerDashboardPage />} />
           <Route path="properties" element={<LotOwnerPropertiesPage />} />
+          <Route path="managers" element={<LotOwnerManagersPage />} />
           <Route path="bookings" element={<LotOwnerBookingsPage />} />
           <Route path="bookings/:id" element={<LotOwnerBookingDetailsPage />} />
-          <Route path="pickups" element={<AdminPickupsPage />} />
+          <Route path="pickups" element={<LotOwnerPickupsPage />} />
+          <Route path="pickup/:id" element={<LotOwnerPickupDetailsPage />} />
+          <Route path="messages" element={<MessagesPage />} />
           <Route path="*" element={<Navigate to="/lot-owner/dashboard" replace />} />
         </Route>
 
@@ -212,9 +222,19 @@ export default function App() {
             <TrackApplicationPage />
           </ProtectedRoute>
         } />
+        <Route path="/track-pickup/:id" element={
+          <ProtectedRoute>
+            <TrackPickupPage />
+          </ProtectedRoute>
+        } />
         <Route path="/my-bookings" element={
           <ProtectedRoute>
             <UserBookingsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/messages" element={
+          <ProtectedRoute>
+            <MessagesPage />
           </ProtectedRoute>
         } />
         <Route path="*" element={<Navigate to="/" replace />} />

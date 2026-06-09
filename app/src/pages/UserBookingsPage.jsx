@@ -4,7 +4,7 @@ import Footer from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { Calendar, Car, ArrowRight, CreditCard, XCircle, Clock, BadgeCheck, MapPin, CheckCircle2, X } from 'lucide-react';
+import { Calendar, Car, ArrowRight, CreditCard, XCircle, Clock, BadgeCheck, MapPin, CheckCircle2, X, Truck } from 'lucide-react';
 
 export default function UserBookingsPage() {
   const [bookings, setBookings] = useState([]);
@@ -296,6 +296,15 @@ export default function UserBookingsPage() {
 
                        {/* Action Buttons Row */}
                        <div className="flex flex-wrap items-center justify-end gap-3 mt-5 w-full">
+                         {booking.pickupStatus && (
+                            <button 
+                              onClick={() => navigate(`/track-pickup/${booking.id}`)}
+                              className="flex-1 sm:flex-none px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[13px] shadow-md transition-all flex items-center justify-center gap-1.5"
+                            >
+                              <Truck size={14} />
+                              Track Pickup
+                            </button>
+                         )}
                          {(isPending || isApproved) && (
                             <button 
                               onClick={() => openCancelModal(booking.id)}

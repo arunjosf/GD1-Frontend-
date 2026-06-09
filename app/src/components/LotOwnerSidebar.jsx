@@ -17,36 +17,53 @@ import { getToken } from '../api/auth';
 export default function LotOwnerSidebar({ isMobileOpen, setIsMobileOpen }) {
   const { logout } = useAuth();
   const [pendingCount, setPendingCount] = useState(0);
+  const [pickupCount, setPickupCount] = useState(0);
 
   useEffect(() => {
-    const fetchPendingCount = async () => {
+    const fetchCounts = async () => {
       try {
         const token = getToken('AccessToken');
         if (!token) return;
-        const res = await fetch('https://localhost:7108/api/LotBooking/bookings', {
+
+        // Fetch bookings
+        const resBookings = await fetch('https://localhost:7108/api/LotBooking/bookings', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (res.ok) {
-          const data = await res.json();
+        if (resBookings.ok) {
+          const data = await resBookings.json();
           const bookings = data.data || data;
           const pending = bookings.filter(b => String(b.status) === 'PendingVerification' || String(b.status) === '13').length;
           setPendingCount(pending);
         }
+
+        // Fetch pickups
+        const resPickups = await fetch('https://localhost:7108/api/Pickup/lot-owner/all-requests', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (resPickups.ok) {
+            const data = await resPickups.json();
+            const pickups = data.data || [];
+            const requested = pickups.filter(p => String(p.status) === 'Requested').length;
+            setPickupCount(requested);
+        }
+
       } catch (e) {
         // fail silently for sidebar
       }
     };
-    fetchPendingCount();
-    // Poll every 30 seconds for new bookings
-    const interval = setInterval(fetchPendingCount, 30000);
+    fetchCounts();
+    // Poll every 30 seconds for new bookings/pickups
+    const interval = setInterval(fetchCounts, 30000);
     return () => clearInterval(interval);
   }, []);
 
   const navItems = [
     { name: 'Dashboard', path: '/lot-owner/dashboard', icon: <LayoutDashboard size={20} /> },
     { name: 'Properties', path: '/lot-owner/properties', icon: <Building2 size={20} /> },
+    { name: 'Managers', path: '/lot-owner/managers', icon: <Users size={20} /> },
     { name: 'Bookings', path: '/lot-owner/bookings', icon: <Calendar size={20} />, count: pendingCount },
-    { name: 'Pickups', path: '/lot-owner/pickups', icon: <Truck size={20} /> },
+    { name: 'Pickups', path: '/lot-owner/pickups', icon: <Truck size={20} />, count: pickupCount },
+    { name: 'Messages', path: '/lot-owner/messages', icon: <FileText size={20} /> },
   ];
 
   return (

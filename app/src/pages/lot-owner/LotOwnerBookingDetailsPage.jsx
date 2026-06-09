@@ -213,20 +213,45 @@ export default function LotOwnerBookingDetailsPage() {
         </div>
       </div>
 
-      {/* Cancelled Banner */}
+      {/* Status Banner */}
       {isCancelled && (
-        <div className="bg-red-50 border border-red-200 rounded-2xl p-5 flex items-start gap-4">
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-5 flex items-start gap-4 mb-4">
           <XCircle className="text-red-500 w-6 h-6 shrink-0 mt-0.5" />
           <div>
-            <h4 className="text-red-800 font-bold text-[16px]">Booking Cancelled</h4>
+            <h4 className="text-red-800 font-bold text-[16px]">
+              {(statusStr === 'AdminRejected' || statusStr === '14') ? 'Booking Rejected' :
+               (statusStr === 'AgreementDeclined' || statusStr === '6') ? 'Agreement Declined' :
+               'Booking Cancelled'}
+            </h4>
             {booking.rejectionReason && <p className="text-red-600 text-[14px] mt-1">{booking.rejectionReason}</p>}
+          </div>
+        </div>
+      )}
+
+      {/* Verification Banner */}
+      {booking.verificationStatus === 'Mismatch' && (
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-5 flex items-start gap-4 mb-4">
+          <XCircle className="text-red-500 w-6 h-6 shrink-0 mt-0.5" />
+          <div>
+            <h4 className="text-red-800 font-bold text-[16px]">AI Verification: Name Mismatch</h4>
+            <p className="text-red-600 text-[14px] mt-1">There is a mismatch between the username, vehicle RC name, and ID proof name.</p>
+          </div>
+        </div>
+      )}
+      
+      {booking.verificationStatus === 'Verified' && (
+        <div className="bg-green-50 border border-green-200 rounded-2xl p-5 flex items-start gap-4 mb-4">
+          <CheckCircle className="text-green-500 w-6 h-6 shrink-0 mt-0.5" />
+          <div>
+            <h4 className="text-green-800 font-bold text-[16px]">AI Verification: Details Matched</h4>
+            <p className="text-green-600 text-[14px] mt-1">The username, vehicle RC name, and ID proof name match successfully.</p>
           </div>
         </div>
       )}
 
       {/* Action Bar for Pending */}
       {isPending && (
-        <div className="bg-white rounded-[24px] shadow-sm border border-orange-100 py-5 p-6 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
+        <div className="bg-white rounded-[24px] shadow-sm border border-orange-100 py-5 p-6 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden mb-4">
           <div className="absolute top-0 left-0 w-1 h-full bg-orange-400"></div>
           <div>
             <h3 className="text-[16px] font-bold text-gray-900">Verification Required!</h3>
@@ -247,16 +272,6 @@ export default function LotOwnerBookingDetailsPage() {
             >
               <CheckCircle size={18} /> Approve
             </button>
-          </div>
-        </div>
-      )}
-      
-      {(statusStr === 'AdminRejected' || statusStr === '14') && booking.rejectionReason && (
-        <div className="bg-red-50 rounded-[24px] border border-red-100 p-6 flex gap-4">
-          <XCircle className="text-red-500 shrink-0 mt-1" size={24} />
-          <div>
-            <h3 className="text-red-800 font-bold">Booking Rejected</h3>
-            <p className="text-red-700 text-sm mt-1">{booking.rejectionReason}</p>
           </div>
         </div>
       )}

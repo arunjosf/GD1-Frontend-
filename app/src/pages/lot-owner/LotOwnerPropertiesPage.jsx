@@ -55,34 +55,35 @@ export default function LotOwnerPropertiesPage() {
               return (
                 <div key={property.id} className="flex flex-col px-6 py-6 border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors">
                   <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-                      <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                             <span className="font-bold text-[#111] text-lg">{property.name}</span>
-                             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${property.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
-                               {property.status}
-                             </span>
+                      <div className="flex-1 flex gap-5">
+                          {property.propertyImages && property.propertyImages.length > 0 ? (
+                            <img src={property.propertyImages[0].startsWith('http') ? property.propertyImages[0] : `https://localhost:7108${property.propertyImages[0].startsWith('/') ? '' : '/'}${property.propertyImages[0]}`} alt={property.name} className="w-24 h-24 rounded-2xl object-cover border border-gray-100 shadow-sm shrink-0 hidden sm:block" />
+                          ) : (
+                            <div className="w-24 h-24 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100 shadow-sm hidden sm:flex">
+                              <Building2 size={32} />
+                            </div>
+                          )}
+                          <div>
+                              <div className="flex items-center gap-3 mb-2">
+                                 <span className="font-bold text-[#111] text-lg">{property.name}</span>
+                                 <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${property.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                                   {property.status}
+                                 </span>
+                              </div>
+                              
+                              <div className="flex flex-wrap gap-4 text-sm text-gray-600 mt-3">
+                                  <div className="flex items-center gap-1.5 bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm">
+                                      <MapPin size={16} className="text-blue-500"/>
+                                      <span className="font-medium text-gray-900">{property.addressLine ? `${property.addressLine}, ` : ''}{property.city}{property.state ? `, ${property.state}` : ''}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1.5 bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm">
+                                      <span className="font-medium text-gray-900">Total Slots: {property.totalSlots}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1.5 bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm">
+                                      <span className="font-medium text-gray-900">Available: {property.availableSlots}</span>
+                                  </div>
+                              </div>
                           </div>
-                          
-                          <div className="flex flex-wrap gap-4 text-sm text-gray-600 mt-3">
-                              <div className="flex items-center gap-1.5 bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm">
-                                  <MapPin size={16} className="text-blue-500"/>
-                                  <span className="font-medium text-gray-900">{property.addressLine}, {property.city}</span>
-                              </div>
-                              <div className="flex items-center gap-1.5 bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm">
-                                  <span className="font-medium text-gray-900">Total Slots: {property.totalSlots}</span>
-                              </div>
-                              <div className="flex items-center gap-1.5 bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm">
-                                  <span className="font-medium text-gray-900">Available: {property.availableSlots}</span>
-                              </div>
-                          </div>
-                      </div>
-
-                      <div className="flex flex-col items-end gap-3 mt-4 lg:mt-0 w-full lg:w-auto">
-                        <div className="flex gap-3 w-full lg:w-auto">
-                          <button className="px-6 py-2.5 bg-white text-blue-600 border border-blue-200 rounded-xl font-bold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2">
-                            <UserPlus size={18} /> Invite Manager
-                          </button>
-                        </div>
                       </div>
                   </div>
                 </div>
