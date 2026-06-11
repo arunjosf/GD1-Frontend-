@@ -167,6 +167,12 @@ export default function UserBookingsPage() {
                   shortStatusLabel = 'Confirmed'; 
                   longStatusMessage = 'Your booking is confirmed.';
                 }
+                const isInLot = booking.status === 'InLot' || booking.status == 2;
+                if (isInLot) {
+                  dotColor = 'bg-blue-600';
+                  shortStatusLabel = 'Stored in Garage';
+                  longStatusMessage = 'Your vehicle is safely stored in the garage.';
+                }
 
                 return (
                   <div key={booking.id} className={`bg-white rounded-[24px] p-4 md:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 border border-gray-100 flex flex-col md:flex-row gap-5 md:gap-6 ${isInactive ? '' : 'hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] group'}`}>
@@ -286,6 +292,12 @@ export default function UserBookingsPage() {
                               {longStatusMessage}
                             </p>
                           )}
+                          {isInLot && (
+                            <p className="text-blue-700 font-semibold text-[13px] flex items-center gap-2">
+                              <CheckCircle2 className="w-4 h-4 shrink-0" />
+                              {longStatusMessage}
+                            </p>
+                          )}
                           {isCancelled && (
                             <p className="text-red-700 font-semibold text-[13px] flex items-center gap-2">
                               <XCircle className="w-4 h-4 shrink-0" />
@@ -327,6 +339,15 @@ export default function UserBookingsPage() {
                               className="flex-1 sm:flex-none px-8 py-2.5 bg-white hover:bg-gray-50 text-[#111] border border-gray-200 rounded-xl font-bold text-[13px] shadow-sm transition-all"
                             >
                               View Agreement
+                            </button>
+                         )}
+                         {isInLot && (
+                            <button 
+                              onClick={() => navigate(`/stored-vehicle/${booking.id}`)}
+                              className="flex-1 sm:flex-none px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[13px] shadow-md transition-all flex items-center justify-center gap-1.5"
+                            >
+                              <Car size={14} />
+                              View Dashboard
                             </button>
                          )}
                        </div>

@@ -33,6 +33,8 @@ export default function LotOwnerManagersPage() {
     if (location.state?.viewAllManagers) {
       fetchManagersForProperty({ id: 'all', name: 'All Properties' });
       setLoadingProperties(false);
+      // Clear the state so refreshing or navigating back doesn't stick to this view
+      window.history.replaceState({}, document.title);
     } else {
       fetchProperties();
     }
@@ -370,6 +372,31 @@ export default function LotOwnerManagersPage() {
                         )}
                       </button>
                     </div>
+
+                    {/* Performance Graph */}
+                    {manager.performanceGraphData && manager.performanceGraphData.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-gray-50">
+                        <p className="text-xs font-bold text-gray-500 mb-3 flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-blue-500"></span> Performance (Last 7 Days)
+                        </p>
+                        <div className="h-40 w-full flex items-end gap-1 px-1 pt-6">
+                          {(manager.performanceGraphData || []).map((data, index) => {
+                            const total = data.pickupsDone + data.onDemandImagesDone + data.weeklySubmissionsDone;
+                            const heightPct = Math.min(100, Math.max(5, (total / 10) * 100));
+                            return (
+                              <div key={index} className="flex-1 flex flex-col items-center justify-end h-full relative group">
+                                {/* Tooltip */}
+                                <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-[10px] p-1.5 rounded whitespace-nowrap z-10 pointer-events-none">
+                                  <p>{data.date}</p>
+                                  <p>P: {data.pickupsDone} | W: {data.weeklySubmissionsDone} | O: {data.onDemandImagesDone}</p>
+                                </div>
+                                <div className="w-full max-w-[20px] bg-blue-500 rounded-t-sm" style={{ height: `${heightPct}%` }}></div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}

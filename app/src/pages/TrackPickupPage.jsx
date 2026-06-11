@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { toast } from 'react-hot-toast';
+import { getToken } from '../api/auth';
+import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { MapPin, Navigation, ArrowLeft, Phone, Calendar, Clock, Car, FileText, CheckCircle2, AlertCircle, Maximize2, XCircle, Shield, Mail, PhoneCall, Check } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -17,11 +19,20 @@ L.Icon.Default.mergeOptions({
 });
 
 // Custom Car Icon for Leaflet
-const carIcon = L.icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/744/744465.png',
-  iconSize: [32, 32],
-  iconAnchor: [16, 16],
-  popupAnchor: [0, -16]
+const carIcon = L.divIcon({
+  className: 'custom-live-car-icon',
+  html: `
+    <div style="position: relative; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+      <div style="position: absolute; width: 100%; height: 100%; background-color: rgba(37, 99, 235, 0.2); border-radius: 50%; animation: ping 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+      <div style="position: absolute; width: 36px; height: 36px; background-color: rgba(37, 99, 235, 0.4); border-radius: 50%;"></div>
+      <div style="position: absolute; width: 22px; height: 22px; background-color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3); border: 2px solid white;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="black" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a2 2 0 0 0-1.6-.8H7.3a2 2 0 0 0-1.6.8L3 11l-.16.84A1 1 0 0 0 2 12.85V16h3m14 0v1.5a2.5 2.5 0 0 1-5 0V16m5 0h-5m-9 0v1.5a2.5 2.5 0 0 1-5 0V16m5 0H4"/></svg>
+      </div>
+    </div>
+  `,
+  iconSize: [60, 60],
+  iconAnchor: [30, 30],
+  popupAnchor: [0, -20]
 });
 
 function MapBoundsFit({ bounds }) {
@@ -33,6 +44,48 @@ function MapBoundsFit({ bounds }) {
   }, [bounds, map]);
   return null;
 }
+
+const normalizeStatus = (status) => {
+  if (status === undefined || status === null) return '';
+  const statusStr = String(status).trim();
+  switch (statusStr) {
+    case '0':
+    case 'Requested':
+      return 'Requested';
+    case '1':
+    case 'Assigned':
+      return 'Assigned';
+    case '2':
+    case 'ManagerScheduled':
+      return 'ManagerScheduled';
+    case '3':
+    case 'Approved':
+      return 'Approved';
+    case '4':
+    case 'Declined':
+      return 'Declined';
+    case '5':
+    case 'OtpSent':
+      return 'OtpSent';
+    case '6':
+    case 'OwnerOtpSubmitted':
+      return 'OwnerOtpSubmitted';
+    case '7':
+    case 'Verified':
+      return 'Verified';
+    case '8':
+    case 'VehiclePicked':
+      return 'VehiclePicked';
+    case '9':
+    case 'InTransit':
+      return 'InTransit';
+    case '10':
+    case 'Stored':
+      return 'Stored';
+    default:
+      return statusStr;
+  }
+};
 
 export default function TrackPickupPage() {
   const { id } = useParams(); // Booking ID
@@ -46,10 +99,14 @@ export default function TrackPickupPage() {
   
   // Route and Live tracking states
   const [routeCoords, setRouteCoords] = useState([]);
-  const [carPos, setCarPos] = useState(null);
+  const [liveGpsPos, setLiveGpsPos] = useState(null);
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
   const [isRouteOffline, setIsRouteOffline] = useState(false);
+  const [isMapExpanded, setIsMapExpanded] = useState(false);
+
+
+
 
   // Refs for auto scrolling
   const stepRefs = {
@@ -66,9 +123,7 @@ export default function TrackPickupPage() {
 
   const fetchBookingDetails = async () => {
     try {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; AccessToken=`);
-      const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
+      const token = getToken('AccessToken');
 
       if (!token) return;
 
@@ -77,10 +132,13 @@ export default function TrackPickupPage() {
       });
       const data = await res.json();
       if (data.success) {
+        if (data.data) {
+          data.data.pickupStatus = normalizeStatus(data.data.pickupStatus);
+        }
         setBooking(data.data);
         const b = data.data;
         if (b.pickupLatitude && b.pickupLongitude && b.lotLatitude && b.lotLongitude) {
-          fetchRoute(b.lotLatitude, b.lotLongitude, b.pickupLatitude, b.pickupLongitude);
+          fetchRoute(b.pickupLatitude, b.pickupLongitude, b.lotLatitude, b.lotLongitude);
         }
       } else {
         toast.error("Failed to load tracking details");
@@ -172,29 +230,56 @@ export default function TrackPickupPage() {
       case 'Approved': return 2;
       case 'OtpSent': return 3;
       case 'OwnerOtpSubmitted': return 3;
-      case 'Verified': return 3;
+      case 'Verified': return 4;
       case 'VehiclePicked': return 4;
-      case 'InTransit': return 4;
-      case 'Stored': return 5;
+      case 'InTransit': return 5;
+      case 'Stored': return 6;
       default: return 0;
     }
   };
 
   const statusIndex = booking ? getStepIndex(booking.pickupStatus) : 0;
 
-  // Live location animation simulation
+  const fallbackPos = routeCoords.length > 0 ? routeCoords[0] : (booking?.pickupLatitude && booking?.pickupLongitude ? [booking.pickupLatitude, booking.pickupLongitude] : null);
+  const displayCarPos = liveGpsPos || (booking?.lastGpsLatitude && booking?.lastGpsLongitude ? [booking.lastGpsLatitude, booking.lastGpsLongitude] : fallbackPos);
+
+  const isTransit = booking && (String(booking.pickupStatus).toUpperCase() === 'INTRANSIT' || String(booking.pickupStatus) === '9');
+  const isActiveTracking = booking && ['1', '2', '3', '5', '6', '7', '8', '9', 'Assigned', 'ManagerScheduled', 'Approved', 'OtpSent', 'OwnerOtpSubmitted', 'Verified', 'VehiclePicked', 'InTransit'].includes(String(booking.pickupStatus));
+
+  // Connect to SignalR TrackingHub for real-time tracking updates
   useEffect(() => {
-    if (booking?.pickupStatus === 'InTransit' && routeCoords.length > 0) {
-      let index = 0;
-      const interval = setInterval(() => {
-        setCarPos(routeCoords[index]);
-        index = (index + 1) % routeCoords.length;
-      }, 1200);
-      return () => clearInterval(interval);
-    } else {
-      setCarPos(null);
-    }
-  }, [booking?.pickupStatus, routeCoords]);
+    if (!isActiveTracking || !booking?.id) return;
+
+    const token = getToken('AccessToken');
+    if (!token) return;
+
+    console.log('[TrackPickup] Connecting to TrackingHub for bookingId:', booking.id);
+
+    const connection = new HubConnectionBuilder()
+      .withUrl("https://localhost:7108/hubs/tracking", { accessTokenFactory: () => token })
+      .configureLogging(LogLevel.Warning)
+      .withAutomaticReconnect()
+      .build();
+
+    connection.on("ReceiveLocationUpdate", (lat, lng) => {
+      console.log('[TrackPickup] ReceiveLocationUpdate:', lat, lng);
+      setLiveGpsPos([lat, lng]);
+    });
+
+    connection.start()
+      .then(async () => {
+        console.log('[TrackPickup] TrackingHub connected, joining group:', booking.id);
+        await connection.invoke("JoinTrackingGroup", Number(booking.id));
+        console.log('[TrackPickup] Joined tracking group:', booking.id);
+      })
+      .catch(err => console.error('[TrackPickup] TrackingHub connection failed:', err));
+
+    return () => {
+      console.log('[TrackPickup] Disconnecting from TrackingHub');
+      connection.stop();
+    };
+  }, [booking?.id, isActiveTracking]);
+
 
   // Auto-scroll to latest active step on load
   useEffect(() => {
@@ -282,51 +367,104 @@ export default function TrackPickupPage() {
       title: 'Departure Verification',
       description: 'Vehicle condition check at your location.',
       longDesc: 'The manager checks and records your vehicle condition before starting the trip. Live condition details are visible below.',
-      details: booking.pickupImages ? (
-        <div className="mt-4 bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-3">
-          {booking.pickupImages.managerRemarks && (
-            <p className="text-sm text-gray-600 italic bg-white p-3 rounded-lg border-l-4 border-blue-500">
-              "{booking.pickupImages.managerRemarks}"
-            </p>
+      details: booking.pickupImages || booking.pickupStatus === 'OtpSent' ? (
+        <div className="mt-4 space-y-4">
+          {booking.pickupStatus === 'OtpSent' && (
+            <div className="bg-blue-50/80 p-4 rounded-xl border border-blue-200">
+              <span className="text-blue-800 font-bold text-sm">OTP has been sent to your email and phone! Provide it to the manager.</span>
+            </div>
           )}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {[
-              { label: 'Front', img: booking.pickupImages.frontImageUrl },
-              { label: 'Rear', img: booking.pickupImages.rearImageUrl },
-              { label: 'Left Side', img: booking.pickupImages.leftSideImageUrl },
-              { label: 'Right Side', img: booking.pickupImages.rightSideImageUrl },
-              { label: 'Interior', img: booking.pickupImages.interiorImageUrl },
-              { label: 'Odometer', img: booking.pickupImages.odometerImageUrl },
-              { label: 'Live Selfie', img: booking.pickupImages.selfieUrl }
-            ].map((item, idx) => item.img && (
-              <div key={idx} className="space-y-1">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{item.label}</p>
-                <div className="relative group cursor-pointer aspect-video bg-white rounded-lg overflow-hidden border border-gray-200" onClick={() => { setFullScreenImage(getImageUrl(item.img)); setIsImageExpanded(true); }}>
-                  <img src={getImageUrl(item.img)} alt={item.label} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Maximize2 size={14} className="text-white" />
+          {booking.pickupImages && (
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-3">
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {[
+                  { label: 'Front', img: booking.pickupImages.frontImageUrl },
+                  { label: 'Rear', img: booking.pickupImages.rearImageUrl },
+                  { label: 'Left Side', img: booking.pickupImages.leftSideImageUrl },
+                  { label: 'Right Side', img: booking.pickupImages.rightSideImageUrl },
+                  { label: 'Live Selfie', img: booking.pickupImages.selfieUrl }
+                ].map((item, idx) => item.img && (
+                  <div key={idx} className="space-y-1">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{item.label}</p>
+                    <div className="relative group cursor-pointer aspect-video bg-white rounded-lg overflow-hidden border border-gray-200" onClick={() => { setFullScreenImage(getImageUrl(item.img)); setIsImageExpanded(true); }}>
+                      <img src={getImageUrl(item.img)} alt={item.label} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Maximize2 size={14} className="text-white" />
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
       ) : null
     },
     {
       id: 4,
-      title: 'In Transit',
-      description: 'Vehicle is on the way to the storage garage.',
-      longDesc: 'Your vehicle is carefully being navigated to its parking slot. You can monitor the path on the map below.',
-      details: booking.pickupStatus === 'InTransit' ? (
-        <div className="mt-4 bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-blue-600 animate-ping"></div>
-          <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">Live location tracking active</span>
+      title: 'Manager OTP Submission',
+      description: 'Manager verifies your OTP.',
+      longDesc: 'The manager submits the OTP you provided to securely authorize the pickup before transit.',
+      details: statusIndex >= 4 ? (
+        <div className="mt-4 bg-green-50/50 p-4 rounded-xl border border-green-100 flex items-center gap-3">
+          <CheckCircle2 size={20} className="text-green-600" />
+          <span className="text-xs font-bold text-green-700 uppercase tracking-wider">Manager successfully submitted OTP</span>
         </div>
       ) : null
     },
     {
       id: 5,
+      title: 'In Transit',
+      description: 'Vehicle is on the way to the storage garage.',
+      longDesc: 'Your vehicle is carefully being navigated to its parking slot. You can monitor the path on the map below.',
+      details: (isTransit || statusIndex >= 5) ? (
+        <div className="mt-4 space-y-4">
+          {isTransit && (
+            <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-blue-600 animate-ping"></div>
+                <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">Live location tracking active</span>
+              </div>
+              <button 
+                onClick={() => setIsMapExpanded(true)}
+                className="flex items-center justify-center gap-2 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors shadow-sm self-start"
+              >
+                <Maximize2 size={16} />
+                Live Track Manager
+              </button>
+            </div>
+          )}
+          {booking.pickupImages && (booking.pickupImages.interiorImageUrl || booking.pickupImages.odometerImageUrl) && (
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-3">
+              {booking.pickupImages.managerRemarks && (
+                <p className="text-sm text-gray-600 italic bg-white p-3 rounded-lg border-l-4 border-blue-500">
+                  "{booking.pickupImages.managerRemarks}"
+                </p>
+              )}
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { label: 'Interior', img: booking.pickupImages.interiorImageUrl },
+                  { label: 'Odometer', img: booking.pickupImages.odometerImageUrl }
+                ].map((item, idx) => item.img && (
+                  <div key={idx} className="space-y-1">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{item.label}</p>
+                    <div className="relative group cursor-pointer aspect-video bg-white rounded-lg overflow-hidden border border-gray-200" onClick={() => { setFullScreenImage(getImageUrl(item.img)); setIsImageExpanded(true); }}>
+                      <img src={getImageUrl(item.img)} alt={item.label} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Maximize2 size={14} className="text-white" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      ) : null
+    },
+    {
+      id: 6,
       title: 'Stored Securely',
       description: 'Vehicle safely stored in the designated slot.',
       longDesc: 'The vehicle is parked in its assigned slot. Arrival condition and final photographs are stored here.',
@@ -479,28 +617,50 @@ export default function TrackPickupPage() {
               </div>
 
               {/* Map Container */}
-              {booking.pickupLatitude != null && booking.pickupLongitude != null && booking.lotLatitude != null && booking.lotLongitude != null ? (
+              {booking.pickupLatitude != null && booking.pickupLongitude != null && booking.lotLatitude != null && booking.lotLongitude != null && (isActiveTracking || booking.pickupStatus === 'Stored' || String(booking.pickupStatus) === '10') ? (
                 <div className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Live Route Map</h3>
-                    {distance && duration && (
-                      <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1.5 rounded-lg flex flex-col items-end gap-0.5 border border-blue-100/40 shadow-sm leading-tight text-right animate-fade-in">
-                        <span>{distance} km • {duration} mins</span>
-                        {isRouteOffline && <span className="text-[9px] text-orange-600 font-bold tracking-wide">⚠️ Routing Offline</span>}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => setIsMapExpanded(true)}
+                        className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-gray-500 hover:text-gray-700"
+                        title="Expand Map"
+                      >
+                        <Maximize2 size={14} />
+                      </button>
+                      {distance && duration && (
+                        <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100/40 shadow-sm leading-tight">
+                          {distance} km • {duration} mins
+                        </span>
+                      )}
+                    </div>
                   </div>
                   
-                  <div className="h-[320px] rounded-xl overflow-hidden border border-gray-200 z-0">
+                  <div 
+                    onClick={() => setIsMapExpanded(true)}
+                    className="h-[320px] rounded-xl overflow-hidden border border-gray-200 z-0 cursor-pointer relative group"
+                  >
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 z-[1000] transition-colors flex items-center justify-center">
+                        <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full font-bold text-sm text-gray-800 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity translate-y-4 group-hover:translate-y-0 flex items-center gap-2">
+                            <Maximize2 size={16} /> Click to Expand Map
+                        </div>
+                    </div>
                     <MapContainer 
-                      center={carPos || [booking.pickupLatitude, booking.pickupLongitude]} 
+                      center={displayCarPos || [booking.pickupLatitude, booking.pickupLongitude]} 
                       zoom={13} 
                       style={{ height: '100%', width: '100%' }}
                       scrollWheelZoom={false}
+                      zoomControl={false}
+                      dragging={false}
                     >
                       <TileLayer
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        attribution='&copy; OpenStreetMap contributors'
+                        url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png"
+                        attribution='&copy; OpenStreetMap contributors &copy; CARTO'
+                      />
+                      <TileLayer
+                        url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png"
+                        pane="shadowPane"
                       />
                       
                       <MapBoundsFit bounds={[
@@ -508,13 +668,15 @@ export default function TrackPickupPage() {
                         [booking.lotLatitude, booking.lotLongitude]
                       ]} />
 
-                      {/* Origin Marker */}
-                      <Marker position={[booking.pickupLatitude, booking.pickupLongitude]}>
-                        <Popup>
-                          <div className="font-bold text-xs">Pickup Origin</div>
-                          <p className="text-xs text-gray-500 mt-1">{booking.propertyAddress}</p>
-                        </Popup>
-                      </Marker>
+                      {/* Origin Marker (Hidden during transit) */}
+                      {!isTransit && (
+                        <Marker position={[booking.pickupLatitude, booking.pickupLongitude]}>
+                          <Popup>
+                            <div className="font-bold text-xs">Pickup Origin</div>
+                            <p className="text-xs text-gray-500 mt-1">{booking.propertyAddress}</p>
+                          </Popup>
+                        </Marker>
+                      )}
 
                       {/* Destination Marker */}
                       <Marker position={[booking.lotLatitude, booking.lotLongitude]}>
@@ -524,12 +686,15 @@ export default function TrackPickupPage() {
                         </Popup>
                       </Marker>
 
-                      {/* Simulated Live Car Marker */}
-                      {booking.pickupStatus === 'InTransit' && carPos && (
-                        <Marker position={carPos} icon={carIcon}>
+                      {/* Live Car Marker — always visible when tracking is active */}
+                      {isActiveTracking && (
+                        <Marker
+                          position={liveGpsPos || (booking.lastGpsLatitude && booking.lastGpsLongitude ? [booking.lastGpsLatitude, booking.lastGpsLongitude] : [booking.pickupLatitude, booking.pickupLongitude])}
+                          icon={carIcon}
+                        >
                           <Popup>
-                            <div className="font-bold text-xs">Vehicle In Transit</div>
-                            <p className="text-[10px] text-gray-500 mt-0.5">Moving towards garage...</p>
+                            <div className="font-bold text-xs">{isTransit ? 'Vehicle In Transit' : 'Manager En-Route'}</div>
+                            <p className="text-[10px] text-gray-500 mt-0.5">{liveGpsPos ? 'Live location' : (isTransit ? 'Moving towards garage...' : 'Manager approaching vehicle...')}</p>
                           </Popup>
                         </Marker>
                       )}
@@ -538,7 +703,7 @@ export default function TrackPickupPage() {
                       <Polyline 
                         positions={routeCoords.length > 0 ? routeCoords : [[booking.pickupLatitude, booking.pickupLongitude], [booking.lotLatitude, booking.lotLongitude]]} 
                         color="#2563eb" 
-                        weight={4} 
+                        weight={4.5} 
                       />
                     </MapContainer>
                   </div>
@@ -564,6 +729,85 @@ export default function TrackPickupPage() {
                 </button>
                 <img src={fullScreenImage} alt="Expanded view" className="rounded-2xl max-h-[80vh] object-contain shadow-2xl" />
             </div>
+        </div>
+      )}
+
+      {/* Expanded Map Modal */}
+      {isMapExpanded && booking.pickupLatitude != null && booking.pickupLongitude != null && (
+        <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm p-4 md:p-8 flex items-center justify-center animate-fade-in" onClick={() => setIsMapExpanded(false)}>
+          <div className="bg-white rounded-3xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
+            
+            {/* Modal Header */}
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Live Route Map</h3>
+                <p className="text-sm text-gray-500 mt-1">{booking.propertyAddress}</p>
+              </div>
+              <button 
+                onClick={() => setIsMapExpanded(false)}
+                className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 hover:bg-gray-50 rounded-xl text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                <XCircle size={24} />
+              </button>
+            </div>
+
+            {/* Modal Map Body */}
+            <div className="flex-1 w-full relative z-0">
+              <MapContainer 
+                  key={`modal-owner-${isMapExpanded}`}
+                  center={displayCarPos || [booking.pickupLatitude, booking.pickupLongitude]} 
+                  zoom={13} 
+                  style={{ height: '100%', width: '100%' }}
+                  scrollWheelZoom={true}
+              >
+                  <TileLayer
+                      url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png"
+                      attribution='&copy; OpenStreetMap contributors &copy; CARTO'
+                  />
+                  
+                  <MapBoundsFit bounds={[
+                      [booking.pickupLatitude, booking.pickupLongitude],
+                      [booking.lotLatitude, booking.lotLongitude]
+                  ]} />
+
+                  {/* Origin */}
+                  {!isTransit && (
+                    <Marker position={[booking.pickupLatitude, booking.pickupLongitude]}>
+                        <Popup><div className="font-bold text-xs">Pickup Origin</div><p className="text-xs text-gray-500 mt-1">{booking.propertyAddress}</p></Popup>
+                    </Marker>
+                  )}
+
+                  {/* Destination */}
+                  <Marker position={[booking.lotLatitude, booking.lotLongitude]}>
+                      <Popup><div className="font-bold text-xs">Destination Lot</div><p className="text-xs text-gray-500 mt-1">{booking.propertyName}</p></Popup>
+                  </Marker>
+
+                  {/* Live Moving Marker — always visible when tracking is active */}
+                  {isActiveTracking && (
+                    <Marker
+                      position={liveGpsPos || (booking.lastGpsLatitude && booking.lastGpsLongitude ? [booking.lastGpsLatitude, booking.lastGpsLongitude] : [booking.pickupLatitude, booking.pickupLongitude])}
+                      icon={carIcon}
+                    >
+                      <Popup>
+                        <div className="font-bold text-xs">{isTransit ? 'Vehicle In Transit' : 'Manager En-Route'}</div>
+                        <p className="text-[10px] text-gray-500 mt-0.5">{liveGpsPos ? 'Live location' : (isTransit ? 'Moving towards garage...' : 'Manager approaching vehicle...')}</p>
+                      </Popup>
+                    </Marker>
+                  )}
+
+                  <Polyline 
+                      positions={routeCoords.length > 0 ? routeCoords : [[booking.pickupLatitude, booking.pickupLongitude], [booking.lotLatitude, booking.lotLongitude]]} 
+                      color="#2563eb" 
+                      weight={4.5} 
+                  />
+
+                  <TileLayer
+                      url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png"
+                      pane="shadowPane"
+                  />
+              </MapContainer>
+            </div>
+          </div>
         </div>
       )}
 

@@ -88,7 +88,7 @@ export default function LotOwnerBookingsPage() {
       if (activeTab === 'pending') {
           return statusStr === 'PendingVerification' || statusStr === '13';
       } else if (activeTab === 'completed') {
-          return statusStr === 'Confirmed' || statusStr === '1';
+          return statusStr === 'Confirmed' || statusStr === '1' || statusStr === 'InLot' || statusStr === '2' || statusStr === 'Completed' || statusStr === '3';
       } else if (activeTab === 'cancelled') {
           return statusStr === 'Cancelled' || statusStr === '4' || statusStr === 'AgreementDeclined' || statusStr === '6' || statusStr === 'AdminRejected' || statusStr === '14';
       }
@@ -136,7 +136,7 @@ export default function LotOwnerBookingsPage() {
           >
             Completed Bookings
             <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'completed' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600'}`}>
-               {bookings.filter(b => String(b.status) === 'Confirmed' || String(b.status) === '1').length}
+               {bookings.filter(b => String(b.status) === 'Confirmed' || String(b.status) === '1' || String(b.status) === 'InLot' || String(b.status) === '2' || String(b.status) === 'Completed' || String(b.status) === '3').length}
             </span>
           </button>
           <button
@@ -193,8 +193,8 @@ export default function LotOwnerBookingsPage() {
               } else if (statusStr === 'VerifiedPendingPayment' || statusStr === '15') {
                   statusLabel = 'Awaiting Payment';
                   badgeStyle = 'bg-blue-50 text-blue-700';
-              } else if (statusStr === 'Confirmed' || statusStr === '1') {
-                  statusLabel = 'Confirmed';
+              } else if (statusStr === 'Confirmed' || statusStr === '1' || statusStr === 'InLot' || statusStr === '2' || statusStr === 'Completed' || statusStr === '3') {
+                  statusLabel = statusStr === '1' || statusStr === 'Confirmed' ? 'Confirmed' : statusStr === '2' || statusStr === 'InLot' ? 'In Lot' : 'Completed';
                   badgeStyle = 'bg-green-50 text-green-700';
               } else if (statusStr === 'AgreementDeclined' || statusStr === '6') {
                   statusLabel = 'Agreement Rejection';

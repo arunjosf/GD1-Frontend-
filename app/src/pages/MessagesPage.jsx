@@ -14,12 +14,16 @@ export default function MessagesPage() {
   const [chatManually, setChatManually] = useState(false);
   const [managers, setManagers] = useState([]);
   const [loadingManagers, setLoadingManagers] = useState(false);
+  const [bosses, setBosses] = useState([]);
+  const [loadingBosses, setLoadingBosses] = useState(false);
 
   const { user } = useAuth();
   const { startCall } = useCall();
   const navigate = useNavigate();
   const location = useLocation();
   const predictiveMsg = location.state?.predictiveMessage ? "Hi! Just following up on the pickup request." : null;
+
+
 
   useEffect(() => {
     if (location.state?.preselect) {
@@ -42,10 +46,34 @@ export default function MessagesPage() {
   }, [location.state]);
 
   useEffect(() => {
-    if (user && (user.roleId === 2 || user.roleId === 4) && (activeTab === 'all' || activeTab === 'manager') && managers.length === 0) {
-      fetchManagers();
+    if (user) {
+      if (user.roleId === 2 && (activeTab === 'all' || activeTab === 'manager') && managers.length === 0) {
+        fetchManagers();
+      } else if (user.roleId === 4 && (activeTab === 'all' || activeTab === 'manager') && bosses.length === 0) {
+        fetchBosses();
+      }
     }
   }, [activeTab, user]);
+
+  const fetchBosses = async () => {
+    try {
+      setLoadingBosses(true);
+      const token = getToken('AccessToken');
+      if (!token) return;
+
+      const res = await fetch('https://localhost:7108/api/lot-manager/my-owners', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const result = await res.json();
+        setBosses(result.data || []);
+      }
+    } catch (err) {
+      console.error('Error fetching bosses:', err);
+    } finally {
+      setLoadingBosses(false);
+    }
+  };
 
   const fetchManagers = async () => {
     try {
@@ -79,6 +107,17 @@ export default function MessagesPage() {
     });
   };
 
+  const handleSelectBoss = (boss) => {
+    setSelectedChat({
+      category: 'manager',
+      referenceId: user.userId,
+      title: boss.fullName,
+      otherUserId: boss.ownerId,
+      otherUserName: boss.fullName,
+      isChatActive: true
+    });
+  };
+
   const fetchConversations = async () => {
     try {
       setLoading(true);
@@ -108,7 +147,7 @@ export default function MessagesPage() {
 
   const combinedConversations = [...conversations];
 
-  if (user && (user.roleId === 2 || user.roleId === 4)) {
+  if (user && user.roleId === 2) {
     managers.forEach(mgr => {
       const existingConv = combinedConversations.find(c => c.category === 'manager' && c.referenceId === mgr.managerUserId);
       if (!existingConv) {
@@ -118,6 +157,23 @@ export default function MessagesPage() {
           title: mgr.managerName,
           otherUserId: mgr.managerUserId,
           otherUserName: mgr.managerName,
+          latestMessage: 'No messages yet',
+          latestMessageAt: null,
+          unreadCount: 0,
+          isChatActive: true,
+        });
+      }
+    });
+  } else if (user && user.roleId === 4) {
+    bosses.forEach(boss => {
+      const existingConv = combinedConversations.find(c => c.category === 'manager' && c.otherUserId === boss.ownerId);
+      if (!existingConv) {
+        combinedConversations.push({
+          category: 'manager',
+          referenceId: user.userId,
+          title: boss.fullName,
+          otherUserId: boss.ownerId,
+          otherUserName: boss.fullName,
           latestMessage: 'No messages yet',
           latestMessageAt: null,
           unreadCount: 0,
@@ -143,73 +199,142 @@ export default function MessagesPage() {
             
             {/* Tabs */}
             <div className="flex mt-6 bg-gray-200 p-1 rounded-lg overflow-x-auto no-scrollbar gap-1">
-              <button
-                className={`flex-1 min-w-[60px] py-2 text-[13px] font-medium rounded-md transition-all whitespace-nowrap ${
-                  activeTab === 'all'
-                    ? 'bg-white text-blue-600 shadow-sm' 
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-                onClick={() => { setActiveTab('all'); setChatManually(false); setSelectedChat(null); }}
-              >
-                All
-                {conversations.reduce((sum, c) => sum + c.unreadCount, 0) > 0 && (
-                  <span className="ml-1 bg-blue-100 text-blue-600 py-0.5 px-1.5 rounded-full text-[10px]">
-                    {conversations.reduce((sum, c) => sum + c.unreadCount, 0)}
-                  </span>
-                )}
-              </button>
-              <button
-                className={`flex-1 min-w-[60px] py-2 text-[13px] font-medium rounded-md transition-all whitespace-nowrap ${
-                  activeTab === 'garage'
-                    ? 'bg-white text-blue-600 shadow-sm' 
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-                onClick={() => { setActiveTab('garage'); setChatManually(false); setSelectedChat(null); }}
-              >
-                Garage
-                {conversations.filter(c => c.category === 'garage').reduce((sum, c) => sum + c.unreadCount, 0) > 0 && (
-                  <span className="ml-1 bg-blue-100 text-blue-600 py-0.5 px-1.5 rounded-full text-[10px]">
-                    {conversations.filter(c => c.category === 'garage').reduce((sum, c) => sum + c.unreadCount, 0)}
-                  </span>
-                )}
-              </button>
-              <button
-                className={`flex-1 min-w-[60px] py-2 text-[13px] font-medium rounded-md transition-all whitespace-nowrap ${
-                  activeTab === 'serviceCenter'
-                    ? 'bg-white text-blue-600 shadow-sm' 
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-                onClick={() => { setActiveTab('serviceCenter'); setChatManually(false); setSelectedChat(null); }}
-              >
-                Service
-                {conversations.filter(c => c.category === 'serviceCenter').reduce((sum, c) => sum + c.unreadCount, 0) > 0 && (
-                  <span className="ml-1 bg-blue-100 text-blue-600 py-0.5 px-1.5 rounded-full text-[10px]">
-                    {conversations.filter(c => c.category === 'serviceCenter').reduce((sum, c) => sum + c.unreadCount, 0)}
-                  </span>
-                )}
-              </button>
-              {user && (user.roleId === 2 || user.roleId === 4) && (
-                <button
-                  className={`flex-1 min-w-[60px] py-2 text-[13px] font-medium rounded-md transition-all whitespace-nowrap ${
-                    activeTab === 'manager'
-                      ? 'bg-white text-blue-600 shadow-sm' 
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                  onClick={() => { setActiveTab('manager'); setChatManually(true); setSelectedChat(null); }}
-                >
-                  Manager
-                  {conversations.filter(c => c.category === 'manager').reduce((sum, c) => sum + c.unreadCount, 0) > 0 && (
-                    <span className="ml-1 bg-blue-100 text-blue-600 py-0.5 px-1.5 rounded-full text-[10px]">
-                      {conversations.filter(c => c.category === 'manager').reduce((sum, c) => sum + c.unreadCount, 0)}
-                    </span>
+              {user.roleId === 4 ? (
+                <>
+                  <button
+                    className={`flex-1 min-w-[60px] py-2 text-[13px] font-medium rounded-md transition-all whitespace-nowrap ${
+                      activeTab === 'all'
+                        ? 'bg-white text-blue-600 shadow-sm' 
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                    onClick={() => { setActiveTab('all'); setChatManually(false); setSelectedChat(null); }}
+                  >
+                    All
+                    {conversations.reduce((sum, c) => sum + c.unreadCount, 0) > 0 && (
+                      <span className="ml-1 bg-blue-100 text-blue-600 py-0.5 px-1.5 rounded-full text-[10px]">
+                        {conversations.reduce((sum, c) => sum + c.unreadCount, 0)}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    className={`flex-1 min-w-[60px] py-2 text-[13px] font-medium rounded-md transition-all whitespace-nowrap ${
+                      activeTab === 'serviceCenter'
+                        ? 'bg-white text-blue-600 shadow-sm' 
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                    onClick={() => { setActiveTab('serviceCenter'); setChatManually(false); setSelectedChat(null); }}
+                  >
+                    Service
+                    {conversations.filter(c => c.category === 'serviceCenter').reduce((sum, c) => sum + c.unreadCount, 0) > 0 && (
+                      <span className="ml-1 bg-blue-100 text-blue-600 py-0.5 px-1.5 rounded-full text-[10px]">
+                        {conversations.filter(c => c.category === 'serviceCenter').reduce((sum, c) => sum + c.unreadCount, 0)}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    className={`flex-1 min-w-[60px] py-2 text-[13px] font-medium rounded-md transition-all whitespace-nowrap ${
+                      activeTab === 'garage'
+                        ? 'bg-white text-blue-600 shadow-sm' 
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                    onClick={() => { setActiveTab('garage'); setChatManually(false); setSelectedChat(null); }}
+                  >
+                    v-owner
+                    {conversations.filter(c => c.category === 'garage').reduce((sum, c) => sum + c.unreadCount, 0) > 0 && (
+                      <span className="ml-1 bg-blue-100 text-blue-600 py-0.5 px-1.5 rounded-full text-[10px]">
+                        {conversations.filter(c => c.category === 'garage').reduce((sum, c) => sum + c.unreadCount, 0)}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    className={`flex-1 min-w-[60px] py-2 text-[13px] font-medium rounded-md transition-all whitespace-nowrap ${
+                      activeTab === 'manager'
+                        ? 'bg-white text-blue-600 shadow-sm' 
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                    onClick={() => { setActiveTab('manager'); setChatManually(true); setSelectedChat(null); }}
+                  >
+                    Boss
+                    {conversations.filter(c => c.category === 'manager').reduce((sum, c) => sum + c.unreadCount, 0) > 0 && (
+                      <span className="ml-1 bg-blue-100 text-blue-600 py-0.5 px-1.5 rounded-full text-[10px]">
+                        {conversations.filter(c => c.category === 'manager').reduce((sum, c) => sum + c.unreadCount, 0)}
+                      </span>
+                    )}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    className={`flex-1 min-w-[60px] py-2 text-[13px] font-medium rounded-md transition-all whitespace-nowrap ${
+                      activeTab === 'all'
+                        ? 'bg-white text-blue-600 shadow-sm' 
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                    onClick={() => { setActiveTab('all'); setChatManually(false); setSelectedChat(null); }}
+                  >
+                    All
+                    {conversations.reduce((sum, c) => sum + c.unreadCount, 0) > 0 && (
+                      <span className="ml-1 bg-blue-100 text-blue-600 py-0.5 px-1.5 rounded-full text-[10px]">
+                        {conversations.reduce((sum, c) => sum + c.unreadCount, 0)}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    className={`flex-1 min-w-[60px] py-2 text-[13px] font-medium rounded-md transition-all whitespace-nowrap ${
+                      activeTab === 'garage'
+                        ? 'bg-white text-blue-600 shadow-sm' 
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                    onClick={() => { setActiveTab('garage'); setChatManually(false); setSelectedChat(null); }}
+                  >
+                    Garage
+                    {conversations.filter(c => c.category === 'garage').reduce((sum, c) => sum + c.unreadCount, 0) > 0 && (
+                      <span className="ml-1 bg-blue-100 text-blue-600 py-0.5 px-1.5 rounded-full text-[10px]">
+                        {conversations.filter(c => c.category === 'garage').reduce((sum, c) => sum + c.unreadCount, 0)}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    className={`flex-1 min-w-[60px] py-2 text-[13px] font-medium rounded-md transition-all whitespace-nowrap ${
+                      activeTab === 'serviceCenter'
+                        ? 'bg-white text-blue-600 shadow-sm' 
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                    onClick={() => { setActiveTab('serviceCenter'); setChatManually(false); setSelectedChat(null); }}
+                  >
+                    Service
+                    {conversations.filter(c => c.category === 'serviceCenter').reduce((sum, c) => sum + c.unreadCount, 0) > 0 && (
+                      <span className="ml-1 bg-blue-100 text-blue-600 py-0.5 px-1.5 rounded-full text-[10px]">
+                        {conversations.filter(c => c.category === 'serviceCenter').reduce((sum, c) => sum + c.unreadCount, 0)}
+                      </span>
+                    )}
+                  </button>
+                  {user && user.roleId === 2 && (
+                    <button
+                      className={`flex-1 min-w-[60px] py-2 text-[13px] font-medium rounded-md transition-all whitespace-nowrap ${
+                        activeTab === 'manager'
+                          ? 'bg-white text-blue-600 shadow-sm' 
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                      onClick={() => { setActiveTab('manager'); setChatManually(true); setSelectedChat(null); }}
+                    >
+                      Manager
+                      {conversations.filter(c => c.category === 'manager').reduce((sum, c) => sum + c.unreadCount, 0) > 0 && (
+                        <span className="ml-1 bg-blue-100 text-blue-600 py-0.5 px-1.5 rounded-full text-[10px]">
+                          {conversations.filter(c => c.category === 'manager').reduce((sum, c) => sum + c.unreadCount, 0)}
+                        </span>
+                      )}
+                    </button>
                   )}
-                </button>
+                </>
               )}
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto">
-            {loading || (loadingManagers && (activeTab === 'all' || activeTab === 'manager')) ? (
+            {loading || 
+             (user?.roleId === 2 && loadingManagers && (activeTab === 'all' || activeTab === 'manager')) || 
+             (user?.roleId === 4 && loadingBosses && (activeTab === 'all' || activeTab === 'manager')) ? (
               <div className="flex items-center justify-center h-32">
                 <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
               </div>
@@ -238,6 +363,11 @@ export default function MessagesPage() {
                       <div className="flex items-center gap-2">
                         {chat.isChatActive && <div className="w-2 h-2 rounded-full bg-green-500"></div>}
                         <h3 className="font-semibold text-gray-900 truncate pr-2">{chat.title}</h3>
+                        {user && user.roleId === 4 && chat.category === 'manager' && (
+                          <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm shrink-0">
+                            Boss
+                          </span>
+                        )}
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         {chat.latestMessageAt && (

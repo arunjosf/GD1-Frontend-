@@ -10,7 +10,7 @@ import { CallProvider } from './context/CallContext.jsx';
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
-    <Toaster />
+    <Toaster containerStyle={{ zIndex: 99999 }} />
     <GoogleOAuthProvider clientId="91202562226-4ihbts6r617mgqui3ni8d2o15hmio4t1.apps.googleusercontent.com">
       <AuthProvider>
         <CallProvider>

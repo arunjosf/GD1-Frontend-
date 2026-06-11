@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
+import { getToken } from '../../api/auth';
 import BookingChat from '../../components/BookingChat';
+import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { MapPin, Navigation, ArrowLeft, Phone, Calendar, Clock, Car, FileText, CheckCircle, XCircle, MessageCircle, Maximize2, Check } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -13,6 +15,23 @@ L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+// Custom Black Car Icon with Shadow Circle
+const carIcon = L.divIcon({
+  className: 'custom-live-car-icon',
+  html: `
+    <div style="position: relative; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+      <div style="position: absolute; width: 100%; height: 100%; background-color: rgba(37, 99, 235, 0.2); border-radius: 50%; animation: ping 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+      <div style="position: absolute; width: 36px; height: 36px; background-color: rgba(37, 99, 235, 0.4); border-radius: 50%;"></div>
+      <div style="position: absolute; width: 22px; height: 22px; background-color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3); border: 2px solid white;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="black" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a2 2 0 0 0-1.6-.8H7.3a2 2 0 0 0-1.6.8L3 11l-.16.84A1 1 0 0 0 2 12.85V16h3m14 0v1.5a2.5 2.5 0 0 1-5 0V16m5 0h-5m-9 0v1.5a2.5 2.5 0 0 1-5 0V16m5 0H4"/></svg>
+      </div>
+    </div>
+  `,
+  iconSize: [60, 60],
+  iconAnchor: [30, 30],
+  popupAnchor: [0, -20]
 });
 
 // A component to automatically fit the map bounds to the polyline
@@ -26,6 +45,48 @@ function MapBoundsFit({ bounds }) {
   return null;
 }
 
+const normalizeStatus = (status) => {
+  if (status === undefined || status === null) return '';
+  const statusStr = String(status).trim();
+  switch (statusStr) {
+    case '0':
+    case 'Requested':
+      return 'Requested';
+    case '1':
+    case 'Assigned':
+      return 'Assigned';
+    case '2':
+    case 'ManagerScheduled':
+      return 'ManagerScheduled';
+    case '3':
+    case 'Approved':
+      return 'Approved';
+    case '4':
+    case 'Declined':
+      return 'Declined';
+    case '5':
+    case 'OtpSent':
+      return 'OtpSent';
+    case '6':
+    case 'OwnerOtpSubmitted':
+      return 'OwnerOtpSubmitted';
+    case '7':
+    case 'Verified':
+      return 'Verified';
+    case '8':
+    case 'VehiclePicked':
+      return 'VehiclePicked';
+    case '9':
+    case 'InTransit':
+      return 'InTransit';
+    case '10':
+    case 'Stored':
+      return 'Stored';
+    default:
+      return statusStr;
+  }
+};
+
 export default function LotOwnerPickupDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -35,6 +96,8 @@ export default function LotOwnerPickupDetailsPage() {
   const [isImageExpanded, setIsImageExpanded] = useState(false);
   const [fullScreenImage, setFullScreenImage] = useState(null);
   const [routeCoords, setRouteCoords] = useState([]);
+  const [carPos, setCarPos] = useState(null);
+  const [liveGpsPos, setLiveGpsPos] = useState(null);
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [distance, setDistance] = useState(null); // in km
   const [duration, setDuration] = useState(null); // in mins
@@ -48,6 +111,62 @@ export default function LotOwnerPickupDetailsPage() {
   useEffect(() => {
     fetchPickupDetails();
   }, [id]);
+
+  const fallbackPos = routeCoords.length > 0 ? routeCoords[0] : (pickup?.pickupLatitude && pickup?.pickupLongitude ? [pickup.pickupLatitude, pickup.pickupLongitude] : null);
+  const displayCarPos = liveGpsPos || (pickup?.lastGpsLatitude && pickup?.lastGpsLongitude ? [pickup.lastGpsLatitude, pickup.lastGpsLongitude] : fallbackPos);
+
+  // Live location animation simulation and SignalR connection
+  const isTransit = pickup && (String(pickup.status).toUpperCase() === 'INTRANSIT' || String(pickup.status) === '9');
+  const isActiveTracking = pickup && ['1', '2', '3', '5', '6', '7', '8', '9', 'Assigned', 'ManagerScheduled', 'Approved', 'OtpSent', 'OwnerOtpSubmitted', 'Verified', 'VehiclePicked', 'InTransit'].includes(String(pickup.status));
+
+  useEffect(() => {
+    // Fallback animation if no SignalR/Live tracking yet
+    if (isTransit && routeCoords.length > 0 && !liveGpsPos) {
+      let index = 0;
+      const interval = setInterval(() => {
+        setCarPos(routeCoords[index]);
+        index = (index + 1) % routeCoords.length;
+      }, 1200);
+      return () => clearInterval(interval);
+    } else {
+      setCarPos(null);
+    }
+  }, [isTransit, routeCoords, liveGpsPos]);
+
+  useEffect(() => {
+    if (!isActiveTracking || !pickup?.bookingId) return;
+
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; AccessToken=`);
+    const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
+    if (!token) return;
+
+    console.log('[LotOwner] Connecting to TrackingHub for bookingId:', pickup.bookingId);
+
+    const connection = new HubConnectionBuilder()
+      .withUrl("https://localhost:7108/hubs/tracking", { accessTokenFactory: () => token })
+      .configureLogging(LogLevel.Warning)
+      .withAutomaticReconnect()
+      .build();
+
+    connection.on("ReceiveLocationUpdate", (lat, lng) => {
+      console.log('[LotOwner] ReceiveLocationUpdate:', lat, lng);
+      setLiveGpsPos([lat, lng]);
+    });
+
+    connection.start()
+      .then(async () => {
+        console.log('[LotOwner] TrackingHub connected, joining group:', pickup.bookingId);
+        await connection.invoke("JoinTrackingGroup", Number(pickup.bookingId));
+        console.log('[LotOwner] Joined tracking group:', pickup.bookingId);
+      })
+      .catch(err => console.error('[LotOwner] TrackingHub connection failed:', err));
+
+    return () => {
+      console.log('[LotOwner] Disconnecting from TrackingHub');
+      connection.stop();
+    };
+  }, [pickup?.bookingId, isActiveTracking]);
 
   const calculateHaversineDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371; // Earth radius in km
@@ -134,9 +253,12 @@ export default function LotOwnerPickupDetailsPage() {
       });
       const data = await res.json();
       if (data.success) {
+        if (data.data) {
+          data.data.status = normalizeStatus(data.data.status);
+        }
         setPickup(data.data);
         if (data.data.pickupLatitude && data.data.pickupLongitude && data.data.lotLatitude && data.data.lotLongitude) {
-          fetchRoute(data.data.lotLatitude, data.data.lotLongitude, data.data.pickupLatitude, data.data.pickupLongitude);
+          fetchRoute(data.data.pickupLatitude, data.data.pickupLongitude, data.data.lotLatitude, data.data.lotLongitude);
         }
       } else {
         toast.error("Failed to load pickup details");
@@ -388,8 +510,12 @@ export default function LotOwnerPickupDetailsPage() {
   const getAssignedStepIndex = (status) => {
     switch (status) {
       case 'Assigned': return 1;
-      case 'InTransit': return 2;
-      case 'Stored': return 3;
+      case 'OtpSent': return 2;
+      case 'OwnerOtpSubmitted': return 2;
+      case 'Verified': return 3;
+      case 'VehiclePicked': return 3;
+      case 'InTransit': return 4;
+      case 'Stored': return 5;
       default: return 1;
     }
   };
@@ -539,7 +665,7 @@ export default function LotOwnerPickupDetailsPage() {
                     <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white border border-green-600 shadow-sm">
                       <Check size={14} strokeWidth={3} />
                     </div>
-                  ) : pickup.pickupImages ? (
+                  ) : pickup.status === 'OtpSent' ? (
                     <div className="w-8 h-8 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center relative shadow-sm">
                       <div className="w-3.5 h-3.5 rounded-full bg-blue-600 animate-ping absolute"></div>
                       <div className="w-3 h-3 rounded-full bg-blue-600 relative z-10"></div>
@@ -551,9 +677,15 @@ export default function LotOwnerPickupDetailsPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className={`text-base font-extrabold ${pickup.pickupImages ? 'text-gray-900' : 'text-gray-400'}`}>Departure Verification</h4>
+                  <h4 className={`text-base font-extrabold ${assignedStatusIndex >= 2 ? 'text-gray-900' : 'text-gray-400'}`}>Departure Verification</h4>
                   <p className="text-xs text-gray-500 mt-0.5">Vehicle condition report recorded at pickup location.</p>
                   
+                  {pickup.status === 'OtpSent' && (
+                    <div className="mt-3 bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex items-center gap-3 w-fit">
+                      <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">OTP Sent to Vehicle Owner</span>
+                    </div>
+                  )}
+
                   {pickup.pickupImages && (
                     <div className="mt-4 bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-3">
                       {pickup.pickupImages.managerRemarks && (
@@ -587,10 +719,40 @@ export default function LotOwnerPickupDetailsPage() {
                 </div>
               </div>
 
-              {/* Step 3: In Transit */}
+              {/* Step 3: Manager OTP Submission */}
               <div className="flex gap-6">
                 <div className="relative shrink-0">
-                  {assignedStatusIndex > 2 ? (
+                  {assignedStatusIndex > 3 ? (
+                    <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white border border-green-600 shadow-sm">
+                      <Check size={14} strokeWidth={3} />
+                    </div>
+                  ) : assignedStatusIndex === 3 ? (
+                    <div className="w-8 h-8 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center relative shadow-sm">
+                      <div className="w-3.5 h-3.5 rounded-full bg-blue-600 animate-ping absolute"></div>
+                      <div className="w-3 h-3 rounded-full bg-blue-600 relative z-10"></div>
+                    </div>
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center shadow-sm">
+                      <div className="w-2 h-2 rounded-full bg-gray-300"></div>
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className={`text-base font-extrabold ${assignedStatusIndex >= 3 ? 'text-gray-900' : 'text-gray-400'}`}>Manager OTP Submission</h4>
+                  <p className="text-xs text-gray-500 mt-0.5">Manager submits OTP to securely start the ride.</p>
+                  {assignedStatusIndex >= 3 && (
+                    <div className="mt-3 bg-green-50/50 p-4 rounded-xl border border-green-100 flex items-center gap-3 w-fit">
+                      <CheckCircle2 size={18} className="text-green-600" />
+                      <span className="text-xs font-bold text-green-700 uppercase tracking-wider">Manager successfully submitted OTP</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Step 4: In Transit */}
+              <div className="flex gap-6">
+                <div className="relative shrink-0">
+                  {assignedStatusIndex > 4 ? (
                     <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white border border-green-600 shadow-sm">
                       <Check size={14} strokeWidth={3} />
                     </div>
@@ -606,7 +768,7 @@ export default function LotOwnerPickupDetailsPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className={`text-base font-extrabold ${pickup.status === 'InTransit' || assignedStatusIndex > 2 ? 'text-gray-900' : 'text-gray-400'}`}>In Transit</h4>
+                  <h4 className={`text-base font-extrabold ${pickup.status === 'InTransit' || assignedStatusIndex > 4 ? 'text-gray-900' : 'text-gray-400'}`}>In Transit</h4>
                   <p className="text-xs text-gray-500 mt-0.5">Vehicle is being carefully driven to the garage.</p>
                   {pickup.status === 'InTransit' && (
                     <div className="mt-3 bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex items-center gap-3 w-fit">
@@ -617,7 +779,7 @@ export default function LotOwnerPickupDetailsPage() {
                 </div>
               </div>
 
-              {/* Step 4: Stored Securely */}
+              {/* Step 5: Stored Securely */}
               <div className="flex gap-6">
                 <div className="relative shrink-0">
                   {pickup.status === 'Stored' ? (
@@ -731,69 +893,108 @@ export default function LotOwnerPickupDetailsPage() {
 
             {/* Mini Map */}
             {hasValidCoords ? (
-              <div className="bg-white rounded-[2rem] p-4 border border-gray-100 shadow-sm space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Route Map</h3>
-                  <button 
-                    onClick={() => setIsMapExpanded(true)}
-                    className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-gray-500 hover:text-gray-700"
-                    title="Expand Map"
-                  >
-                    <Maximize2 size={14} />
-                  </button>
-                </div>
-
-                {/* Distance statistics */}
-                {distance && duration && (
-                  <div className="flex flex-col gap-1 bg-blue-50/50 p-3 rounded-xl border border-blue-100/30 text-xs">
-                    <div className="flex justify-between font-semibold text-blue-700">
-                      <span>{distance} km</span>
-                      <span>{duration} mins</span>
+              (isActiveTracking || String(pickup.status).toUpperCase() === 'STORED' || String(pickup.status) === '10') ? (
+                <div className="bg-white rounded-[2rem] p-4 border border-gray-100 shadow-sm space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Live Route Map</h3>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => setIsMapExpanded(true)}
+                        className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-gray-500 hover:text-gray-700"
+                        title="Expand Map"
+                      >
+                        <Maximize2 size={14} />
+                      </button>
+                      {distance && duration && (
+                        <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100/40 shadow-sm leading-tight">
+                          {distance} km • {duration} mins
+                        </span>
+                      )}
                     </div>
-                    {isRouteOffline && (
-                      <span className="text-[9px] text-orange-600 font-bold mt-0.5">
-                        ⚠️ Offline Estimations
-                      </span>
-                    )}
                   </div>
-                )}
 
-                {/* Map view */}
-                <div className="h-[250px] w-full rounded-xl overflow-hidden border border-gray-200 z-0">
-                  <MapContainer 
-                    key={`mini-${mapKey}`}
-                    center={[pLat, pLon]} 
-                    zoom={12} 
-                    style={{ height: '100%', width: '100%' }}
-                    scrollWheelZoom={false}
+                  {/* Distance statistics with offline warning */}
+                  {isRouteOffline && (
+                    <div className="bg-orange-50/50 p-2.5 rounded-xl border border-orange-100/30 text-[10px] text-orange-600 font-bold text-center">
+                      ⚠️ Offline Estimations
+                    </div>
+                  )}
+
+                  {/* Map view */}
+                  <div 
+                    onClick={() => setIsMapExpanded(true)}
+                    className="h-[250px] w-full rounded-xl overflow-hidden border border-gray-200 z-0 cursor-pointer relative group"
                   >
-                    <TileLayer
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                      attribution='&copy; OpenStreetMap contributors'
-                    />
-                    
-                    <MapBoundsFit bounds={mapBounds} />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 z-[1000] transition-colors flex items-center justify-center">
+                        <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full font-bold text-sm text-gray-800 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity translate-y-4 group-hover:translate-y-0 flex items-center gap-2">
+                            <Maximize2 size={16} /> Click to Expand Map
+                        </div>
+                    </div>
+                    <MapContainer 
+                      key={`mini-${mapKey}`}
+                      center={displayCarPos || carPos || [pLat, pLon]} 
+                      zoom={12} 
+                      style={{ height: '100%', width: '100%' }}
+                      scrollWheelZoom={false}
+                      zoomControl={false}
+                      dragging={false}
+                    >
+                      <TileLayer
+                        url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png"
+                        attribution='&copy; OpenStreetMap contributors &copy; CARTO'
+                      />
+                      
+                      <MapBoundsFit bounds={mapBounds} />
 
-                    <Marker position={[pLat, pLon]}>
-                      <Popup>
-                        <div className="font-bold text-xs">Pickup Location</div>
-                      </Popup>
-                    </Marker>
+                      {!isTransit && (
+                        <Marker position={[pLat, pLon]}>
+                          <Popup>
+                            <div className="font-bold text-xs">Pickup Location</div>
+                            <p className="text-xs text-gray-500 mt-1">{pickup.pickupAddress}</p>
+                          </Popup>
+                        </Marker>
+                      )}
 
-                    <Marker position={[lLat, lLon]}>
-                      <Popup>
-                        <div className="font-bold text-xs">Your Garage</div>
-                      </Popup>
-                    </Marker>
+                      <Marker position={[lLat, lLon]}>
+                        <Popup>
+                          <div className="font-bold text-xs">Your Garage</div>
+                          <p className="text-xs text-gray-500 mt-1">{pickup.lotAddress}</p>
+                        </Popup>
+                      </Marker>
 
-                    <Polyline 
-                      positions={routeCoords.length > 0 ? routeCoords : [[lLat, lLon], [pLat, pLon]]} 
-                      color="#2563eb" 
-                      weight={4} 
-                    />
-                  </MapContainer>
+                      {/* Simulated/Live Car Marker — always visible when tracking is active */}
+                      {isActiveTracking && (
+                        <Marker position={liveGpsPos || (pickup.lastGpsLatitude && pickup.lastGpsLongitude ? [pickup.lastGpsLatitude, pickup.lastGpsLongitude] : [pLat, pLon])} icon={carIcon}>
+                          <Popup>
+                            <div className="font-bold text-xs">{isTransit ? 'Vehicle In Transit' : 'Manager En-Route'}</div>
+                            <p className="text-[10px] text-gray-500 mt-0.5">{liveGpsPos ? 'Live location' : (isTransit ? 'Moving towards garage...' : 'Manager approaching vehicle...')}</p>
+                          </Popup>
+                        </Marker>
+                      )}
+
+                      <Polyline 
+                        positions={routeCoords.length > 0 ? routeCoords : [[pLat, pLon], [lLat, lLon]]} 
+                        color="#2563eb" 
+                        weight={4.5} 
+                      />
+
+                      {/* Road labels above polyline */}
+                      <TileLayer
+                        url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png"
+                        pane="shadowPane"
+                      />
+                    </MapContainer>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm flex flex-col items-center justify-center text-gray-400 py-12 text-center">
+                  <MapPin size={32} className="opacity-20 mb-3 text-blue-600 animate-pulse" />
+                  <h4 className="text-sm font-bold text-gray-700">Live Tracking Pending</h4>
+                  <p className="text-xs text-gray-500 max-w-[200px] mt-1.5 leading-relaxed">
+                    Live route and car tracking will activate once the manager uploads the pre-condition report and starts the ride.
+                  </p>
+                </div>
+              )
             ) : (
               <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col items-center justify-center text-gray-400 py-12">
                 <MapPin size={32} className="opacity-20 mb-2" />
@@ -823,7 +1024,7 @@ export default function LotOwnerPickupDetailsPage() {
               {/* Modal Header */}
               <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">Route Map</h3>
+                  <h3 className="text-xl font-bold text-gray-900">Live Route Map</h3>
                   <p className="text-sm text-gray-500 mt-1">{pickup.pickupAddress}</p>
                 </div>
                 <button 
@@ -838,38 +1039,56 @@ export default function LotOwnerPickupDetailsPage() {
               <div className="flex-1 w-full relative z-0">
                 <MapContainer 
                     key={`modal-layoutb-${mapKey}`}
-                    center={[pLat, pLon]} 
+                    center={displayCarPos || carPos || [pLat, pLon]} 
                     zoom={13} 
                     style={{ height: '100%', width: '100%' }}
                     scrollWheelZoom={true}
                 >
                     <TileLayer
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        attribution='&copy; OpenStreetMap contributors'
+                        url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png"
+                        attribution='&copy; OpenStreetMap contributors &copy; CARTO'
                     />
                     
                     <MapBoundsFit bounds={mapBounds} />
 
-                    <Marker position={[pLat, pLon]}>
-                        <Popup>
-                            <div className="font-bold">Pickup Location</div>
-                            {pickup.pickupAddress}
-                        </Popup>
-                    </Marker>
-
-                    {!isNaN(lLat) && !isNaN(lLon) && (
-                      <Marker position={[lLat, lLon]}>
+                    {!isTransit && (
+                      <Marker position={[pLat, pLon]}>
                           <Popup>
-                              <div className="font-bold">Your Garage</div>
-                              {pickup.lotAddress}
+                              <div className="font-bold text-xs">Pickup Location</div>
+                              <p className="text-xs text-gray-500 mt-1">{pickup.pickupAddress}</p>
                           </Popup>
                       </Marker>
                     )}
 
+                    {!isNaN(lLat) && !isNaN(lLon) && (
+                      <Marker position={[lLat, lLon]}>
+                          <Popup>
+                              <div className="font-bold text-xs">Your Garage</div>
+                              <p className="text-xs text-gray-500 mt-1">{pickup.lotAddress}</p>
+                          </Popup>
+                      </Marker>
+                    )}
+
+                    {/* Live Moving Marker */}
+                    {isActiveTracking && (
+                      <Marker position={liveGpsPos || (pickup.lastGpsLatitude && pickup.lastGpsLongitude ? [pickup.lastGpsLatitude, pickup.lastGpsLongitude] : [pLat, pLon])} icon={carIcon}>
+                        <Popup>
+                          <div className="font-bold text-xs">{isTransit ? 'Vehicle in Transit' : 'Manager En-Route'}</div>
+                          <p className="text-[10px] text-gray-500 mt-0.5">{liveGpsPos ? 'Live location' : (isTransit ? 'Moving towards garage...' : 'Manager approaching vehicle...')}</p>
+                        </Popup>
+                      </Marker>
+                    )}
+
                     <Polyline 
-                        positions={routeCoords.length > 0 ? routeCoords : (!isNaN(lLat) && !isNaN(lLon) ? [[lLat, lLon], [pLat, pLon]] : [])} 
+                        positions={routeCoords.length > 0 ? routeCoords : (!isNaN(lLat) && !isNaN(lLon) ? [[pLat, pLon], [lLat, lLon]] : [])} 
                         color="#2563eb" 
                         weight={5} 
+                    />
+
+                    {/* Road labels above polyline */}
+                    <TileLayer
+                      url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png"
+                      pane="shadowPane"
                     />
                 </MapContainer>
               </div>
@@ -1104,27 +1323,39 @@ export default function LotOwnerPickupDetailsPage() {
 
                 {/* Map */}
                 {hasValidCoords ? (
-                    <div className="h-[400px] w-full rounded-xl overflow-hidden border border-gray-200 z-0">
+                    <div 
+                        onClick={() => setIsMapExpanded(true)}
+                        className="h-[400px] w-full rounded-xl overflow-hidden border border-gray-200 z-0 cursor-pointer relative group"
+                    >
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 z-[1000] transition-colors flex items-center justify-center">
+                            <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full font-bold text-sm text-gray-800 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity translate-y-4 group-hover:translate-y-0 flex items-center gap-2">
+                                <Maximize2 size={16} /> Click to Expand Map
+                            </div>
+                        </div>
                         <MapContainer 
                             key={mapKey}
                             center={[pLat, pLon]} 
                             zoom={13} 
                             style={{ height: '100%', width: '100%' }}
                             scrollWheelZoom={false}
+                            zoomControl={false}
+                            dragging={false}
                         >
                             <TileLayer
-                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                attribution='&copy; OpenStreetMap contributors'
+                                url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png"
+                                attribution='&copy; OpenStreetMap contributors &copy; CARTO'
                             />
                             
                             <MapBoundsFit bounds={mapBounds} />
 
-                            <Marker position={[pLat, pLon]}>
-                                <Popup>
-                                    <div className="font-bold">Pickup Location</div>
-                                    {pickup.pickupAddress}
-                                </Popup>
-                            </Marker>
+                            {!isTransit && (
+                              <Marker position={[pLat, pLon]}>
+                                  <Popup>
+                                      <div className="font-bold">Pickup Location</div>
+                                      {pickup.pickupAddress}
+                                  </Popup>
+                              </Marker>
+                            )}
 
                             <Marker position={[lLat, lLon]}>
                                 <Popup>
@@ -1133,10 +1364,22 @@ export default function LotOwnerPickupDetailsPage() {
                                 </Popup>
                             </Marker>
 
+                            {isTransit && (displayCarPos || carPos) && (
+                                <Marker position={displayCarPos || carPos} icon={carIcon}>
+                                    <Popup><div className="font-bold text-xs">Vehicle in Transit</div></Popup>
+                                </Marker>
+                            )}
+
                             <Polyline 
-                                positions={routeCoords.length > 0 ? routeCoords : [[lLat, lLon], [pLat, pLon]]} 
+                                positions={routeCoords.length > 0 ? routeCoords : [[pLat, pLon], [lLat, lLon]]} 
                                 color="#2563eb" 
                                 weight={5} 
+                            />
+
+                            {/* Road labels above polyline */}
+                            <TileLayer
+                              url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png"
+                              pane="shadowPane"
                             />
                         </MapContainer>
                     </div>
@@ -1269,18 +1512,20 @@ export default function LotOwnerPickupDetailsPage() {
                   scrollWheelZoom={true}
               >
                   <TileLayer
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                      attribution='&copy; OpenStreetMap contributors'
+                      url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png"
+                      attribution='&copy; OpenStreetMap contributors &copy; CARTO'
                   />
                   
                   <MapBoundsFit bounds={mapBounds} />
 
-                  <Marker position={[pLat, pLon]}>
-                      <Popup>
-                          <div className="font-bold">Pickup Location</div>
-                          {pickup.pickupAddress}
-                      </Popup>
-                  </Marker>
+                  {!isTransit && (
+                    <Marker position={[pLat, pLon]}>
+                        <Popup>
+                            <div className="font-bold">Pickup Location</div>
+                            {pickup.pickupAddress}
+                        </Popup>
+                    </Marker>
+                  )}
 
                   {!isNaN(lLat) && !isNaN(lLon) && (
                     <Marker position={[lLat, lLon]}>
@@ -1291,10 +1536,26 @@ export default function LotOwnerPickupDetailsPage() {
                     </Marker>
                   )}
 
+                  {/* Live Moving Marker */}
+                  {isActiveTracking && (displayCarPos || carPos) && (
+                      <Marker position={displayCarPos || carPos} icon={carIcon}>
+                          <Popup>
+                            <div className="font-bold text-xs">{isTransit ? 'Vehicle in Transit' : 'Manager En-Route'}</div>
+                            <p className="text-[10px] text-gray-500 mt-0.5">{isTransit ? 'Moving towards garage...' : 'Manager approaching vehicle...'}</p>
+                          </Popup>
+                      </Marker>
+                  )}
+
                   <Polyline 
                       positions={routeCoords.length > 0 ? routeCoords : (!isNaN(lLat) && !isNaN(lLon) ? [[lLat, lLon], [pLat, pLon]] : [])} 
                       color="#2563eb" 
                       weight={5} 
+                  />
+
+                  {/* Road labels above polyline */}
+                  <TileLayer
+                    url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png"
+                    pane="shadowPane"
                   />
               </MapContainer>
             </div>

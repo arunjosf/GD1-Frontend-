@@ -13,6 +13,7 @@ import ProfilePage from './pages/ProfilePage';
 import AddVehiclePage from './pages/AddVehiclePage';
 import TrackApplicationPage from './pages/TrackApplicationPage';
 import TrackPickupPage from './pages/TrackPickupPage';
+import StoredVehicleDashboardPage from './pages/StoredVehicleDashboardPage';
 import SearchPage from './pages/SearchPage';
 import UserBookingsPage from './pages/UserBookingsPage';
 import LotOwnerPickupsPage from './pages/lot-owner/LotOwnerPickupsPage';
@@ -31,6 +32,22 @@ import LotOwnerPickupDetailsPage from './pages/lot-owner/LotOwnerPickupDetailsPa
 import LotOwnerManagersPage from './pages/lot-owner/LotOwnerManagersPage';
 import VerificationPendingPage from './pages/VerificationPendingPage';
 import MessagesPage from './pages/MessagesPage';
+import MyVehiclesPage from './pages/MyVehiclesPage';
+import LotOwnerVehiclesPage from './pages/lot-owner/LotOwnerVehiclesPage';
+import LotOwnerVehicleDetailsPage from './pages/lot-owner/LotOwnerVehicleDetailsPage';
+import ManagerLayout from './components/ManagerLayout';
+import ManagerDashboardPage from './pages/lot-manager/ManagerDashboardPage';
+import ManagerPickupsPage from './pages/lot-manager/ManagerPickupsPage';
+import ManagerVehiclesPage from './pages/lot-manager/ManagerVehiclesPage';
+import ManagerVehicleDetailsPage from './pages/lot-manager/ManagerVehicleDetailsPage';
+import ManagerTasksPage from './pages/lot-manager/ManagerTasksPage';
+import ManagerSubmitWeeklyPage from './pages/lot-manager/ManagerSubmitWeeklyPage';
+import ManagerSubmitOnDemandPage from './pages/lot-manager/ManagerSubmitOnDemandPage';
+import ManagerPickupDetailsPage from './pages/lot-manager/ManagerPickupDetailsPage';
+import ManagerArrivedPage from './pages/lot-manager/ManagerArrivedPage';
+import PreRideConditionPage from './pages/lot-manager/PreRideConditionPage';
+import GarageArrivalConditionPage from './pages/lot-manager/GarageArrivalConditionPage';
+import { NavigationProvider } from './context/NavigationContext';
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -81,8 +98,11 @@ function ProtectedRoute({ children }) {
   if (role === 5) {
     return <Navigate to="/admin/dashboard" replace />;
   }
-  if (role === 2 || role === 4) {
+  if (role === 2) {
     return <Navigate to="/lot-owner/dashboard" replace />;
+  }
+  if (role === 4) {
+    return <Navigate to="/lot-manager/dashboard" replace />;
   }
   
   return children;
@@ -105,7 +125,17 @@ function LotOwnerRoute({ children }) {
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   
   const role = getUserRole();
-  return (role === 2 || role === 4) ? children : <Navigate to="/home" replace />;
+  return role === 2 ? children : <Navigate to="/home" replace />;
+}
+
+function ManagerRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) return null;
+  
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  
+  const role = getUserRole();
+  return role === 4 ? children : <Navigate to="/home" replace />;
 }
 
 function PublicRoute({ children }) {
@@ -115,7 +145,8 @@ function PublicRoute({ children }) {
   if (isAuthenticated) {
     const role = getUserRole();
     if (role === 5) return <Navigate to="/admin/dashboard" replace />;
-    if (role === 2 || role === 4) return <Navigate to="/lot-owner/dashboard" replace />;
+    if (role === 2) return <Navigate to="/lot-owner/dashboard" replace />;
+    if (role === 4) return <Navigate to="/lot-manager/dashboard" replace />;
     return <Navigate to="/home" replace />;
   }
   
@@ -168,8 +199,33 @@ export default function App() {
           <Route path="bookings/:id" element={<LotOwnerBookingDetailsPage />} />
           <Route path="pickups" element={<LotOwnerPickupsPage />} />
           <Route path="pickup/:id" element={<LotOwnerPickupDetailsPage />} />
+          <Route path="vehicles" element={<LotOwnerVehiclesPage />} />
+          <Route path="vehicles/:id" element={<LotOwnerVehicleDetailsPage />} />
           <Route path="messages" element={<MessagesPage />} />
           <Route path="*" element={<Navigate to="/lot-owner/dashboard" replace />} />
+        </Route>
+
+        {/* Manager Routes */}
+        <Route path="/lot-manager" element={
+          <ManagerRoute>
+            <NavigationProvider>
+              <ManagerLayout />
+            </NavigationProvider>
+          </ManagerRoute>
+        }>
+          <Route path="dashboard" element={<ManagerDashboardPage />} />
+          <Route path="pickups" element={<ManagerPickupsPage />} />
+          <Route path="vehicles" element={<ManagerVehiclesPage />} />
+          <Route path="vehicle-details/:id" element={<ManagerVehicleDetailsPage />} />
+          <Route path="tasks" element={<ManagerTasksPage />} />
+          <Route path="submit-weekly/:id" element={<ManagerSubmitWeeklyPage />} />
+          <Route path="submit-ondemand/:id" element={<ManagerSubmitOnDemandPage />} />
+          <Route path="messages" element={<MessagesPage />} />
+          <Route path="pickup-details/:id" element={<ManagerPickupDetailsPage />} />
+          <Route path="manager-arrived/:id" element={<ManagerArrivedPage />} />
+          <Route path="pre-ride-condition/:id" element={<PreRideConditionPage />} />
+          <Route path="garage-arrival-condition/:id" element={<GarageArrivalConditionPage />} />
+          <Route path="*" element={<Navigate to="/lot-manager/dashboard" replace />} />
         </Route>
 
         <Route path="/home" element={
@@ -225,6 +281,16 @@ export default function App() {
         <Route path="/track-pickup/:id" element={
           <ProtectedRoute>
             <TrackPickupPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/stored-vehicle/:id" element={
+          <ProtectedRoute>
+            <StoredVehicleDashboardPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/my-vehicles" element={
+          <ProtectedRoute>
+            <MyVehiclesPage />
           </ProtectedRoute>
         } />
         <Route path="/my-bookings" element={
