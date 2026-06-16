@@ -1,22 +1,27 @@
 import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
+import * as signalR from '@microsoft/signalr';
 import { 
   LayoutDashboard, 
   Truck, 
   Car,
+  Wrench,
   LogOut, 
   MessageCircle,
   ClipboardList,
   X,
   Maximize2,
-  Menu
+  Menu,
+  Bell
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { getToken } from '../api/auth';
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useNavigation } from '../context/NavigationContext';
+import NotificationSidebar from './NotificationSidebar';
 
 const vehicleLocationIcon = L.divIcon({
   html: `
@@ -76,6 +81,10 @@ export default function ManagerLayout() {
   const [metrics, setMetrics] = useState(null);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  const [notifications, setNotifications] = useState([]);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -99,6 +108,16 @@ export default function ManagerLayout() {
           const unread = (cData || []).reduce((sum, c) => sum + (c.unreadCount || 0), 0);
           setUnreadMessagesCount(unread);
         }
+
+        const notifRes = await fetch('https://localhost:7108/api/notifications', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (notifRes.ok) {
+          const result = await notifRes.json();
+          const allNotifs = result.data || [];
+          setNotifications(allNotifs);
+          setUnreadNotifCount(allNotifs.filter(n => !n.isRead).length);
+        }
       } catch (err) {
         console.error('Error fetching layout badges data:', err);
       }
@@ -106,8 +125,54 @@ export default function ManagerLayout() {
 
     fetchData();
     const interval = setInterval(fetchData, 15000);
-    return () => clearInterval(interval);
+
+    // SignalR Notification Setup
+    const token = getToken('AccessToken');
+    let connection = null;
+    if (token) {
+      connection = new signalR.HubConnectionBuilder()
+        .withUrl('https://localhost:7108/hubs/notification', {
+          accessTokenFactory: () => token
+        })
+        .withAutomaticReconnect()
+        .build();
+
+      connection.start()
+        .then(() => {
+          connection.on("ReceiveNotification", (notif) => {
+            // Show toast
+            toast.success(notif.title + ": " + notif.body, { duration: 5000 });
+            // If it's a task notification, we could potentially re-fetch metrics here or just update the badge
+            fetchData();
+          });
+        })
+        .catch(err => console.error("SignalR Notification Connection Error: ", err));
+    }
+
+    return () => {
+      clearInterval(interval);
+      if (connection) {
+        connection.stop();
+      }
+    };
   }, [location.pathname]);
+
+  const handleOpenNotifications = () => {
+    setIsNotificationOpen(true);
+    setUnreadNotifCount(0);
+    const unreadNotifs = notifications.filter(n => !n.isRead);
+    if (unreadNotifs.length > 0) {
+      const token = getToken('AccessToken');
+      if (token) {
+        unreadNotifs.forEach(notif => {
+          fetch(`https://localhost:7108/api/notifications/${notif.id}/mark-read`, {
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${token}` }
+          }).catch(() => { /* ignore */ });
+        });
+      }
+    }
+  };
 
   // Close sidebar on route change (mobile)
   useEffect(() => {
@@ -123,6 +188,7 @@ export default function ManagerLayout() {
     { path: '/lot-manager/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/lot-manager/pickups', icon: Truck, label: 'Pickups', badge: metrics?.pendingPickupsCount },
     { path: '/lot-manager/vehicles', icon: Car, label: 'Vehicles' },
+    { path: '/lot-manager/services', icon: Wrench, label: 'Services' },
     { 
       path: '/lot-manager/tasks', 
       icon: ClipboardList, 
@@ -192,7 +258,21 @@ export default function ManagerLayout() {
         })}
       </nav>
 
-      <div className="px-3 border-t border-gray-100 pt-4">
+      <div className="px-3 border-t border-gray-100 pt-4 space-y-1">
+        <button
+          onClick={handleOpenNotifications}
+          className="flex items-center justify-between px-4 h-12 w-full rounded-xl bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-medium text-[15px] transition-all duration-200"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-6 flex justify-center"><Bell size={20} className={unreadNotifCount > 0 ? "text-blue-500" : ""} /></div>
+            <span>Notifications</span>
+          </div>
+          {unreadNotifCount > 0 && (
+            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-500 text-white shadow-sm">
+              {unreadNotifCount}
+            </span>
+          )}
+        </button>
         <button
           onClick={handleLogout}
           className="flex items-center gap-4 px-4 h-12 w-full rounded-xl bg-white text-gray-500 hover:bg-red-50 hover:text-red-600 font-medium text-[15px] transition-all duration-200"
@@ -242,7 +322,15 @@ export default function ManagerLayout() {
             <span className="font-bold text-gray-900">GD1 Manager</span>
           </div>
           {/* Badge summary for mobile */}
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-4">
+            <button onClick={handleOpenNotifications} className="relative">
+              <Bell size={22} className="text-gray-500" />
+              {unreadNotifCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">
+                  {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
+                </span>
+              )}
+            </button>
             {unreadMessagesCount > 0 && (
               <button onClick={() => navigate('/lot-manager/messages')} className="relative">
                 <MessageCircle size={22} className="text-gray-500" />
@@ -307,6 +395,12 @@ export default function ManagerLayout() {
           </div>
         </div>
       )}
+
+      <NotificationSidebar 
+        isOpen={isNotificationOpen} 
+        onClose={() => setIsNotificationOpen(false)} 
+        notifications={notifications} 
+      />
     </div>
   );
 }

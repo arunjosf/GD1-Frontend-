@@ -31,8 +31,8 @@ export default function ManagerTasksPage() {
   };
 
   const getTaskInfo = (type) => {
-    if (type === 0 || type === 'WeeklyConditionCheck') return { title: 'Weekly Condition Check', color: 'bg-blue-50 text-blue-700', path: 'weekly' };
-    if (type === 1 || type === 'OnDemandConditionCheck') return { title: 'On-Demand Image Request', color: 'bg-yellow-50 text-yellow-700', path: 'ondemand' };
+    if (type === 1 || type === 'WeeklyConditionCheck') return { title: 'Weekly Condition Check', color: 'bg-blue-50 text-blue-700', path: 'weekly' };
+    if (type === 0 || type === 'OnDemandImage') return { title: 'On-Demand Image Request', color: 'bg-yellow-50 text-yellow-700', path: 'ondemand' };
     return { title: 'Unknown Task', color: 'bg-gray-50 text-gray-700', path: '' };
   };
 
@@ -56,15 +56,19 @@ export default function ManagerTasksPage() {
           <p className="text-gray-500 text-sm mt-2">You have completed all your maintenance tasks. Great job!</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tasks.map((task) => {
             const info = getTaskInfo(task.type);
             return (
-              <div key={task.id} className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-5">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${info.color}`}>
-                    <ClipboardList size={24} />
-                  </div>
+              <div key={task.id} className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex flex-col gap-4">
+                  {task.imageUrl ? (
+                    <img src={task.imageUrl} alt={`${task.brand} ${task.model}`} className="w-full h-48 rounded-xl object-cover border border-gray-100 shadow-sm" />
+                  ) : (
+                    <div className={`w-full h-48 rounded-xl flex items-center justify-center ${info.color}`}>
+                      <ClipboardList size={40} />
+                    </div>
+                  )}
                   <div>
                     <h4 className="text-lg font-bold text-gray-900 mb-1">{info.title}</h4>
                     <p className="text-sm font-semibold text-gray-500">
@@ -73,13 +77,13 @@ export default function ManagerTasksPage() {
                   </div>
                 </div>
                 
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4 border-t border-gray-50 md:border-none pt-4 md:pt-0">
+                <div className="flex flex-col gap-3 pt-2">
                   <div className="flex items-center gap-2 text-sm font-semibold text-orange-600 bg-orange-50 px-3 py-1.5 rounded-lg">
                     <Clock size={16} /> Requested: {new Date(task.requestedAt).toLocaleDateString()}
                   </div>
                   <button 
                     onClick={() => navigate(`/lot-manager/submit-${info.path}/${task.id}`)}
-                    className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gray-900 text-white font-bold hover:bg-gray-800 transition-colors shadow-sm"
+                    className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#0071e3] text-white font-bold hover:bg-[#0077ED] transition-colors shadow-sm"
                   >
                     Submit Report <ArrowRight size={16} />
                   </button>

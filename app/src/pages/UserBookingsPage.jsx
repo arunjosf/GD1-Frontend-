@@ -4,7 +4,7 @@ import Footer from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { Calendar, Car, ArrowRight, CreditCard, XCircle, Clock, BadgeCheck, MapPin, CheckCircle2, X, Truck } from 'lucide-react';
+import { Calendar, Car, ArrowRight, CreditCard, XCircle, Clock, BadgeCheck, MapPin, CheckCircle2, X, Truck, Wrench } from 'lucide-react';
 
 export default function UserBookingsPage() {
   const [bookings, setBookings] = useState([]);
@@ -23,9 +23,8 @@ export default function UserBookingsPage() {
 
     const fetchBookings = async () => {
       try {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; AccessToken=`);
-        const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
+        const match = document.cookie.match(new RegExp('(^| )AccessToken=([^;]+)'));
+        const token = match ? match[2] : null;
 
         if (!token) throw new Error("No token found");
 
@@ -33,12 +32,13 @@ export default function UserBookingsPage() {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
-        if (!res.ok) throw new Error("Failed to fetch bookings");
+        if (!res.ok) throw new Error(`Failed to fetch bookings: ${res.status}`);
         
         const data = await res.json();
         setBookings(data.data || []);
-      } catch {
-        toast.error("Failed to load your bookings");
+      } catch (err) {
+        console.error(err);
+        toast.error(`Error: ${err.message}`);
       } finally {
         setLoading(false);
       }
@@ -69,11 +69,10 @@ export default function UserBookingsPage() {
 
     setIsCancelling(true);
     try {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; AccessToken=`);
-      const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
+      const match = document.cookie.match(new RegExp('(^| )AccessToken=([^;]+)'));
+      const token = match ? match[2] : null;
 
-      const response = await fetch(`https://localhost:7108/api/lotbooking/${cancelModalBookingId}/cancel?reason=${encodeURIComponent(cancelReason.trim())}`, {
+      const response = await fetch(`https://localhost:7108/api/LotBooking/${cancelModalBookingId}/cancel?reason=${encodeURIComponent(cancelReason.trim())}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -308,7 +307,7 @@ export default function UserBookingsPage() {
 
                        {/* Action Buttons Row */}
                        <div className="flex flex-wrap items-center justify-end gap-3 mt-5 w-full">
-                         {booking.pickupStatus && (
+                         {booking.pickupStatus && booking.status !== 'Stored' && booking.status != 10 && !isInLot && (
                             <button 
                               onClick={() => navigate(`/track-pickup/${booking.id}`)}
                               className="flex-1 sm:flex-none px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[13px] shadow-md transition-all flex items-center justify-center gap-1.5"
@@ -341,15 +340,24 @@ export default function UserBookingsPage() {
                               View Agreement
                             </button>
                          )}
-                         {isInLot && (
-                            <button 
-                              onClick={() => navigate(`/stored-vehicle/${booking.id}`)}
-                              className="flex-1 sm:flex-none px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[13px] shadow-md transition-all flex items-center justify-center gap-1.5"
-                            >
-                              <Car size={14} />
-                              View Dashboard
-                            </button>
-                         )}
+                           {booking.hasActiveServiceRequest && booking.activeServiceRequestId && (
+                             <button 
+                                onClick={() => navigate(`/track-service/${booking.activeServiceRequestId}`)}
+                                className="flex-1 sm:flex-none px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[13px] shadow-md transition-all flex items-center justify-center gap-1.5"
+                              >
+                                <Wrench size={14} />
+                                Track Service
+                              </button>
+                           )}
+                           {isInLot && !booking.hasActiveServiceRequest && (
+                             <button 
+                                onClick={() => navigate(`/stored-vehicle/${booking.id}`)}
+                                className="flex-1 sm:flex-none px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[13px] shadow-md transition-all flex items-center justify-center gap-1.5"
+                              >
+                                <Car size={14} />
+                                View Dashboard
+                              </button>
+                           )}
                        </div>
                      </div>
                   </div>

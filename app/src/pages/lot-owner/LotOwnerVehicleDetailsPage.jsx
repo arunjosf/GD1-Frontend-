@@ -48,6 +48,13 @@ export default function LotOwnerVehicleDetailsPage() {
     }
   };
 
+  
+  const getUpcomingService = () => {
+    if (!services || services.length === 0) return null;
+    return services.find(s => s.status !== 'Service Completed' && s.status !== 'Completed' && s.status !== 'Cancelled');
+  };
+  const upcomingService = getUpcomingService();
+
   const getImageUrl = (url) => {
     if (!url) return null;
     if (url.startsWith('http') || url.startsWith('data:')) return url;

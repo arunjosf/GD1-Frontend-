@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Bell } from 'lucide-react';
+import { Bell, Wrench } from 'lucide-react';
 import NotificationSidebar from './NotificationSidebar';
 
 export default function Navbar() {
@@ -73,7 +73,7 @@ export default function Navbar() {
         }`} 
       />
 
-      <div className="w-full px-[6vw] h-12 flex items-center justify-between">
+      <div className="w-full px-[6vw] md:px-0 h-12 flex items-center justify-between md:justify-center md:gap-16">
         
         {/* Logo / Brand */}
         <div className="flex-shrink-0 flex items-center relative z-[110]">
@@ -83,7 +83,7 @@ export default function Navbar() {
         </div>  
 
         {/* Center Nav Links */}
-        <div className="hidden md:flex items-center justify-center gap-9 absolute left-1/2 -translate-x-1/2">
+        <div className="hidden md:flex items-center justify-center gap-10 whitespace-nowrap">
           {['Home', 'About', 'Contact'].map((item) => (
             <Link 
               key={item} 
@@ -114,10 +114,7 @@ export default function Navbar() {
               </Link>
             </div>
           </div>
-        </div>
 
-        {/* Right Actions */}
-        <div className="hidden md:flex items-center gap-5 flex-shrink-0">
           {isAuthenticated ? (
             <>
               <Link to="/profile" className="text-[12px] font-medium tracking-wide text-gray-800 hover:text-black transition-colors no-underline">
@@ -126,21 +123,17 @@ export default function Navbar() {
               <Link to={role === 'LotOwner' ? "/lot-owner/vehicles" : "/my-vehicles"} className="text-[12px] font-medium tracking-wide text-gray-800 hover:text-black transition-colors no-underline">
                 Vehicles
               </Link>
+              {role === 'LotOwner' && (
+                <Link to="/lot-owner/services" className="text-[12px] font-medium tracking-wide text-gray-800 hover:text-black transition-colors no-underline">
+                  Services
+                </Link>
+              )}
               <Link to="/my-bookings" className="text-[12px] font-medium tracking-wide text-gray-800 hover:text-black transition-colors no-underline">
                 My Bookings
               </Link>
               <Link to="/messages" className="text-[12px] font-medium tracking-wide text-gray-800 hover:text-black transition-colors no-underline">
                 Messages
               </Link>
-
-                 <button onClick={handleOpenNotifications} className="relative text-gray-800 hover:text-black transition-colors outline-none cursor-pointer">
-                <Bell size={16} />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-[#111] text-[8px] font-bold text-white">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </button>
             </>
           ) : (
             <>
@@ -151,6 +144,20 @@ export default function Navbar() {
                 Sign up
               </Link>
             </>
+          )}
+        </div>
+
+        {/* Right Actions */}
+        <div className="hidden md:flex items-center gap-5 flex-shrink-0">
+          {isAuthenticated && (
+             <button onClick={handleOpenNotifications} className="relative text-gray-800 hover:text-black transition-colors outline-none cursor-pointer">
+                <Bell size={16} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-[#111] text-[8px] font-bold text-white">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+             </button>
           )}
         </div>
 
@@ -200,6 +207,9 @@ export default function Navbar() {
               </Link>
               <Link to={role === 'LotOwner' ? "/lot-owner/vehicles" : "/my-vehicles"} onClick={() => setIsOpen(false)} className="flex items-center gap-2 text-[15px] font-medium text-[#111] no-underline">
                 Vehicles
+              </Link>
+              <Link to={role === 'LotOwner' ? "/lot-owner/services" : "/my-services"} onClick={() => setIsOpen(false)} className="flex items-center gap-2 text-[15px] font-medium text-[#111] no-underline">
+                Services
               </Link>
               <Link to="/my-bookings" onClick={() => setIsOpen(false)} className="flex items-center gap-2 text-[15px] font-medium text-[#111] no-underline">
                 My Bookings

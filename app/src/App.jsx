@@ -13,6 +13,7 @@ import ProfilePage from './pages/ProfilePage';
 import AddVehiclePage from './pages/AddVehiclePage';
 import TrackApplicationPage from './pages/TrackApplicationPage';
 import TrackPickupPage from './pages/TrackPickupPage';
+import TrackServicePage from './pages/vehicle-owner/TrackServicePage';
 import StoredVehicleDashboardPage from './pages/StoredVehicleDashboardPage';
 import SearchPage from './pages/SearchPage';
 import UserBookingsPage from './pages/UserBookingsPage';
@@ -21,6 +22,7 @@ import LotOwnerDashboardPage from './pages/lot-owner/LotOwnerDashboardPage';
 import LotOwnerPropertiesPage from './pages/lot-owner/LotOwnerPropertiesPage';
 import LotOwnerLayout from './components/LotOwnerLayout';
 import PropertyDetailsPage from './pages/PropertyDetailsPage';
+import NearbyServiceCentersPage from './pages/vehicle-owner/NearbyServiceCentersPage';
 import AgreementPage from './pages/AgreementPage';
 import PickupOptionsPage from './pages/PickupOptionsPage';
 import AdminLayout from './components/AdminLayout';
@@ -32,9 +34,23 @@ import LotOwnerPickupDetailsPage from './pages/lot-owner/LotOwnerPickupDetailsPa
 import LotOwnerManagersPage from './pages/lot-owner/LotOwnerManagersPage';
 import VerificationPendingPage from './pages/VerificationPendingPage';
 import MessagesPage from './pages/MessagesPage';
+import OwnerServicesPage from './pages/OwnerServicesPage';
 import MyVehiclesPage from './pages/MyVehiclesPage';
 import LotOwnerVehiclesPage from './pages/lot-owner/LotOwnerVehiclesPage';
 import LotOwnerVehicleDetailsPage from './pages/lot-owner/LotOwnerVehicleDetailsPage';
+
+import ServiceCenterLayout from './layouts/ServiceCenterLayout';
+import SCDashboardPage from './pages/service-center/SCDashboardPage';
+import SCBookingsPage from './pages/service-center/SCBookingsPage';
+import SCBookingDetailsPage from './pages/service-center/SCBookingDetailsPage';
+import SCMechanicsPage from './pages/service-center/SCMechanicsPage';
+import SCAssignMechanicPage from './pages/service-center/SCAssignMechanicPage';
+
+import ManagerServicesPage from './pages/lot-manager/ManagerServicesPage';
+import ManagerServiceTrackingPage from './pages/lot-manager/ManagerServiceTrackingPage';
+import LotOwnerServicesPage from './pages/lot-owner/LotOwnerServicesPage';
+import LotOwnerServiceTrackingPage from './pages/lot-owner/LotOwnerServiceTrackingPage';
+
 import ManagerLayout from './components/ManagerLayout';
 import ManagerDashboardPage from './pages/lot-manager/ManagerDashboardPage';
 import ManagerPickupsPage from './pages/lot-manager/ManagerPickupsPage';
@@ -104,8 +120,21 @@ function ProtectedRoute({ children }) {
   if (role === 4) {
     return <Navigate to="/lot-manager/dashboard" replace />;
   }
+  if (role === 6) {
+    return <Navigate to="/service-center/dashboard" replace />;
+  }
   
   return children;
+}
+
+function ServiceCenterRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) return null;
+  
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  
+  const role = getUserRole();
+  return role === 6 ? children : <Navigate to="/home" replace />;
 }
 
 function AdminRoute({ children }) {
@@ -147,6 +176,7 @@ function PublicRoute({ children }) {
     if (role === 5) return <Navigate to="/admin/dashboard" replace />;
     if (role === 2) return <Navigate to="/lot-owner/dashboard" replace />;
     if (role === 4) return <Navigate to="/lot-manager/dashboard" replace />;
+    if (role === 6) return <Navigate to="/service-center/dashboard" replace />;
     return <Navigate to="/home" replace />;
   }
   
@@ -200,6 +230,8 @@ export default function App() {
           <Route path="pickups" element={<LotOwnerPickupsPage />} />
           <Route path="pickup/:id" element={<LotOwnerPickupDetailsPage />} />
           <Route path="vehicles" element={<LotOwnerVehiclesPage />} />
+          <Route path="services" element={<LotOwnerServicesPage />} />
+          <Route path="services/:id" element={<LotOwnerServiceTrackingPage />} />
           <Route path="vehicles/:id" element={<LotOwnerVehicleDetailsPage />} />
           <Route path="messages" element={<MessagesPage />} />
           <Route path="*" element={<Navigate to="/lot-owner/dashboard" replace />} />
@@ -215,10 +247,14 @@ export default function App() {
         }>
           <Route path="dashboard" element={<ManagerDashboardPage />} />
           <Route path="pickups" element={<ManagerPickupsPage />} />
+
           <Route path="vehicles" element={<ManagerVehiclesPage />} />
+          <Route path="services" element={<ManagerServicesPage />} />
+          <Route path="services/:id" element={<ManagerServiceTrackingPage />} />
           <Route path="vehicle-details/:id" element={<ManagerVehicleDetailsPage />} />
           <Route path="tasks" element={<ManagerTasksPage />} />
           <Route path="submit-weekly/:id" element={<ManagerSubmitWeeklyPage />} />
+          <Route path="submit-weekly/:id/:vehicleId" element={<ManagerSubmitWeeklyPage />} />
           <Route path="submit-ondemand/:id" element={<ManagerSubmitOnDemandPage />} />
           <Route path="messages" element={<MessagesPage />} />
           <Route path="pickup-details/:id" element={<ManagerPickupDetailsPage />} />
@@ -228,6 +264,21 @@ export default function App() {
           <Route path="*" element={<Navigate to="/lot-manager/dashboard" replace />} />
         </Route>
 
+
+        {/* Service Center Routes */}
+        <Route path="/service-center" element={
+          <ServiceCenterRoute>
+            <ServiceCenterLayout />
+          </ServiceCenterRoute>
+        }>
+          <Route path="dashboard" element={<SCDashboardPage />} />
+          <Route path="bookings" element={<SCBookingsPage />} />
+          <Route path="bookings/:id" element={<SCBookingDetailsPage />} />
+          <Route path="bookings/:id/assign" element={<SCAssignMechanicPage />} />
+          <Route path="mechanics" element={<SCMechanicsPage />} />
+          <Route path="messages" element={<MessagesPage />} />
+          <Route path="*" element={<Navigate to="/service-center/dashboard" replace />} />
+        </Route>
         <Route path="/home" element={
           <ProtectedRoute>
             <HomePage />
@@ -241,6 +292,11 @@ export default function App() {
         <Route path="/garage/:id" element={
           <ProtectedRoute>
             <PropertyDetailsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/owner/nearby-services/:propertyId" element={
+          <ProtectedRoute>
+            <NearbyServiceCentersPage />
           </ProtectedRoute>
         } />
         <Route path="/booking-verification/:id" element={
@@ -279,12 +335,17 @@ export default function App() {
           </ProtectedRoute>
         } />
         <Route path="/track-pickup/:id" element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['VehicleOwner']}>
             <TrackPickupPage />
           </ProtectedRoute>
         } />
+        <Route path="/track-service/:id" element={
+          <ProtectedRoute allowedRoles={['VehicleOwner']}>
+            <TrackServicePage />
+          </ProtectedRoute>
+        } />
         <Route path="/stored-vehicle/:id" element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['VehicleOwner']}>
             <StoredVehicleDashboardPage />
           </ProtectedRoute>
         } />

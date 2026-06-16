@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ShieldCheck, Video, Camera, MapPin, Calendar, ChevronLeft, Phone, MessageSquare } from 'lucide-react';
+import { ShieldCheck, Video, Camera, MapPin, Calendar, Phone, MessageSquare, ArrowRight, Wrench, Maximize, Check, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getToken } from '../api/auth';
 import Navbar from '../components/Navbar';
@@ -12,6 +12,35 @@ export default function StoredVehicleDashboardPage() {
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeDisplay, setActiveDisplay] = useState('CCTV');
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const viewerRef = useRef(null);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      viewerRef.current?.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
+  const cctvVideos = ['/cctv.mp4', '/cctv2.mp4', '/cctv3.mp4', '/cctv4.mp4', '/cctv5.mp4', '/cctv6.mp4'];
+
+  const handleVideoEnded = () => {
+    setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % cctvVideos.length);
+  };
 
   useEffect(() => {
     fetchBookingDetail();
@@ -33,11 +62,34 @@ export default function StoredVehicleDashboardPage() {
     }
   };
 
+  const handleRequestImage = async () => {
+    try {
+      if (!booking?.vehicleId) return;
+      const token = getToken('AccessToken');
+      const res = await fetch(`https://localhost:7108/api/Vehicle/${booking.vehicleId}/vehicle-owner/request-images`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const result = await res.json();
+      if (!res.ok || !result.success) throw new Error(result.message || "Failed to request image");
+      toast.success("demanted image to manager it will submit shortly");
+    } catch (err) {
+      toast.error(err.message || "Error requesting image");
+    }
+  };
+
+  const getNextUpdateDate = () => {
+    if (!booking?.startDate) return null;
+    const startDate = new Date(booking.startDate);
+    startDate.setDate(startDate.getDate() + 7);
+    return startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-[#f5f5f7]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-12 h-12 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
+          <div className="w-12 h-12 rounded-full border-4 border-gray-200 border-t-[#0071e3] animate-spin" />
           <p className="text-gray-500 font-medium">Loading your vehicle dashboard...</p>
         </div>
       </div>
@@ -46,7 +98,7 @@ export default function StoredVehicleDashboardPage() {
 
   if (!booking) {
     return (
-      <div className="min-h-screen flex flex-col font-sans bg-[#f8f9fa]">
+      <div className="min-h-screen flex flex-col font-sans bg-[#f5f5f7]">
         <Navbar />
         <div className="flex-grow flex items-center justify-center">
           <p className="text-gray-500 font-medium text-lg">Vehicle not found.</p>
@@ -56,71 +108,84 @@ export default function StoredVehicleDashboardPage() {
     );
   }
 
-  const latestImages = booking.arrivalImages || booking.pickupImages;
+  const latestImages = booking.weeklyUpdate || booking.recentOnDemandImages || booking.arrivalImages || booking.pickupImages;
   const imageList = [];
   if (latestImages) {
     if (latestImages.frontImageUrl) imageList.push({ label: 'Front', url: latestImages.frontImageUrl });
     if (latestImages.rearImageUrl) imageList.push({ label: 'Rear', url: latestImages.rearImageUrl });
     if (latestImages.leftSideImageUrl) imageList.push({ label: 'Left', url: latestImages.leftSideImageUrl });
     if (latestImages.rightSideImageUrl) imageList.push({ label: 'Right', url: latestImages.rightSideImageUrl });
+    if (latestImages.interiorImageUrl) imageList.push({ label: 'Interior', url: latestImages.interiorImageUrl });
+    if (latestImages.odometerImageUrl) imageList.push({ label: 'Odometer', url: latestImages.odometerImageUrl });
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] flex flex-col font-sans">
+    <div className="min-h-screen bg-[#f5f5f7] flex flex-col font-sans">
       <Navbar />
-      <main className="flex-grow pt-[140px] pb-20 px-[6vw]">
-        
-        {/* Back Button */}
-        <div className="max-w-[1400px] mx-auto mb-6">
-           <button onClick={() => navigate('/my-vehicles')} className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 border border-gray-200 rounded-full text-sm font-semibold text-gray-600 transition-colors shadow-sm">
-             <ChevronLeft size={16} /> Back to Vehicles
-           </button>
-        </div>
+      <main className="flex-grow pt-[110px] pb-24 px-[6vw]">
 
-        <div className="max-w-[1400px] mx-auto flex flex-col gap-8 lg:gap-12">
-          
-          {/* TOP SECTION: Two columns */}
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+          <div className="max-w-[1400px] mx-auto flex flex-col gap-6 lg:gap-8">
+            <div className="flex flex-col gap-3 lg:gap-4">
+              {booking?.hasServiceRecommendation && (
+                <div className="flex items-center self-start gap-2 text-[12px] md:text-[12px] font-semibold text-orange-700 bg-orange-500/10 backdrop-blur-xl px-4 py-1.5 rounded-full border border-orange-500/20">
+                  <Wrench size={14} className="text-orange-500" />
+                  <span>Service recommended by manager. Scroll down for details.</span>
+                </div>
+              )}
+
+              {/* TOP SECTION: Viewer & Details horizontally aligned */}
+              <div className="flex flex-col lg:flex-row lg:flex-wrap items-stretch gap-6 lg:gap-8">
             
-            {/* LEFT SIDE: Big viewer & thumbs */}
-            <div className="w-full lg:w-[65%] flex flex-col items-center">
-              {/* Big Center Aligned Square for CCTV / Selected Image */}
-              <div className="w-full aspect-video md:aspect-[4/2.5] bg-black rounded-[2.5rem] shadow-2xl overflow-hidden relative border-[6px] border-white mb-6 transition-all group">
-                {activeDisplay === 'CCTV' ? (
-                  <>
-                    <video 
-                      src="/cctv.mp4" 
-                      autoPlay loop muted playsInline
-                      className="w-full h-full object-cover opacity-90"
-                    />
-                    <div className="absolute top-6 left-6 flex items-center gap-2">
-                      <span className="flex items-center gap-1.5 text-[11px] font-semibold tracking-widest text-red-500 bg-red-50/90 backdrop-blur px-3 py-1.5 rounded-full shadow-sm border border-red-100 uppercase">
-                        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> LIVE CCTV
-                      </span>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <img src={activeDisplay} className="w-full h-full object-cover" alt="Selected View" />
-                    <div className="absolute top-6 left-6 flex items-center gap-2">
-                      <span className="text-[11px] font-semibold tracking-widest text-gray-700 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow-sm border border-gray-200 uppercase">
-                        LATEST CAPTURE
-                      </span>
-                    </div>
-                  </>
-                )}
-              </div>
+            {/* 1. Big Viewer */}
+            <div className="w-full lg:w-[calc(65%-1rem)] order-1 flex flex-col">
 
-              {/* Latest Images Thumbnails */}
-              {imageList.length > 0 && (
-                <div className="flex items-center gap-4 overflow-x-auto pb-4 w-full justify-start md:justify-center px-4">
-                  <button 
+              {/* Big Center Aligned Square for CCTV / Selected Image */}
+              <div ref={viewerRef} className={`w-full bg-black shadow-[0_8px_30px_rgb(0,0,0,0.12)] overflow-hidden relative transition-all group aspect-video lg:aspect-auto flex-1 ${isFullscreen ? 'border-0 rounded-none' : 'border-[4px] border-white rounded-[2rem]'}`}>
+                {/* Fullscreen Button */}
+                <button 
+                  onClick={toggleFullScreen}
+                  className="absolute top-6 right-6 z-10 w-10 h-10 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/10 transition-all opacity-0 group-hover:opacity-100"
+                  title="Toggle Fullscreen"
+                >
+                  <Maximize size={18} />
+                </button>
+
+                {activeDisplay === 'CCTV' ? (
+                  <video 
+                    src={cctvVideos[currentVideoIndex]} 
+                    autoPlay muted playsInline
+                    onEnded={handleVideoEnded}
+                    className="absolute inset-0 w-full h-full object-cover opacity-90"
+                  />
+                ) : (
+                  <img src={activeDisplay} className="absolute inset-0 w-full h-full object-cover" alt="Selected View" />
+                )}
+
+                {/* Top Left Badges */}
+                <div className="absolute top-6 left-6 flex flex-col items-start gap-2 z-10 pointer-events-none">
+                  {activeDisplay === 'CCTV' ? (
+                    <span className="flex items-center gap-1.5 text-[11px] font-semibold tracking-widest text-red-500 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm border border-white/10 uppercase pointer-events-auto">
+                      <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> LIVE CCTV
+                    </span>
+                  ) : (
+                    <span className="text-[11px] font-semibold tracking-widest text-white bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm border border-white/10 uppercase pointer-events-auto">
+                      LATEST CAPTURE
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Thumbnails ROW */}
+            <div className="w-full lg:w-[calc(65%-1rem)] order-2 lg:order-3 -mt-3 lg:-mt-5">
+              <div className="flex items-center gap-4 overflow-x-auto overflow-y-hidden pt-1 pb-4 w-full justify-start md:justify-center px-4 scrollbar-hide">
+                <button 
                     onClick={() => setActiveDisplay('CCTV')}
-                    className={`relative w-15 h-15 md:w-18 md:h-18 rounded-2xl overflow-hidden border-2 transition-all shrink-0 ${activeDisplay === 'CCTV' ? 'border-blue-500 scale-105 shadow-xl' : 'border-white shadow-md hover:scale-105'}`}
+                    className={`relative w-15 h-15 md:w-18 md:h-18 rounded-[1.25rem] overflow-hidden transition-all shrink-0 ${activeDisplay === 'CCTV' ? 'ring-2 ring-[#0071e3] ring-offset-2 scale-[1.03] shadow-md' : 'ring-1 ring-black/5 shadow-sm hover:scale-[1.02]'}`}
                   >
-                     <div className="w-full h-full bg-gray-900 flex flex-col items-center justify-center text-white">
-                        <Video size={20} className="mb-1 text-red-400" />
-                        <span className="text-[10px] font-semibold tracking-widest">LIVE</span>
+                     <div className="w-full h-full bg-[#1d1d1f] flex flex-col items-center justify-center text-white">
+                        <Video size={20} className="mb-1 text-[#ff3b30]" />
+                        <span className="text-[9px] font-bold tracking-widest uppercase">Live</span>
                      </div>
                   </button>
 
@@ -128,116 +193,242 @@ export default function StoredVehicleDashboardPage() {
                     <button 
                       key={idx}
                       onClick={() => setActiveDisplay(img.url)}
-                      className={`relative w-15 h-15 md:w-18 md:h-18 rounded-2xl overflow-hidden border-2 transition-all shrink-0 ${activeDisplay === img.url ? 'border-blue-500 scale-105 shadow-xl' : 'border-white shadow-md hover:scale-105'}`}
+                      className={`relative w-15 h-15 md:w-18 md:h-18 rounded-[1.25rem] overflow-hidden transition-all shrink-0 ${activeDisplay === img.url ? 'ring-2 ring-[#0071e3] ring-offset-2 scale-[1.03] shadow-md' : 'ring-1 ring-black/5 shadow-sm hover:scale-[1.02]'}`}
                     >
                       <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* RIGHT SIDE: Vehicle details, actions, lot owner */}
-            <div className="w-full lg:w-[35%] flex flex-col gap-6">
+            {/* 3. RIGHT SIDE: Vehicle details & lot owner */}
+            <div className="w-full lg:w-[calc(35%-1rem)] order-3 lg:order-2 flex flex-col gap-4">
               
-              {/* Vehicle Info & Actions */}
-              <div className="bg-white p-8 lg:p-10 rounded-[2rem] shadow-sm border border-gray-100 flex flex-col flex-grow">
-                 <div className="mb-8">
+              {/* Vehicle Info */}
+              <div className="bg-white/80 backdrop-blur-xl px-6 py-5 lg:px-8 lg:py-6 rounded-[2rem] shadow-[0_2px_20px_rgb(0,0,0,0.04)] border border-gray-100/50 flex flex-col flex-1">
+                 <div className="mb-4 lg:mb-6">
                     <div className="flex items-center gap-2 mb-4">
-                      <span className="px-2.5 py-0.5 bg-green-100 text-green-700 text-[10px] font-semibold uppercase tracking-widest rounded-md flex items-center gap-1.5">
+                      <span className="px-2.5 py-0.5 bg-gray-100 text-gray-700 text-[10px] font-semibold uppercase tracking-widest rounded-md flex items-center gap-1.5">
                         <ShieldCheck size={14}/> STORED
                       </span>
                     </div>
-                    <h1 className="text-3xl lg:text-[29px] font-semibold text-[#111] leading-tight mb-3">
+                    <h1 className="text-3xl lg:text-[29px] font-semibold text-[#1d1d1f] leading-tight mb-3 tracking-tight">
                       {booking.vehicleBrand} <span> </span>
                       {booking.vehicleModel}
                     </h1>
-                    <span className="text-sm font-semibold text-gray-600 uppercase tracking-widest bg-gray-100 px-4 py-1.5 rounded-lg border border-gray-200 inline-block mb-4">
+                    <span className="text-[13px] font-semibold text-[#86868b] uppercase tracking-widest bg-gray-50/80 px-4 py-1.5 rounded-lg border border-gray-100 inline-block mb-4">
                       {booking.registrationNo}
                     </span>
                     
-                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-500">
-                      <MapPin size={16} className="text-blue-500" /> 
+                    <div className="flex items-center gap-2 text-[13px] font-medium text-[#86868b]">
+                      <MapPin size={16} className="text-[#0071e3]" /> 
                       {booking.propertyName}
                     </div>
                  </div>
 
-                 <div className="flex flex-col gap-4 mt-auto">
+                 <div className="flex flex-col gap-3 mt-auto">
                    <button 
                      onClick={() => navigate(`/track-pickup/${booking.id}`)}
-                     className="w-full py-3 bg-white border-2 border-gray-200 hover:border-gray-300 text-gray-800 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-sm text-sm"
+                     className="w-full py-3.5 bg-gray-100 hover:bg-gray-200 text-[#1d1d1f] rounded-[1rem] font-semibold flex items-center justify-center gap-2 transition-colors border border-transparent text-sm"
                    >
-                     <MapPin size={18} /> View Vehicle Journey
+                     View Vehicle Journey <ArrowRight size={18} />
                    </button>
                    <button 
-                     className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-blue-500/25 text-sm"
+                     onClick={handleRequestImage}
+                     disabled={booking?.hasPendingOnDemandRequest}
+                     className={`w-full py-3.5 ${booking?.hasPendingOnDemandRequest ? 'bg-gray-400 text-white cursor-not-allowed shadow-none' : 'bg-[#0071e3] hover:bg-[#0077ED] text-white shadow-[0_4px_14px_rgba(0,113,227,0.25)]'} rounded-[1rem] font-semibold flex items-center justify-center gap-2 transition-all text-sm`}
                    >
-                     <Camera size={18} /> Demand Vehicle Image
+                     <Camera size={18} /> {booking?.hasPendingOnDemandRequest ? 'Requested Vehicle Image' : 'Demand Vehicle Image'}
                    </button>
+
                  </div>
               </div>
 
               {/* Lot Owner Info */}
-              <div className="bg-white p-8 lg:p-10 rounded-[2rem] shadow-sm border border-gray-100 flex flex-col items-center text-center hover:shadow-md transition-shadow">
-                  <p className="text-xl font-semibold text-[#111] tracking-tight mb-1">{booking.lotOwnerName || "Assigned Lot Owner"}</p>
-                  <p className="text-sm font-semibold text-gray-500 mb-8">{booking.lotOwnerPhone || "Contact Not Available"}</p>
+              <div className="bg-white/80 backdrop-blur-xl px-6 py-5 lg:px-8 lg:py-6 rounded-[2rem] shadow-[0_2px_20px_rgb(0,0,0,0.04)] border border-gray-100/50 flex flex-col items-center justify-center text-center transition-shadow flex-1">
+                  <div className="w-full flex justify-start mb-1">
+                    <span className="px-2.5 py-0.5 bg-gray-100 text-gray-700 text-[10px] font-semibold uppercase tracking-widest rounded-md flex items-center gap-1.5">
+                      LOT OWNER
+                    </span>
+                  </div>
+                  <p className="text-[19px] font-semibold text-[#1d1d1f] tracking-tight mb-1">{booking.lotOwnerName || "Lot Owner"}</p>
+                  <p className="text-[13px] font-medium text-[#86868b] mb-2">{booking.lotOwnerPhone || "Contact Not Available"}</p>
                   
-                  <div className="flex items-center justify-center gap-4 w-full">
-                      <button className="flex-1 py-2 rounded-xl bg-green-50 hover:bg-green-100 text-green-700 font-semibold flex items-center justify-center transition-colors shadow-sm gap-2">
-                          <Phone size={18} /> Call
+                  <div className="flex items-center justify-center gap-3 w-full mt-auto">
+                      <button className="flex-1 py-3 rounded-[1rem] bg-gray-100 hover:bg-gray-200 text-[#1d1d1f] font-semibold flex items-center justify-center transition-colors text-sm gap-2">
+                          <Phone size={16} /> Call
                       </button>
-                      <button className="flex-1 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold flex items-center justify-center transition-colors shadow-sm gap-2">
-                          <MessageSquare size={18} /> Chat
+                      <button className="flex-1 py-3 rounded-[1rem] bg-gray-100 hover:bg-gray-200 text-[#1d1d1f] font-semibold flex items-center justify-center transition-colors text-sm gap-2">
+                          <MessageSquare size={16} /> Chat  
                       </button>
                   </div>
               </div>
             </div>
 
           </div>
+          </div>
 
-          {/* BOTTOM SECTION: Submissions Full Width Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full mt-4">
+          {/* BOTTOM SECTION: Submissions Stacked Full Width */}
+          <div className="flex flex-col gap-6 w-full mt-2">
             
-            {/* On-Demand Submission */}
-            <div className="bg-white rounded-[2rem] p-8 md:p-10 shadow-sm border border-gray-100 flex flex-col md:flex-row items-center justify-between text-center md:text-left hover:shadow-lg transition-shadow duration-300 gap-6">
+            {/* Service & Maintenance */}
+            <div className="bg-white/80 backdrop-blur-xl w-full rounded-[2rem] p-8 md:p-10 shadow-[0_2px_20px_rgb(0,0,0,0.04)] border border-gray-100/50 flex flex-col md:flex-row items-center justify-between text-center md:text-left transition-all duration-300 gap-6">
               <div className="flex flex-col md:flex-row items-center gap-6">
-                <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex shrink-0 items-center justify-center border-4 border-white shadow-inner">
-                  <Camera size={32} />
+                <div className="w-14 h-14 bg-orange-50 text-orange-500 rounded-2xl flex shrink-0 items-center justify-center border border-orange-100 shadow-sm">
+                  <Wrench size={24} />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-semibold text-[#111] mb-2 tracking-tight">On-Demand Images</h3>
-                  <p className="text-gray-500 text-sm font-medium max-w-[280px] leading-relaxed">Request real-time photos of your vehicle at any given moment.</p>
+                  <h3 className="text-[20px] md:text-[22px] font-semibold text-[#1d1d1f] mb-2 tracking-tight">Service & Maintenance</h3>
+                  {booking?.hasServiceRecommendation ? (
+                    <div className="text-[13px] font-medium max-w-[450px] leading-relaxed mb-3">
+                      <div className="flex flex-col md:flex-row md:items-center gap-2">
+                        <span className="font-bold text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-md text-[11px] uppercase tracking-wider shrink-0 border border-orange-100">Manager Remark</span>
+                        <span className="text-[#1d1d1f] italic">"{booking.managerServiceRemarks}"</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-[#86868b] text-[13px] font-medium max-w-[400px] leading-relaxed mb-2">
+                      No notification of service recommendation
+                    </p>
+                  )}
+                  <p className="text-[#86868b] text-[13px] font-medium max-w-[400px] leading-relaxed flex items-center justify-center md:justify-start gap-1.5">
+                    Last Service: <span className="font-semibold text-[#1d1d1f]">{booking?.lastServiceReportDate ? new Date(booking.lastServiceReportDate).toLocaleDateString() : 'No service done yet'}</span>
+                  </p>
                 </div>
               </div>
-              {/* On Demand Info (Left space for future dynamic content) */}
-              <div className="w-full md:w-auto bg-gray-50 px-6 py-4 rounded-2xl border border-gray-100 flex items-center justify-center">
-                <span className="text-sm font-semibold text-gray-400 uppercase tracking-widest">No Active Request</span>
+              <div className="w-full md:w-auto shrink-0 mt-4 md:mt-0">
+                <button 
+                  onClick={() => booking?.hasActiveServiceRequest && booking?.activeServiceRequestId 
+                    ? navigate(`/track-service/${booking.activeServiceRequestId}`) 
+                    : navigate(`/owner/nearby-services/${booking?.propertyId}`, { state: { vehicleBrand: booking?.vehicleBrand, vehicleId: booking?.vehicleId, bookingId: booking?.id } })}
+                  className="w-full md:w-auto px-5 py-2.5 bg-[#0071e3] hover:bg-[#0077ED] text-white rounded-xl text-[14px] font-semibold shadow-sm transition-all flex items-center justify-center gap-1.5"
+                >
+                  {booking?.hasActiveServiceRequest ? "Track Service Request" : "Book Service"} <ArrowRight size={16} />
+                </button>
               </div>
             </div>
 
-            {/* Weekly Submission */}
-            <div className="bg-white rounded-[2rem] p-8 md:p-10 shadow-sm border border-gray-100 flex flex-col justify-center text-center hover:shadow-lg transition-shadow duration-300 gap-6">
-              <div className="flex flex-col md:flex-row items-center gap-6 text-left">
-                <div className="w-20 h-20 bg-purple-50 text-purple-600 rounded-full flex shrink-0 items-center justify-center border-4 border-white shadow-inner">
-                  <Calendar size={32} />
+            {/* On-Demand Submission */}
+            <div className="bg-white/80 backdrop-blur-xl w-full rounded-[2rem] p-8 md:p-10 shadow-[0_2px_20px_rgb(0,0,0,0.04)] border border-gray-100/50 flex flex-col gap-6 transition-all duration-300">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="flex items-center gap-6">
+                  <div className="w-16 h-16 bg-gray-50 text-[#1d1d1f] rounded-2xl flex shrink-0 items-center justify-center border border-gray-200/60 shadow-sm">
+                    <Camera size={28} />
+                  </div>
+                  <div>
+                    <h3 className="text-[22px] font-semibold text-[#1d1d1f] mb-1.5 tracking-tight">On-Demand Images</h3>
+                    <p className="text-[#86868b] text-[13px] font-medium max-w-[320px] leading-relaxed">Request real-time photos of your vehicle at any given moment.</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-2xl font-semibold text-[#111] mb-2 tracking-tight">Weekly Update</h3>
-                  <p className="text-gray-500 text-sm font-medium max-w-[280px] leading-relaxed">Detailed weekly inspection report and media from the Lot Manager.</p>
+                <div className="w-full md:w-auto flex items-center justify-center md:justify-end gap-3">
+                  {booking?.hasPendingOnDemandRequest ? (
+                    <div className="bg-gray-50/80 px-6 py-4 rounded-[1.25rem] border border-gray-200 flex flex-col items-center justify-center min-w-[180px]">
+                      <span className="text-[12px] font-semibold text-gray-600 uppercase tracking-wider mb-1">Requested</span>
+                      <span className="text-[14px] font-bold text-[#1d1d1f] tracking-tight">{booking.pendingOnDemandRequestDate ? new Date(booking.pendingOnDemandRequestDate).toLocaleDateString() : 'Pending'}</span>
+                    </div>
+                  ) : !booking?.recentOnDemandImages ? (
+                    <div className="bg-[#f5f5f7] px-6 py-4 rounded-[1.25rem] border border-gray-200/50 flex items-center justify-center min-w-[180px]">
+                      <span className="text-[12px] font-semibold text-[#86868b] uppercase tracking-wider">No Active Request</span>
+                    </div>
+                  ) : null}
                 </div>
               </div>
-              
-              {/* Weekly Update Info & Remarks */}
-              {latestImages?.managerRemarks ? (
-                <div className="w-full bg-orange-50/50 p-6 rounded-[1.5rem] border border-orange-100 text-left mt-2">
-                  <p className="text-xs font-semibold tracking-widest text-orange-400 uppercase mb-2">Manager's Remark</p>
-                  <p className="text-[#111] font-medium text-sm leading-relaxed">"{latestImages.managerRemarks}"</p>
-                </div>
-              ) : (
-                <div className="w-full bg-gray-50 px-6 py-4 rounded-2xl border border-gray-100 flex items-center justify-center mt-2">
-                  <span className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Awaiting Check</span>
+              {booking?.recentOnDemandImages && (
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                  {[
+                    { label: 'Front', url: booking.recentOnDemandImages.frontImageUrl },
+                    { label: 'Rear', url: booking.recentOnDemandImages.rearImageUrl },
+                    { label: 'Left', url: booking.recentOnDemandImages.leftSideImageUrl },
+                    { label: 'Right', url: booking.recentOnDemandImages.rightSideImageUrl },
+                    { label: 'Interior', url: booking.recentOnDemandImages.interiorImageUrl },
+                    { label: 'Odometer', url: booking.recentOnDemandImages.odometerImageUrl },
+                  ].filter(img => img.url).map((img, i) => (
+                    <div
+                      key={i}
+                      className="group relative aspect-square rounded-2xl overflow-hidden cursor-pointer border border-gray-100 shadow-sm"
+                      onClick={() => setSelectedImage(img)}
+                    >
+                      <img
+                        src={img.url.startsWith('http') ? img.url : `https://localhost:7108${img.url}`}
+                        alt={img.label}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
+                        <span className="text-white font-bold text-[10px] uppercase tracking-widest">{img.label}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
+            </div>
+
+            {/* Weekly Submission */}
+            <div className="bg-white rounded-[2rem] shadow-[0_4px_24px_rgb(0,0,0,0.06)] border border-gray-100 overflow-hidden flex flex-col transition-all duration-300">
+              <div className="p-8 md:px-10 md:py-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div className="flex items-center gap-5">
+                  <div className="w-14 h-14 bg-gray-50 rounded-2xl flex shrink-0 items-center justify-center text-[#1d1d1f] border border-gray-200/60 shadow-sm">
+                    <Calendar size={26} />
+                  </div>
+                  <div>
+                    <h3 className="text-[22px] font-bold text-[#1d1d1f] tracking-tight mb-1">Weekly Update</h3>
+                    <p className="text-[#86868b] text-[13px] font-medium max-w-[320px] leading-relaxed">Detailed weekly inspection report and media from the Lot Manager.</p>
+                  </div>
+                </div>
+                {!booking?.weeklyUpdate && (
+                  <div className="bg-[#f5f5f7] px-6 py-4 rounded-2xl border border-gray-200/50 flex flex-col items-center justify-center min-w-[160px] shadow-sm">
+                    <span className="text-[10px] font-bold text-[#86868b] uppercase tracking-widest mb-1.5">Next Update</span>
+                    <span className="text-[15px] font-bold text-[#1d1d1f] tracking-tight">{getNextUpdateDate() || "Pending"}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="p-8 md:p-10 flex flex-col gap-6">
+              
+              
+              {booking?.weeklyUpdate && (
+                <div className="w-full mt-4 space-y-6">
+                  {booking.weeklyUpdate.managerRemarks && (
+                    <div className="bg-orange-50/50 p-6 rounded-[1.5rem] border border-orange-100 text-left">
+                      <p className="text-xs font-semibold tracking-widest text-orange-400 uppercase mb-2">Manager's Remark</p>
+                      <p className="text-[#111] font-medium text-[13px] leading-relaxed">"{booking.weeklyUpdate.managerRemarks}"</p>
+                    </div>
+                  )}
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className={`p-4 rounded-[1.5rem] border ${booking.weeklyUpdate.carWashCompleted ? 'bg-green-50/50 border-green-100 text-green-700' : 'bg-red-50/50 border-red-100 text-red-700'} flex items-center justify-between`}>
+                      <span className="text-sm font-bold tracking-tight">Car Wash</span>
+                      {booking.weeklyUpdate.carWashCompleted ? <Check size={20} /> : <X size={20} />}
+                    </div>
+                    <div className={`p-4 rounded-[1.5rem] border ${booking.weeklyUpdate.tyrePressureChecked ? 'bg-green-50/50 border-green-100 text-green-700' : 'bg-red-50/50 border-red-100 text-red-700'} flex items-center justify-between`}>
+                      <span className="text-sm font-bold tracking-tight">Tyre Pressure</span>
+                      {booking.weeklyUpdate.tyrePressureChecked ? <Check size={20} /> : <X size={20} />}
+                    </div>
+                    <div className={`p-4 rounded-[1.5rem] border ${booking.weeklyUpdate.dailyStartupsCompleted ? 'bg-green-50/50 border-green-100 text-green-700' : 'bg-red-50/50 border-red-100 text-red-700'} flex items-center justify-between`}>
+                      <span className="text-sm font-bold tracking-tight">Daily Startups</span>
+                      {booking.weeklyUpdate.dailyStartupsCompleted ? <Check size={20} /> : <X size={20} />}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                    {[
+                      { label: 'Front', url: booking.weeklyUpdate.frontImageUrl },
+                      { label: 'Rear', url: booking.weeklyUpdate.rearImageUrl },
+                      { label: 'Left', url: booking.weeklyUpdate.leftSideImageUrl },
+                      { label: 'Right', url: booking.weeklyUpdate.rightSideImageUrl },
+                      { label: 'Interior', url: booking.weeklyUpdate.interiorImageUrl },
+                      { label: 'Odometer', url: booking.weeklyUpdate.odometerImageUrl },
+                    ].filter(img => img.url).map((img, i) => (
+                      <div key={i} className="group relative aspect-square rounded-2xl overflow-hidden cursor-pointer border border-gray-100/50 shadow-sm" onClick={() => setSelectedImage(img)}>
+                        <img src={img.url.startsWith('http') ? img.url : `https://localhost:7108${img.url}`} alt={img.label} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                        <div className="absolute inset-0 bg-transparent flex items-end p-2.5">
+                          <span className="text-white font-bold text-[10px] uppercase tracking-widest">{img.label}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              </div>
             </div>
 
           </div>
@@ -245,6 +436,26 @@ export default function StoredVehicleDashboardPage() {
         </div>
       </main>
       <Footer />
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-[110] bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center"
+          onClick={() => setSelectedImage(null)}
+        >
+          <button
+            className="absolute top-5 right-5 w-11 h-11 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+            onClick={() => setSelectedImage(null)}
+          >
+            ✕
+          </button>
+          <img
+            src={selectedImage.url.startsWith('http') ? selectedImage.url : `https://localhost:7108${selectedImage.url}`}
+            alt={selectedImage.label}
+            className="max-w-[90vw] max-h-[80vh] object-contain rounded-2xl shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          />
+          <p className="text-white font-bold text-base mt-5 tracking-wide uppercase">{selectedImage.label}</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -6,6 +6,22 @@
 
 body {
   font-family: "Inter", sans-serif;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Hide number input arrows/spinners */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
 }
 
 /* Required for the live-tracking car marker pulsing ring animation */
@@ -73,4 +89,8 @@ body {
 
 @utility animate-slide-in-left {
   animation: slideInLeft 0.22s ease-out both;
+}
+input[type=password]::-ms-reveal,
+input[type=password]::-ms-clear {
+  display: none;
 }

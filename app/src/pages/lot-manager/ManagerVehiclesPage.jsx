@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Car, Search, ShieldCheck, Loader2, Calendar, MapPin, ChevronRight, User } from 'lucide-react';
+import { Car, Search, ShieldCheck, Loader2, Calendar, MapPin, ChevronRight, User, Camera } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getToken } from '../../api/auth';
 import { useNavigate } from 'react-router-dom';
@@ -47,10 +47,10 @@ export default function ManagerVehiclesPage() {
   return (
     <div className="w-full max-w-[1600px] mx-auto space-y-8 animate-fade-in pb-10">
       {/* Header Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-900 rounded-[2.5rem] p-10 text-white shadow-2xl border border-white/10">
+      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-900 via-teal-900 to-slate-900 rounded-[2.5rem] p-10 text-white shadow-2xl border border-white/10">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-20 pointer-events-none">
-          <div className="absolute -top-[20%] -right-[10%] w-[50%] h-[150%] bg-gradient-to-b from-blue-400 to-transparent rotate-45 blur-[100px]" />
-          <div className="absolute -bottom-[20%] -left-[10%] w-[50%] h-[150%] bg-gradient-to-t from-purple-400 to-transparent rotate-45 blur-[100px]" />
+          <div className="absolute -top-[20%] -right-[10%] w-[50%] h-[150%] bg-gradient-to-b from-emerald-400 to-transparent rotate-45 blur-[100px]" />
+          <div className="absolute -bottom-[20%] -left-[10%] w-[50%] h-[150%] bg-gradient-to-t from-teal-400 to-transparent rotate-45 blur-[100px]" />
         </div>
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -119,10 +119,15 @@ export default function ManagerVehiclesPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80" />
                 
                 {/* Badges */}
-                <div className="absolute top-4 left-4 flex gap-2">
+                <div className="absolute top-4 left-4 flex flex-col items-start gap-2">
                   <span className="px-3 py-1.5 bg-white/95 backdrop-blur-sm text-gray-900 font-black text-xs rounded-xl shadow-sm border border-white/50">
                     {vehicle.registrationNo}
                   </span>
+                  {vehicle.hasPendingOnDemandRequest && (
+                    <span className="px-3 py-1.5 bg-orange-500/90 backdrop-blur-sm text-white font-bold text-xs rounded-xl shadow-sm border border-orange-400/50 flex items-center gap-1.5">
+                      <Camera size={14} /> Image Requested
+                    </span>
+                  )}
                 </div>
                 <div className="absolute top-4 right-4">
                   <div className="px-3 py-1.5 bg-green-500/90 backdrop-blur-sm text-white font-bold text-xs rounded-xl shadow-sm flex items-center gap-1.5">

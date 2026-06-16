@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { 
-  ArrowLeft, CheckCircle, XCircle, FileText, Car, MapPin, Calendar, CreditCard, ShieldCheck, User, X
+  ArrowLeft, CheckCircle, XCircle, FileText, Car, MapPin, Calendar, CreditCard, ShieldCheck, User, X, Wrench
 } from 'lucide-react';
 
 export default function LotOwnerBookingDetailsPage() {
@@ -275,6 +275,21 @@ export default function LotOwnerBookingDetailsPage() {
           </div>
         </div>
       )}
+
+        {/* Service Recommended Banner */}
+        {booking?.hasServiceRecommendation && (
+          <div className="bg-orange-50/80 backdrop-blur-xl w-full rounded-[24px] p-6 md:p-8 shadow-sm border border-orange-200/80 flex flex-col md:flex-row items-center gap-6 mb-4">
+            <div className="w-14 h-14 bg-white text-orange-600 rounded-2xl flex shrink-0 items-center justify-center border border-orange-200 shadow-sm">
+              <Wrench size={24} />
+            </div>
+            <div>
+              <h3 className="text-[18px] font-bold text-orange-900 mb-1 tracking-tight">Service Recommended by Lot Manager</h3>
+              <p className="text-orange-800/90 text-[14px] leading-relaxed">
+                <span className="font-semibold">Manager Remarks:</span> "{booking.managerServiceRemarks}"
+              </p>
+            </div>
+          </div>
+        )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         

@@ -63,6 +63,7 @@ export default function LotOwnerSidebar({ isMobileOpen, setIsMobileOpen }) {
     { name: 'Managers', path: '/lot-owner/managers', icon: <Users size={20} /> },
     { name: 'Bookings', path: '/lot-owner/bookings', icon: <Calendar size={20} />, count: pendingCount },
     { name: 'Pickups', path: '/lot-owner/pickups', icon: <Truck size={20} />, count: pickupCount },
+    { name: 'Services', path: '/lot-owner/services', icon: <Wrench size={20} /> },
     { name: 'Messages', path: '/lot-owner/messages', icon: <FileText size={20} /> },
   ];
 
