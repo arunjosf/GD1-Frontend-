@@ -142,7 +142,7 @@ export default function LotOwnerBookingDetailsPage() {
       {/* Full Screen Image Modal */}
       {fullScreenImage && (
         <div 
-          className="fixed top-0 left-0 w-screen h-screen z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 cursor-zoom-out animate-fade-in"
+          className="fixed top-0 left-0 w-screen h-screen z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 cursor-zoom-out animate-fade-in"
           onClick={() => setFullScreenImage(null)}
         >
           <img 
@@ -302,9 +302,9 @@ export default function LotOwnerBookingDetailsPage() {
               {/* Top row: Vehicle Image and Details */}
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="w-full md:w-1/2 aspect-video bg-gray-50 rounded-2xl p-2 border border-gray-100 overflow-hidden group relative">
-                  {booking.vehicleImageUrl ? (
-                    <div className="w-full h-full cursor-pointer" onClick={() => setFullScreenImage(booking.vehicleImageUrl)}>
-                      <img src={booking.vehicleImageUrl} alt="Vehicle" className="w-full h-full object-contain rounded-xl" />
+                  {(booking.vehicleImageUrl || booking.arrivalImages?.frontImageUrl || booking.pickupImages?.frontImageUrl) ? (
+                    <div className="w-full h-full cursor-pointer" onClick={() => setFullScreenImage(booking.vehicleImageUrl || booking.arrivalImages?.frontImageUrl || booking.pickupImages?.frontImageUrl)}>
+                      <img src={booking.vehicleImageUrl || booking.arrivalImages?.frontImageUrl || booking.pickupImages?.frontImageUrl} alt="Vehicle" className="w-full h-full object-contain rounded-xl" />
                       <div className="absolute inset-0 bg-black/0 hover:bg-black/5 transition-colors flex items-center justify-center">
                         <span className="bg-white/90 text-black px-4 py-2 rounded-full text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm shadow-sm">View Full</span>
                       </div>

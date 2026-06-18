@@ -107,10 +107,6 @@ export default function AdminLayout() {
                 <span className="absolute top-2 right-2.5 w-2.5 h-2.5 bg-blue-500 border-2 border-white rounded-full"></span>
               )}
             </button>
-            
-            <div className="h-10 w-10 rounded-full bg-blue-100 shadow-sm overflow-hidden flex-shrink-0 ml-2 border border-gray-200">
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4" alt="Admin" className="w-full h-full object-cover" />
-            </div>
           </div>
         </header>
 

@@ -1,171 +1,178 @@
-import React, { useState, useEffect } from 'react';
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
-import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Car, Search, ShieldCheck, Loader2, Calendar, MapPin, ChevronRight, User, Camera } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { Car, Search, MapPin, Calendar, Clock, ShieldCheck } from 'lucide-react';
+import { getToken } from '../../api/auth';
+import { useNavigate } from 'react-router-dom';
 
 export default function LotOwnerVehiclesPage() {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const { isAuthenticated, role } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isAuthenticated || role !== 'LotOwner') {
-      navigate('/login');
-      return;
-    }
-
-    const fetchVehicles = async () => {
-      try {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; AccessToken=`);
-        const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
-
-        if (!token) throw new Error("No token found");
-
-        const res = await fetch(`https://localhost:7108/api/vehicle/admin/lot-owner/manager/all-vehicles?search=${searchTerm}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (!res.ok) throw new Error("Failed to fetch vehicles");
-        
-        const data = await res.json();
-        setVehicles(data.data || []);
-      } catch {
-        toast.error("Failed to load stored vehicles");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchVehicles();
-  }, [isAuthenticated, navigate, role, searchTerm]);
+  }, []);
+
+  const fetchVehicles = async () => {
+    setLoading(true);
+    try {
+      const token = getToken('AccessToken');
+      const res = await fetch(`https://localhost:7108/api/lot-owner/dashboard/vehicles`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Failed to fetch vehicles");
+      const result = await res.json();
+      setVehicles(result.data || []);
+    } catch (err) {
+      toast.error(err.message || "Error loading vehicles");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredVehicles = vehicles.filter(v => 
+    v.brand.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    v.model.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    v.registrationNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    v.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const getImageUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith('http') || url.startsWith('data:')) return url;
+    return `https://localhost:7108${url.startsWith('/') ? url : `/${url}`}`;
+  };
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] flex flex-col font-sans">
-      <Navbar />
-
-      <main className="flex-grow pt-[140px] pb-20 px-[6vw]">
-        <div className="max-w-7xl mx-auto">
-          
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-black text-[#111] tracking-tight mb-2">Parked Vehicles</h1>
-              <p className="text-gray-500 text-[14px]">Overview of all vehicles currently stored in your properties.</p>
+    <div className="w-full max-w-[1600px] mx-auto space-y-8 animate-fade-in pb-10">
+      {/* Header Section */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-900 via-teal-900 to-slate-900 rounded-[2.5rem] p-10 text-white shadow-2xl border border-white/10">
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-20 pointer-events-none">
+          <div className="absolute -top-[20%] -right-[10%] w-[50%] h-[150%] bg-gradient-to-b from-emerald-400 to-transparent rotate-45 blur-[100px]" />
+          <div className="absolute -bottom-[20%] -left-[10%] w-[50%] h-[150%] bg-gradient-to-t from-teal-400 to-transparent rotate-45 blur-[100px]" />
+        </div>
+        
+        <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-4">
+              <ShieldCheck size={16} className="text-green-400" />
+              <span className="text-xs font-bold tracking-wider text-green-50 uppercase">Secure Storage</span>
             </div>
-            
-            <div className="w-full md:w-auto relative">
-              <input
-                type="text"
-                placeholder="Search by license plate or model..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full md:w-80 pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all shadow-sm"
-              />
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-            </div>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">Stored Vehicles</h1>
+            <p className="text-blue-100/80 text-lg max-w-xl">Monitor and manage all vehicles currently safely parked in your managed properties.</p>
           </div>
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 flex flex-col items-center min-w-[140px]">
+            <span className="text-4xl font-black text-white">{vehicles.length}</span>
+            <span className="text-xs font-bold text-blue-200 uppercase tracking-wider mt-1">Total Vehicles</span>
+          </div>
+        </div>
+      </div>
 
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
-            </div>
-          ) : vehicles.length === 0 ? (
-            <div className="bg-white rounded-[2rem] p-12 text-center shadow-xl border border-gray-100">
-              <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-5">
-                 <Car className="text-gray-400 w-10 h-10" />
+      {/* Search and Filters */}
+      <div className="bg-white/80 backdrop-blur-xl p-3 rounded-3xl border border-gray-200 shadow-lg shadow-gray-200/50 flex items-center gap-3 sticky top-6 z-20 transition-all hover:bg-white">
+        <div className="bg-blue-50 p-3 rounded-2xl text-blue-600">
+          <Search size={22} strokeWidth={2.5} />
+        </div>
+        <input 
+          type="text" 
+          placeholder="Search by brand, model, registration no, or owner name..."
+          className="flex-1 bg-transparent border-none focus:ring-0 text-gray-900 placeholder-gray-400 text-lg font-medium py-2"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
+      {/* Main Content */}
+      {loading ? (
+        <div className="flex flex-col justify-center items-center py-32 space-y-4">
+          <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+          <p className="text-gray-500 font-semibold animate-pulse">Fetching stored vehicles...</p>
+        </div>
+      ) : filteredVehicles.length === 0 ? (
+        <div className="bg-white rounded-[2.5rem] p-16 text-center border border-gray-100 shadow-xl shadow-gray-200/50 flex flex-col items-center justify-center">
+          <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 border border-gray-100">
+            <Car size={40} className="text-gray-300" />
+          </div>
+          <h3 className="text-2xl font-black text-gray-900 mb-2">No Vehicles Found</h3>
+          <p className="text-gray-500 text-lg max-w-md">We couldn't find any stored vehicles matching your criteria.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredVehicles.map((vehicle, idx) => (
+            <div 
+              key={vehicle.vehicleId} 
+              className="group bg-white rounded-3xl border border-gray-200/80 shadow-md hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 overflow-hidden cursor-pointer flex flex-col relative translate-y-0 hover:-translate-y-1"
+              style={{ animationDelay: `${idx * 50}ms` }}
+              onClick={() => navigate(`/lot-owner/vehicles/${vehicle.vehicleId}`)}
+            >
+              {/* Image Section */}
+              <div className="h-56 bg-gray-100 relative overflow-hidden">
+                {vehicle.imageUrl ? (
+                  <img src={getImageUrl(vehicle.imageUrl)} alt={vehicle.brand} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gradient-to-br from-gray-50 to-gray-200">
+                    <Car size={48} strokeWidth={1.5} />
+                  </div>
+                )}
+                {/* Overlay Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80" />
+                
+                {/* Badges */}
+                <div className="absolute top-4 left-4 flex flex-col items-start gap-2">
+                  <span className="px-3 py-1.5 bg-white/95 backdrop-blur-sm text-gray-900 font-black text-xs rounded-xl shadow-sm border border-white/50">
+                    {vehicle.registrationNo}
+                  </span>
+                  {vehicle.hasPendingOnDemandRequest && (
+                    <span className="px-3 py-1.5 bg-orange-500/90 backdrop-blur-sm text-white font-bold text-xs rounded-xl shadow-sm border border-orange-400/50 flex items-center gap-1.5">
+                      <Camera size={14} /> Image Requested
+                    </span>
+                  )}
+                </div>
+                <div className="absolute top-4 right-4">
+                  <div className="px-3 py-1.5 bg-green-500/90 backdrop-blur-sm text-white font-bold text-xs rounded-xl shadow-sm flex items-center gap-1.5">
+                    <ShieldCheck size={14} />
+                    Stored
+                  </div>
+                </div>
+
+                {/* Title inside image area */}
+                <div className="absolute bottom-4 left-4 right-4 text-white">
+                  <h3 className="text-xl font-black leading-tight drop-shadow-md">{vehicle.brand} {vehicle.model}</h3>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-[#111] mb-2">No Vehicles Found</h3>
-              <p className="text-gray-500 mb-6">There are currently no vehicles matching your search criteria.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {vehicles.map(vehicle => {
-                const getImageUrl = (url) => {
-                  if (!url) return "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&auto=format&fit=crop";
-                  if (url.startsWith('http')) return url;
-                  return `https://localhost:7108${url.startsWith('/') ? url : `/${url}`}`;
-                };
-
-                return (
-                  <div key={vehicle.id} className="group bg-white rounded-3xl border border-gray-200/80 shadow-md hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 overflow-hidden flex flex-col relative translate-y-0 hover:-translate-y-1">
-                    <div className="h-48 bg-gray-100 relative overflow-hidden">
-                      <img 
-                        src={getImageUrl(vehicle.profileImageUrl)} 
-                        alt={vehicle.model}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                        onError={(e) => { e.target.onerror = null; e.target.src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&auto=format&fit=crop"; }}
-                      />
-                      <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5 border border-gray-100/50">
-                        <ShieldCheck size={14} className="text-blue-600" />
-                        <span className="text-[11px] font-black tracking-widest text-gray-900 uppercase">
-                          {vehicle.registrationNo}
-                        </span>
-                      </div>
+              
+              {/* Info Section */}
+              <div className="p-5 flex-1 flex flex-col bg-white">
+                <div className="space-y-3 mb-4">
+                  <div className="flex items-center gap-3 text-gray-600 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                      <User size={16} />
                     </div>
-
-                    <div className="p-6 flex-1 flex flex-col">
-                      <div className="mb-4">
-                        <h2 className="text-xl font-black text-[#111] leading-tight mb-1">
-                          {vehicle.brand} {vehicle.model}
-                        </h2>
-                        <div className="flex items-center gap-2 mt-2">
-                           <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider">{vehicle.category || 'Vehicle'}</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-3 mb-6 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
-                        {vehicle.lotName && (
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center shrink-0 shadow-sm">
-                              <MapPin size={14} className="text-gray-500" />
-                            </div>
-                            <div>
-                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Location</p>
-                              <p className="text-[13px] font-bold text-[#111] truncate">{vehicle.lotName}</p>
-                            </div>
-                          </div>
-                        )}
-                        {vehicle.startDate && (
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center shrink-0 shadow-sm">
-                              <Calendar size={14} className="text-gray-500" />
-                            </div>
-                            <div>
-                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Stored Since</p>
-                              <p className="text-[13px] font-bold text-[#111]">
-                                {new Date(vehicle.startDate).toLocaleDateString(undefined, {
-                                  year: 'numeric',
-                                  month: 'short',
-                                  day: 'numeric'
-                                })}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="mt-auto">
-                        <button 
-                          onClick={() => navigate(`/lot-owner/vehicles/${vehicle.bookingId}`)}
-                          className="w-full py-3.5 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-bold text-[13px] shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-4 focus:ring-gray-100 flex items-center justify-center gap-2 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600"
-                        >
-                          View Details
-                        </button>
-                      </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Owner</span>
+                      <span className="text-sm font-bold text-gray-900">{vehicle.ownerName}</span>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+
+                <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between text-gray-500 group-hover:text-blue-600 transition-colors">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Stored Since</span>
+                    <div className="flex items-center gap-1.5 font-bold text-sm text-gray-900">
+                      <Calendar size={14} className="text-blue-500" /> 
+                      {new Date(vehicle.storedSince).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </div>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-blue-50 group-hover:scale-110 transition-all">
+                    <ChevronRight size={18} />
+                  </div>
+                </div>
+              </div>
             </div>
-          )}
+          ))}
         </div>
-      </main>
-      <Footer />
+      )}
     </div>
   );
 }

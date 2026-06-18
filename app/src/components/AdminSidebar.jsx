@@ -70,9 +70,7 @@ export default function AdminSidebar({ isMobileOpen, setIsMobileOpen }) {
 
   const navItems = [
     { name: 'Dashboard', path: '/admin/dashboard', icon: <LayoutDashboard size={20} /> },
-    { name: 'Analytics', path: '/admin/analytics', icon: <BarChart3 size={20} /> },
     { name: 'Bookings', path: '/admin/bookings', icon: <Calendar size={20} />, count: pendingBookingCount },
-    { name: 'Pickups', path: '/admin/pickups', icon: <Truck size={20} /> },
     { name: 'Applications', path: '/admin/applications', icon: <FileText size={20} />, count: appCount },
     { name: 'Properties', path: '/admin/properties', icon: <Building2 size={20} /> },
     { name: 'Users', path: '/admin/users', icon: <Users size={20} /> },

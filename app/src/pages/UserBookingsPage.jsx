@@ -340,24 +340,24 @@ export default function UserBookingsPage() {
                               View Agreement
                             </button>
                          )}
-                           {booking.hasActiveServiceRequest && booking.activeServiceRequestId && (
-                             <button 
-                                onClick={() => navigate(`/track-service/${booking.activeServiceRequestId}`)}
-                                className="flex-1 sm:flex-none px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[13px] shadow-md transition-all flex items-center justify-center gap-1.5"
-                              >
-                                <Wrench size={14} />
-                                Track Service
-                              </button>
-                           )}
-                           {isInLot && !booking.hasActiveServiceRequest && (
-                             <button 
-                                onClick={() => navigate(`/stored-vehicle/${booking.id}`)}
-                                className="flex-1 sm:flex-none px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[13px] shadow-md transition-all flex items-center justify-center gap-1.5"
-                              >
-                                <Car size={14} />
-                                View Dashboard
-                              </button>
-                           )}
+                         {booking.hasActiveServiceRequest && booking.activeServiceRequestId && (
+                           <button 
+                              onClick={() => navigate(`/track-service/${booking.activeServiceRequestId}`)}
+                              className="flex-1 sm:flex-none px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[13px] shadow-md transition-all flex items-center justify-center gap-1.5"
+                            >
+                              <Wrench size={14} />
+                              Track Service
+                            </button>
+                         )}
+                         {isInLot && !booking.hasActiveServiceRequest && (
+                           <button 
+                              onClick={() => navigate(`/stored-vehicle/${booking.id}`)}
+                              className="flex-1 sm:flex-none px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[13px] shadow-md transition-all flex items-center justify-center gap-1.5"
+                            >
+                              <Car size={14} />
+                              View Dashboard
+                            </button>
+                         )}
                        </div>
                      </div>
                   </div>

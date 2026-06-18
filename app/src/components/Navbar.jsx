@@ -129,8 +129,11 @@ export default function Navbar() {
                 </Link>
               )}
               <Link to="/my-bookings" className="text-[12px] font-medium tracking-wide text-gray-800 hover:text-black transition-colors no-underline">
-                My Bookings
-              </Link>
+                  My Bookings
+                </Link>
+                <Link to="/payments" className="text-[12px] font-medium tracking-wide text-gray-800 hover:text-black transition-colors no-underline">
+                  Payments
+                </Link>
               <Link to="/messages" className="text-[12px] font-medium tracking-wide text-gray-800 hover:text-black transition-colors no-underline">
                 Messages
               </Link>
@@ -212,8 +215,11 @@ export default function Navbar() {
                 Services
               </Link>
               <Link to="/my-bookings" onClick={() => setIsOpen(false)} className="flex items-center gap-2 text-[15px] font-medium text-[#111] no-underline">
-                My Bookings
-              </Link>
+                  My Bookings
+                </Link>
+                <Link to="/payments" onClick={() => setIsOpen(false)} className="flex items-center gap-2 text-[15px] font-medium text-[#111] no-underline">
+                  Payments
+                </Link>
               <Link to="/messages" onClick={() => setIsOpen(false)} className="flex items-center gap-2 text-[15px] font-medium text-[#111] no-underline">
                 Messages
               </Link>

@@ -257,7 +257,7 @@ export default function MessagesPage() {
                     }`}
                     onClick={() => { setActiveTab('garage'); setChatManually(false); setSelectedChat(null); }}
                   >
-                    Garage
+                    {user && user.roleId === 2 ? 'V-Owner' : 'Garage'}
                     {conversations.filter(c => c.category === 'garage').reduce((sum, c) => sum + c.unreadCount, 0) > 0 && (
                       <span className="ml-1 bg-blue-100 text-blue-600 py-0.5 px-1.5 rounded-full text-[10px]">
                         {conversations.filter(c => c.category === 'garage').reduce((sum, c) => sum + c.unreadCount, 0)}

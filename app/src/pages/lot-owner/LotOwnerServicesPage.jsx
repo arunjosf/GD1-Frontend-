@@ -152,7 +152,7 @@ export default function LotOwnerServicesPage() {
               <div className="p-4 border-t border-gray-50 bg-gray-50/50 group-hover:bg-blue-50/30 transition-colors">
                 <button 
                   onClick={() => navigate(`/lot-owner/services/${service.id}`)}
-                  className="w-full flex items-center justify-center gap-2 bg-[#1d1d1f] hover:bg-black text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-sm"
+                  className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-colors shadow-sm"
                 >
                   <span>Track Service Journey</span>
                   <ChevronRight size={16} />

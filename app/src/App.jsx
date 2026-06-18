@@ -23,6 +23,7 @@ import LotOwnerPropertiesPage from './pages/lot-owner/LotOwnerPropertiesPage';
 import LotOwnerLayout from './components/LotOwnerLayout';
 import PropertyDetailsPage from './pages/PropertyDetailsPage';
 import NearbyServiceCentersPage from './pages/vehicle-owner/NearbyServiceCentersPage';
+import VehicleOwnerPaymentsPage from './pages/vehicle-owner/VehicleOwnerPaymentsPage';
 import AgreementPage from './pages/AgreementPage';
 import PickupOptionsPage from './pages/PickupOptionsPage';
 import AdminLayout from './components/AdminLayout';
@@ -31,6 +32,7 @@ import AdminApplicationsPage from './pages/AdminApplicationsPage';
 import LotOwnerBookingsPage from './pages/lot-owner/LotOwnerBookingsPage';
 import LotOwnerBookingDetailsPage from './pages/lot-owner/LotOwnerBookingDetailsPage';
 import LotOwnerPickupDetailsPage from './pages/lot-owner/LotOwnerPickupDetailsPage';
+import LotOwnerPaymentsPage from './pages/lot-owner/LotOwnerPaymentsPage';
 import LotOwnerManagersPage from './pages/lot-owner/LotOwnerManagersPage';
 import VerificationPendingPage from './pages/VerificationPendingPage';
 import MessagesPage from './pages/MessagesPage';
@@ -230,6 +232,7 @@ export default function App() {
           <Route path="pickups" element={<LotOwnerPickupsPage />} />
           <Route path="pickup/:id" element={<LotOwnerPickupDetailsPage />} />
           <Route path="vehicles" element={<LotOwnerVehiclesPage />} />
+          <Route path="payments" element={<LotOwnerPaymentsPage />} />
           <Route path="services" element={<LotOwnerServicesPage />} />
           <Route path="services/:id" element={<LotOwnerServiceTrackingPage />} />
           <Route path="vehicles/:id" element={<LotOwnerVehicleDetailsPage />} />
@@ -357,6 +360,11 @@ export default function App() {
         <Route path="/my-bookings" element={
           <ProtectedRoute>
             <UserBookingsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/payments" element={
+          <ProtectedRoute>
+            <VehicleOwnerPaymentsPage />
           </ProtectedRoute>
         } />
         <Route path="/messages" element={

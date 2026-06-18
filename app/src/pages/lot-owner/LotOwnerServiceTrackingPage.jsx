@@ -169,14 +169,7 @@ export default function LotOwnerServiceTrackingPage() {
       title: 'Payment',
       description: 'Payment for the service is pending/completed.',
       isActive: currentStatusIndex >= 7,
-      isCompleted: currentStatusIndex >= 7,
-      details: serviceRequest.billUrl && (
-        <div className="mt-4">
-          <a href={serviceRequest.billUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm text-blue-600 font-medium hover:underline">
-            View Service Bill
-          </a>
-        </div>
-      )
+      isCompleted: currentStatusIndex >= 7
     }
   ];
 
