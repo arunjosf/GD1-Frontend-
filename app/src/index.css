@@ -10,6 +10,10 @@ body {
   -ms-overflow-style: none; /* IE/Edge */
 }
 
+.leaflet-container {
+  z-index: 0 !important;
+}
+
 body::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }

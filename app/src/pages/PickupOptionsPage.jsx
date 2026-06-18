@@ -15,6 +15,8 @@ export default function PickupOptionsPage() {
   const [city, setCity] = useState('');
   const [pincode, setPincode] = useState('');
   const [address, setAddress] = useState('');
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
   
   // Custom Time State
   const [hour, setHour] = useState('');
@@ -121,9 +123,11 @@ export default function PickupOptionsPage() {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
-          const { latitude, longitude } = position.coords;
+          const { latitude: lat, longitude: lon } = position.coords;
+          setLatitude(lat);
+          setLongitude(lon);
           // Reverse geocoding using Nominatim
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
           const data = await res.json();
           
           if (data && data.address) {
@@ -201,6 +205,30 @@ export default function PickupOptionsPage() {
     }
 
     setIsSubmitting(true);
+
+    let finalLatitude = latitude;
+    let finalLongitude = longitude;
+
+    if (selectedOption === 'pickup' && (!finalLatitude || !finalLongitude)) {
+      try {
+        const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address + ', ' + city)}&limit=1`);
+        const geoData = await geoRes.json();
+        if (geoData && geoData.length > 0) {
+          finalLatitude = parseFloat(geoData[0].lat);
+          finalLongitude = parseFloat(geoData[0].lon);
+        } else {
+          const geoCityRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}&limit=1`);
+          const geoCityData = await geoCityRes.json();
+          if (geoCityData && geoCityData.length > 0) {
+            finalLatitude = parseFloat(geoCityData[0].lat);
+            finalLongitude = parseFloat(geoCityData[0].lon);
+          }
+        }
+      } catch (err) {
+        console.error("Geocoding failed", err);
+      }
+    }
+
     try {
       const token = getToken('AccessToken');
       const payload = {
@@ -210,8 +238,8 @@ export default function PickupOptionsPage() {
         pincode: pincode,
         pickupAddress: address,
         requestedPickupTime: finalTime,
-        pickupLatitude: null,
-        pickupLongitude: null
+        pickupLatitude: finalLatitude,
+        pickupLongitude: finalLongitude
       };
 
       // 1. Call Create Order
@@ -314,6 +342,7 @@ export default function PickupOptionsPage() {
 
           <div className="flex flex-col gap-3">
             <button
+              onClick={() => navigate(`/track-pickup/${id}`)}
               className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
             >
               Track Application

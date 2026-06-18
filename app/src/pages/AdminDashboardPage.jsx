@@ -57,15 +57,10 @@ export default function AdminDashboardPage() {
         });
         if (res.ok) {
           const result = await res.json();
-          // The query reverses time natively for standard building, so let's reverse to show chronological L-to-R
           const data = result.data || result;
-          if (data.monthlyStats) {
-            data.monthlyStats = [...data.monthlyStats].reverse();
-          }
-          if (data.yearlyStats) {
-            data.yearlyStats = [...data.yearlyStats].reverse();
-          }
           setStats(data);
+        } else {
+          console.error('[AdminDashboard] API error:', res.status);
         }
       } catch (err) {
         console.error(err);

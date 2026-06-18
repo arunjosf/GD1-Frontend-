@@ -66,6 +66,8 @@ import ManagerArrivedPage from './pages/lot-manager/ManagerArrivedPage';
 import PreRideConditionPage from './pages/lot-manager/PreRideConditionPage';
 import GarageArrivalConditionPage from './pages/lot-manager/GarageArrivalConditionPage';
 import { NavigationProvider } from './context/NavigationContext';
+import VehicleJourneyPage from './pages/vehicle-owner/VehicleJourneyPage';
+
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -236,6 +238,7 @@ export default function App() {
           <Route path="services" element={<LotOwnerServicesPage />} />
           <Route path="services/:id" element={<LotOwnerServiceTrackingPage />} />
           <Route path="vehicles/:id" element={<LotOwnerVehicleDetailsPage />} />
+          <Route path="vehicle-journey/:vehicleId" element={<VehicleJourneyPage />} />
           <Route path="messages" element={<MessagesPage />} />
           <Route path="*" element={<Navigate to="/lot-owner/dashboard" replace />} />
         </Route>
@@ -264,6 +267,7 @@ export default function App() {
           <Route path="manager-arrived/:id" element={<ManagerArrivedPage />} />
           <Route path="pre-ride-condition/:id" element={<PreRideConditionPage />} />
           <Route path="garage-arrival-condition/:id" element={<GarageArrivalConditionPage />} />
+          <Route path="vehicle-journey/:vehicleId" element={<VehicleJourneyPage />} />
           <Route path="*" element={<Navigate to="/lot-manager/dashboard" replace />} />
         </Route>
 
@@ -365,6 +369,11 @@ export default function App() {
         <Route path="/payments" element={
           <ProtectedRoute>
             <VehicleOwnerPaymentsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/vehicle-journey/:vehicleId" element={
+          <ProtectedRoute>
+            <VehicleJourneyPage />
           </ProtectedRoute>
         } />
         <Route path="/messages" element={

@@ -963,13 +963,22 @@ export default function ManagerPickupDetailsPage() {
 
                 if (status === 'ASSIGNED' || status === '1' || status === 'MANAGERSCHEDULED' || status === '2' || status === 'APPROVED' || status === '3' || status === 'OTPSENT' || status === '5') {
                   return (
-                    <button
-                      onClick={() => navigate(`/lot-manager/manager-arrived/${pickup.pickupRequestId}`)}
-                      className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-md text-sm"
-                    >
-                      <MapPin size={16} fill="currentColor" />
-                      Manager Arrived at Vehicle / Verify OTP
-                    </button>
+                    <div className="flex flex-col gap-3">
+                      <button
+                        onClick={() => navigate(`/lot-manager/manager-arrived/${pickup.pickupRequestId}`)}
+                        className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-md text-sm"
+                      >
+                        <MapPin size={16} fill="currentColor" />
+                        Manager Arrived at Vehicle / Verify OTP
+                      </button>
+                      <button
+                        onClick={() => startNavigation(pickup)}
+                        className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl bg-gray-100 hover:bg-gray-200 border-2 border-gray-900 text-gray-900 font-bold transition-all text-base shadow-sm"
+                      >
+                        <Play size={18} fill="currentColor" />
+                        Start/Continue Navigation (GPS)
+                      </button>
+                    </div>
                   );
                 }
 
@@ -993,29 +1002,28 @@ export default function ManagerPickupDetailsPage() {
                             Submit Pre-Ride Condition
                           </button>
                           <button
-                            disabled
-                            className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl bg-gray-100 text-gray-400 border border-gray-200 font-bold transition-all text-base cursor-not-allowed"
+                            onClick={() => startNavigation(pickup)}
+                            className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl bg-gray-100 hover:bg-gray-200 border-2 border-gray-900 text-gray-900 font-bold transition-all text-base shadow-sm"
                           >
                             <Play size={18} fill="currentColor" />
-                            Start Ride to Garage (Photos Required)
+                            Start/Continue Navigation (GPS)
                           </button>
                         </>
                       ) : (
                         <>
-                          <div className="bg-green-50 border border-green-200 p-4 rounded-2xl flex gap-3 text-xs text-left">
-                            <Check className="text-green-600 shrink-0 mt-0.5" size={16} />
-                            <div>
-                              <p className="font-bold text-green-800">Pre-Ride Check Completed</p>
-                              <p className="text-green-700 mt-0.5 leading-relaxed">Odometer, interior photos, and description submitted. Ready to start transit.</p>
-                            </div>
-                          </div>
                           <button
-                            onClick={handleStartRide}
-                            disabled={rideSubmitting}
-                            className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black transition-all text-base shadow-lg shadow-blue-500/30 active:scale-98"
+                            onClick={() => navigate(`/lot-manager/garage-arrival-condition/${pickup.pickupRequestId}`)}
+                            className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors text-base shadow-lg shadow-blue-500/30"
                           >
-                            {rideSubmitting ? <Loader2 className="animate-spin" size={18} /> : <Play size={18} fill="currentColor" />}
-                            Ride to Garage
+                            <MapPin size={18} fill="currentColor" />
+                            Arrived at Garage
+                          </button>
+                          <button
+                            onClick={() => startNavigation({ ...pickup, status: 'INTRANSIT' })}
+                            className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl bg-gray-100 hover:bg-gray-200 border-2 border-gray-900 text-gray-900 font-bold transition-all text-base shadow-sm"
+                          >
+                            <Play size={18} fill="currentColor" />
+                            Start/Continue Navigation (GPS)
                           </button>
                         </>
                       )}

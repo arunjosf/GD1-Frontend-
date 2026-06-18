@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { getToken } from '../../api/auth';
 import BookingChat from '../../components/BookingChat';
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
-import { MapPin, Navigation, ArrowLeft, Phone, Calendar, Clock, Car, FileText, CheckCircle, XCircle, MessageCircle, Maximize2, Check } from 'lucide-react';
+import { MapPin, Navigation, ArrowLeft, Phone, Calendar, Clock, Car, FileText, CheckCircle, CheckCircle2, XCircle, MessageCircle, Maximize2, Check } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
