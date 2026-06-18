@@ -10,10 +10,26 @@ export default function ServiceCenterLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [scName, setScName] = useReactState('Service Center');
+  const [pendingCount, setPendingCount] = useReactState(0);
 
   useEffect(() => {
     fetchProfile();
+    fetchPendingCount();
   }, []);
+
+  const fetchPendingCount = async () => {
+    try {
+      const res = await fetch(`https://localhost:7108/api/service-center/bookings`, {
+        headers: { Authorization: `Bearer ${getToken('AccessToken')}` }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const bookings = json.data || [];
+        const count = bookings.filter(b => b.status === 'Pending' || b.status === 'Requested').length;
+        setPendingCount(count);
+      }
+    } catch(e) {}
+  };
 
   const fetchProfile = async () => {
     try {
@@ -74,7 +90,12 @@ export default function ServiceCenterLayout() {
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive ? 'bg-blue-50 text-blue-700 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-medium'}`}
               >
                 <Icon size={20} className={isActive ? "text-blue-600" : "text-gray-400"} />
-                {item.name}
+                <span className="flex-1">{item.name}</span>
+                {item.name === 'Bookings' && pendingCount > 0 && (
+                  <span className="ml-auto bg-red-500 text-white text-xs font-black rounded-full w-5 h-5 flex items-center justify-center">
+                    {pendingCount > 9 ? '9+' : pendingCount}
+                  </span>
+                )}
               </Link>
             );
           })}

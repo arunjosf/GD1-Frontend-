@@ -272,7 +272,7 @@ export default function SCBookingDetailsPage() {
               <Car size={18} className="text-blue-600"/> Vehicle
             </h3>
             <div className="w-full h-40 bg-gray-100 rounded-xl overflow-hidden mb-4 border border-gray-200">
-              <img src={booking.serviceCenterImage ? (booking.serviceCenterImage.startsWith('http') ? booking.serviceCenterImage : `https://localhost:7108${booking.serviceCenterImage}`) : 'https://placehold.co/400x300/e2e8f0/64748b?text=No+Image'} className="w-full h-full object-cover" alt="Vehicle" />
+              <img src={booking.vehicleLatestConditionImageUrl ? (booking.vehicleLatestConditionImageUrl.startsWith('http') ? booking.vehicleLatestConditionImageUrl : `https://localhost:7108${booking.vehicleLatestConditionImageUrl}`) : 'https://placehold.co/400x300/e2e8f0/64748b?text=No+Image'} className="w-full h-full object-cover" alt="Vehicle" />
             </div>
             <div className="space-y-3">
               <div>

@@ -11,9 +11,9 @@ const DAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 function getDaysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
 function getFirstDayOfMonth(y, m) { return new Date(y, m, 1).getDay(); }
 
-function CalendarPopover({ value, onChange, onClose }) {
-  const today = new Date();
-  const [view, setView] = useState({ y: today.getFullYear(), m: today.getMonth() });
+function CalendarPopover({ value, onChange, onClose, minDate }) {
+  const effectiveMin = minDate ? (() => { const d = new Date(minDate); d.setHours(0,0,0,0); return d; })() : (() => { const d = new Date(); d.setHours(0,0,0,0); return d; })();
+  const [view, setView] = useState({ y: effectiveMin.getFullYear(), m: effectiveMin.getMonth() });
 
   const prev = () => setView(v => v.m === 0 ? { y: v.y - 1, m: 11 } : { y: v.y, m: v.m - 1 });
   const next = () => setView(v => v.m === 11 ? { y: v.y + 1, m: 0 } : { y: v.y, m: v.m + 1 });
@@ -22,17 +22,17 @@ function CalendarPopover({ value, onChange, onClose }) {
   const firstDay = getFirstDayOfMonth(view.y, view.m);
   const cells = Array(firstDay).fill(null).concat(Array.from({ length: days }, (_, i) => i + 1));
 
+  const today = new Date(); today.setHours(0,0,0,0);
   const isToday = (d) => d === today.getDate() && view.m === today.getMonth() && view.y === today.getFullYear();
   const isSelected = (d) => {
     if (!value || !d) return false;
     return value.getDate() === d && value.getMonth() === view.m && value.getFullYear() === view.y;
   };
-  const isPast = (d) => {
+  const isDisabled = (d) => {
     if (!d) return false;
     const cell = new Date(view.y, view.m, d);
     cell.setHours(0,0,0,0);
-    const t = new Date(); t.setHours(0,0,0,0);
-    return cell < t;
+    return cell < effectiveMin;
   };
 
   return (
@@ -54,10 +54,10 @@ function CalendarPopover({ value, onChange, onClose }) {
           <button
             key={i}
             type="button"
-            disabled={!d || isPast(d)}
+            disabled={!d || isDisabled(d)}
             onClick={() => { onChange(new Date(view.y, view.m, d)); onClose(); }}
             className={`h-8 w-full flex items-center justify-center text-[12px] rounded-full transition-all font-medium
-              ${!d ? '' : isPast(d) ? 'text-[#ccc] cursor-not-allowed' : isSelected(d)
+              ${!d ? '' : isDisabled(d) ? 'text-[#ccc] cursor-not-allowed' : isSelected(d)
                 ? 'bg-[#111] text-white'
                 : isToday(d)
                   ? 'border border-[#111] text-[#111] hover:bg-[#111] hover:text-white'
@@ -148,7 +148,10 @@ export default function SCAssignMechanicPage() {
       await api.post('/service-center/assign-mechanic', {
         serviceRequestId: booking.id,
         mechanicId: parseInt(selectedMechanic),
-        scheduledDate: scheduledDate ? new Date(scheduledDate).toISOString() : null,
+        scheduledDate: scheduledDate ? (() => {
+          const d = new Date(scheduledDate);
+          return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}T00:00:00`;
+        })() : null,
         adminNotes: adminNotes
       });
       toast.success('Mechanic assigned and notified successfully!');
@@ -273,7 +276,8 @@ export default function SCAssignMechanicPage() {
                     <CalendarPopover 
                       value={scheduledDate ? new Date(scheduledDate) : null} 
                       onChange={(d) => setScheduledDate(d.toISOString())} 
-                      onClose={() => setShowCal(false)} 
+                      onClose={() => setShowCal(false)}
+                      minDate={booking?.scheduledDate}
                     />
                   )}
                 </div>
