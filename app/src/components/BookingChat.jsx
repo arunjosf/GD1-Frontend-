@@ -18,9 +18,40 @@ export default function BookingChat({ bookingId, category = "garage", currentUse
 
   useEffect(() => {
     fetchHistory();
-    setupSignalR();
+    let newConnection = null;
+
+    const initSignalR = async () => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; AccessToken=`);
+      const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
+
+      if (!token) return;
+
+      newConnection = new HubConnectionBuilder()
+        .withUrl("https://localhost:7108/hubs/chat", { accessTokenFactory: () => token })
+        .configureLogging(LogLevel.Information)
+        .build();
+
+      newConnection.on("ReceiveMessage", (message) => {
+        setMessages(prev => [...prev, message]);
+      });
+
+      try {
+        await newConnection.start();
+        await newConnection.invoke("JoinGroup", category, Number(referenceId));
+        setConnection(newConnection);
+      } catch (err) {
+        console.error("SignalR Connection Error: ", err);
+        toast.error("Failed to connect to chat server.");
+      }
+    };
+
+    initSignalR();
+
     return () => {
-      if (connection) connection.stop();
+      if (newConnection) {
+        newConnection.stop();
+      }
     };
   }, [bookingId]);
 
@@ -44,31 +75,7 @@ export default function BookingChat({ bookingId, category = "garage", currentUse
     }
   };
 
-  const setupSignalR = async () => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; AccessToken=`);
-    const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
 
-    if (!token) return;
-
-    const newConnection = new HubConnectionBuilder()
-      .withUrl("https://localhost:7108/hubs/chat", { accessTokenFactory: () => token })
-      .configureLogging(LogLevel.Information)
-      .build();
-
-    newConnection.on("ReceiveMessage", (message) => {
-      setMessages(prev => [...prev, message]);
-    });
-
-    try {
-      await newConnection.start();
-      await newConnection.invoke("JoinGroup", category, Number(referenceId));
-      setConnection(newConnection);
-    } catch (err) {
-      console.error("SignalR Connection Error: ", err);
-      toast.error("Failed to connect to chat server.");
-    }
-  };
 
   const sendMessage = async (e) => {
     e.preventDefault();

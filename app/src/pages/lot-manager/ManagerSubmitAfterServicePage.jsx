@@ -119,7 +119,7 @@ const FileSlot = ({ label, icon: Icon, file, onFile, onPreview }) => {
   );
 };
 
-export default function ManagerSubmitWeeklyPage() {
+export default function ManagerSubmitAfterServicePage() {
   const { id, vehicleId } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -204,16 +204,13 @@ export default function ManagerSubmitWeeklyPage() {
       const payload = {
         taskId: parsedTaskId ?? null,
         vehicleId: parsedVehicleId ?? null,
-        carWashCompleted: form.carWashCompleted,
-        tyrePressureChecked: form.tyrePressureChecked,
-        dailyStartupsCompleted: form.dailyStartupsCompleted,
         managerRemarks: form.managerRemarks,
         ...images
       };
       console.log('Submitting weekly payload:', payload);
 
       const token = getToken('AccessToken');
-      const res = await fetch('https://localhost:7108/api/lot-manager/submit-weekly-check', {
+      const res = await fetch('https://localhost:7108/api/lot-manager/submit-afterservice', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -253,35 +250,15 @@ export default function ManagerSubmitWeeklyPage() {
           <ArrowLeft size={20} />
         </button>
         <div>
-          <h2 className="text-[28px] font-black text-gray-900 tracking-tight">Submit Weekly Report</h2>
-          <p className="text-gray-500 text-sm mt-1">Complete the routine checklist and capture photos</p>
+          <h2 className="text-[28px] font-black text-gray-900 tracking-tight">Submit After Service Condition</h2>
+          <p className="text-gray-500 text-sm mt-1">Capture photos and provide remarks for the after-service condition</p>
         </div>
       </div>
 
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden p-6 lg:p-8">
         <form onSubmit={handleSubmit} className="space-y-10">
           
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <CheckCircle size={20} className="text-blue-500" /> Routine Checklist
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <label className={`flex items-center gap-4 p-5 border-2 rounded-2xl cursor-pointer transition-colors ${form.carWashCompleted ? 'border-blue-500 bg-blue-50/50' : 'border-gray-100 bg-gray-50 hover:bg-gray-100'}`}>
-                <input type="checkbox" checked={form.carWashCompleted} onChange={() => handleCheckboxChange('carWashCompleted')} className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                <span className={`font-bold text-sm ${form.carWashCompleted ? 'text-blue-900' : 'text-gray-700'}`}>Car Wash</span>
-              </label>
-              <label className={`flex items-center gap-4 p-5 border-2 rounded-2xl cursor-pointer transition-colors ${form.tyrePressureChecked ? 'border-blue-500 bg-blue-50/50' : 'border-gray-100 bg-gray-50 hover:bg-gray-100'}`}>
-                <input type="checkbox" checked={form.tyrePressureChecked} onChange={() => handleCheckboxChange('tyrePressureChecked')} className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                <span className={`font-bold text-sm ${form.tyrePressureChecked ? 'text-blue-900' : 'text-gray-700'}`}>Tyre Pressure</span>
-              </label>
-              <label className={`flex items-center gap-4 p-5 border-2 rounded-2xl cursor-pointer transition-colors ${form.dailyStartupsCompleted ? 'border-blue-500 bg-blue-50/50' : 'border-gray-100 bg-gray-50 hover:bg-gray-100'}`}>
-                <input type="checkbox" checked={form.dailyStartupsCompleted} onChange={() => handleCheckboxChange('dailyStartupsCompleted')} className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                <span className={`font-bold text-sm ${form.dailyStartupsCompleted ? 'text-blue-900' : 'text-gray-700'}`}>Daily Startups</span>
-              </label>
-            </div>
-          </div>
-
-          <div className="space-y-4 border-t border-gray-100 pt-8">
+                    <div className="space-y-4 border-t border-gray-100 pt-8">
             <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
               <Camera size={20} className="text-blue-500" /> Required Images
             </h3>

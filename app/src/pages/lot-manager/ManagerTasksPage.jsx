@@ -33,6 +33,7 @@ export default function ManagerTasksPage() {
   const getTaskInfo = (type) => {
     if (type === 1 || type === 'WeeklyConditionCheck') return { title: 'Weekly Condition Check', color: 'bg-blue-50 text-blue-700', path: 'weekly' };
     if (type === 0 || type === 'OnDemandImage') return { title: 'On-Demand Image Request', color: 'bg-yellow-50 text-yellow-700', path: 'ondemand' };
+    if (type === 2 || type === 'AfterServiceCondition') return { title: 'After Service Condition', color: 'bg-green-50 text-green-700', path: 'afterservice' };
     return { title: 'Unknown Task', color: 'bg-gray-50 text-gray-700', path: '' };
   };
 
@@ -41,7 +42,7 @@ export default function ManagerTasksPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-[28px] font-black text-gray-900 tracking-tight">Maintenance Tasks</h2>
-          <p className="text-gray-500 text-sm mt-1">Pending weekly checks and on-demand image requests</p>
+          <p className="text-gray-500 text-sm mt-1">Pending weekly checks, on-demand image requests, and post-service condition reports.</p>
         </div>
       </div>
 
@@ -59,16 +60,17 @@ export default function ManagerTasksPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tasks.map((task) => {
             const info = getTaskInfo(task.type);
+            const formattedUrl = task.imageUrl?.startsWith('/') ? task.imageUrl : `/${task.imageUrl}`;
+            const displayImage = task.imageUrl ? (task.imageUrl.startsWith('http') ? task.imageUrl : `https://localhost:7108${formattedUrl}`) : null;
             return (
               <div key={task.id} className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex flex-col gap-4">
-                  {task.imageUrl ? (
-                    <img src={task.imageUrl} alt={`${task.brand} ${task.model}`} className="w-full h-48 rounded-xl object-cover border border-gray-100 shadow-sm" />
-                  ) : (
-                    <div className={`w-full h-48 rounded-xl flex items-center justify-center ${info.color}`}>
-                      <ClipboardList size={40} />
-                    </div>
-                  )}
+                  {displayImage ? (
+                    <img src={displayImage} alt={`${task.brand} ${task.model}`} className="w-full h-48 rounded-xl object-cover border border-gray-100 shadow-sm" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
+                  ) : null}
+                  <div className={`w-full h-48 rounded-xl items-center justify-center ${info.color}`} style={{ display: displayImage ? 'none' : 'flex' }}>
+                    <ClipboardList size={40} />
+                  </div>
                   <div>
                     <h4 className="text-lg font-bold text-gray-900 mb-1">{info.title}</h4>
                     <p className="text-sm font-semibold text-gray-500">

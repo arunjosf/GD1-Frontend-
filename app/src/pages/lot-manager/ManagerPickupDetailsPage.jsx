@@ -897,6 +897,25 @@ export default function ManagerPickupDetailsPage() {
             </div>
           </div>
 
+          {/* Vehicle Information */}
+          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-4">
+            <h3 className="font-extrabold text-gray-900 text-lg">Vehicle Information</h3>
+            <div className="flex flex-col gap-3">
+              <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+                <span className="text-gray-500 text-sm font-medium">Brand</span>
+                <span className="font-bold text-gray-900">{pickup.vehicleBrand || 'Unknown'}</span>
+              </div>
+              <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+                <span className="text-gray-500 text-sm font-medium">Model</span>
+                <span className="font-bold text-gray-900">{pickup.vehicleModel || 'Unknown'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-500 text-sm font-medium">Registration No.</span>
+                <span className="font-bold text-gray-900 bg-gray-100 px-2 py-0.5 rounded tracking-wide">{pickup.registrationNo || 'Unknown'}</span>
+              </div>
+            </div>
+          </div>
+
           {/* Operation Status controls */}
           <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-5">
             <h3 className="font-extrabold text-gray-900 text-lg text-left">Ride Action Operations</h3>

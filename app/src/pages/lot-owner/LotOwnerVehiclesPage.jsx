@@ -99,13 +99,21 @@ export default function LotOwnerVehiclesPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredVehicles.map((vehicle, idx) => (
-            <div 
-              key={vehicle.vehicleId} 
-              className="group bg-white rounded-3xl border border-gray-200/80 shadow-md hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 overflow-hidden cursor-pointer flex flex-col relative translate-y-0 hover:-translate-y-1"
-              style={{ animationDelay: `${idx * 50}ms` }}
-              onClick={() => navigate(`/lot-owner/vehicles/${vehicle.vehicleId}`)}
-            >
+          {filteredVehicles.map((vehicle, idx) => {
+            const isMoveOutReached = vehicle.endDate && new Date(vehicle.endDate) <= new Date();
+            const isCompleted = vehicle.bookingStatus === 'Completed' || vehicle.bookingStatus === 3 || isMoveOutReached;
+
+            return (
+              <div 
+                key={vehicle.bookingId} 
+                className={`group bg-white rounded-3xl border border-gray-200/80 shadow-md transition-all duration-300 overflow-hidden flex flex-col relative ${
+                  !isCompleted 
+                    ? 'hover:shadow-2xl hover:shadow-blue-500/10 cursor-pointer translate-y-0 hover:-translate-y-1' 
+                    : ''
+                }`}
+                style={{ animationDelay: `${idx * 50}ms` }}
+                onClick={!isCompleted ? () => navigate(`/lot-owner/vehicles/${vehicle.vehicleId}?bookingId=${vehicle.bookingId}`, { state: { bookingId: vehicle.bookingId } }) : undefined}
+              >
               {/* Image Section */}
               <div className="h-56 bg-gray-100 relative overflow-hidden">
                 {vehicle.imageUrl ? (
@@ -130,10 +138,22 @@ export default function LotOwnerVehiclesPage() {
                   )}
                 </div>
                 <div className="absolute top-4 right-4">
-                  <div className="px-3 py-1.5 bg-green-500/90 backdrop-blur-sm text-white font-bold text-xs rounded-xl shadow-sm flex items-center gap-1.5">
-                    <ShieldCheck size={14} />
-                    Stored
-                  </div>
+                  {(() => {
+                    const isMoveOutReached = vehicle.endDate && new Date(vehicle.endDate) <= new Date();
+                    const isCompleted = vehicle.bookingStatus === 'Completed' || vehicle.bookingStatus === 3 || isMoveOutReached;
+                    if (isCompleted) {
+                      return (
+                        <div className="px-3 py-1.5 bg-gray-600/90 backdrop-blur-sm text-white font-bold text-xs rounded-xl shadow-sm flex items-center gap-1.5">
+                          <ShieldCheck size={14} /> Moved Out
+                        </div>
+                      );
+                    }
+                    return (
+                      <div className="px-3 py-1.5 bg-green-500/90 backdrop-blur-sm text-white font-bold text-xs rounded-xl shadow-sm flex items-center gap-1.5">
+                        <ShieldCheck size={14} /> Stored
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Title inside image area */}
@@ -168,9 +188,31 @@ export default function LotOwnerVehiclesPage() {
                     <ChevronRight size={18} />
                   </div>
                 </div>
+
+                {(() => {
+                  const isMoveOutReached = vehicle.endDate && new Date(vehicle.endDate) <= new Date();
+                  const isCompleted = vehicle.bookingStatus === 'Completed' || vehicle.bookingStatus === 3 || isMoveOutReached;
+                  if (isCompleted) {
+                    return (
+                      <div className="mt-4 pt-3 border-t border-gray-100">
+                        <div 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/lot-owner/vehicle-journey/${vehicle.vehicleId}`, { state: { bookingId: vehicle.bookingId } });
+                          }}
+                          className="w-full py-2.5 px-4 bg-gray-900 hover:bg-gray-800 text-white rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-md shadow-gray-900/10 text-center cursor-pointer"
+                        >
+                          <span>View Vehicle Journey</span>
+                          <ChevronRight size={16} />
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
             </div>
-          ))}
+          )})}
         </div>
       )}
     </div>

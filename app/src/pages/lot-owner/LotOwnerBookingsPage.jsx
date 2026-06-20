@@ -116,10 +116,10 @@ export default function LotOwnerBookingsPage() {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 items-center px-4 sm:px-0">
-        <div className="flex p-1 bg-gray-100 rounded-xl w-max my-2 sm:my-0">
+        <div className="flex p-1 bg-gray-100 rounded-xl w-full sm:w-max overflow-x-auto my-2 sm:my-0 hide-scrollbar">
           <button
             onClick={() => setActiveTab('pending')}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+            className={`flex items-center whitespace-nowrap gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
               activeTab === 'pending' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'
             }`}
           >
@@ -130,7 +130,7 @@ export default function LotOwnerBookingsPage() {
           </button>
           <button
             onClick={() => setActiveTab('completed')}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+            className={`flex items-center whitespace-nowrap gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
               activeTab === 'completed' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'
             }`}
           >
@@ -141,7 +141,7 @@ export default function LotOwnerBookingsPage() {
           </button>
           <button
             onClick={() => setActiveTab('cancelled')}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+            className={`flex items-center whitespace-nowrap gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
               activeTab === 'cancelled' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'
             }`}
           >

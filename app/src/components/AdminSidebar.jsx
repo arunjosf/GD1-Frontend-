@@ -72,9 +72,8 @@ export default function AdminSidebar({ isMobileOpen, setIsMobileOpen }) {
     { name: 'Dashboard', path: '/admin/dashboard', icon: <LayoutDashboard size={20} /> },
     { name: 'Bookings', path: '/admin/bookings', icon: <Calendar size={20} />, count: pendingBookingCount },
     { name: 'Applications', path: '/admin/applications', icon: <FileText size={20} />, count: appCount },
-    { name: 'Properties', path: '/admin/properties', icon: <Building2 size={20} /> },
-    { name: 'Users', path: '/admin/users', icon: <Users size={20} /> },
-    { name: 'Settings', path: '/admin/settings', icon: <Settings size={20} /> },
+    { name: 'Partners', path: '/admin/partners', icon: <Building2 size={20} /> },
+    { name: 'Users', path: '/admin/users', icon: <Users size={20} /> }
   ];
 
   return (

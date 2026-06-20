@@ -849,9 +849,14 @@ export default function LotOwnerPickupDetailsPage() {
                 <p className="font-bold text-gray-900 truncate group-hover:text-blue-600 transition-colors text-base">
                   {pickup.vehicleBrand} {pickup.vehicleModel}
                 </p>
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">
-                  Owner: {pickup.customerName}
-                </p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                    Owner: {pickup.customerName}
+                  </span>
+                  <span className="text-[10px] font-bold text-gray-900 bg-gray-100 px-1.5 py-0.5 rounded tracking-wide">
+                    {pickup.registrationNo || 'Unknown'}
+                  </span>
+                </div>
               </div>
             </div>
 

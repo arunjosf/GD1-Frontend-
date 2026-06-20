@@ -129,8 +129,20 @@ export default function UserBookingsPage() {
                 const isConfirmed = booking.status === 'Confirmed' || booking.status == 1;
                 const isCancelled = booking.status === 'Cancelled' || booking.status == 4;
                 const isAgreementDeclined = booking.status === 'AgreementDeclined' || booking.status == 6;
+                let isMoveOutReached = false;
+                if (booking.endDate) {
+                  const end = new Date(booking.endDate);
+                  const now = new Date();
+                  end.setHours(0,0,0,0);
+                  const diffTime = end.getTime() - now.getTime();
+                  if (Math.ceil(diffTime / (1000 * 60 * 60 * 24)) <= 0) {
+                    isMoveOutReached = true;
+                  }
+                }
 
-                const isInactive = isCancelled || isRejected || isAgreementDeclined;
+                const isCompleted = booking.status === 'Completed' || booking.status == 3 || isMoveOutReached;
+
+                const isInactive = isCancelled || isRejected || isAgreementDeclined || isCompleted;
 
                 let dotColor = 'bg-gray-300';
                 let shortStatusLabel = 'Unknown';
@@ -171,6 +183,11 @@ export default function UserBookingsPage() {
                   dotColor = 'bg-blue-600';
                   shortStatusLabel = 'Stored in Garage';
                   longStatusMessage = 'Your vehicle is safely stored in the garage.';
+                }
+                if (isCompleted) {
+                  dotColor = 'bg-gray-600';
+                  shortStatusLabel = 'Vehicle Moved Out';
+                  longStatusMessage = 'Your vehicle storage has been completed.';
                 }
 
                 return (
@@ -245,7 +262,9 @@ export default function UserBookingsPage() {
                          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50/80 rounded-xl border border-gray-100/80">
                            <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
                            <span className="text-[13px] font-bold text-[#111]">
-                             {new Date(booking.startDate).toLocaleDateString()} - {new Date(booking.endDate).toLocaleDateString()}
+                             <span className="text-gray-500 font-semibold mr-1">Start:</span>{new Date(booking.startDate).toLocaleDateString()} 
+                             <span className="text-gray-500 font-semibold mx-1">|</span> 
+                             <span className="text-gray-500 font-semibold mr-1">End:</span>{new Date(booking.endDate).toLocaleDateString()}
                            </span>
                          </div>
                        </div>
@@ -307,7 +326,7 @@ export default function UserBookingsPage() {
 
                        {/* Action Buttons Row */}
                        <div className="flex flex-wrap items-center justify-end gap-3 mt-5 w-full">
-                         {booking.pickupStatus && booking.status !== 'Stored' && booking.status != 10 && !isInLot && (
+                         {booking.pickupStatus && booking.status !== 'Stored' && booking.status != 10 && !isInLot && !isCompleted && (
                             <button 
                               onClick={() => navigate(`/track-pickup/${booking.id}`)}
                               className="flex-1 sm:flex-none px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[13px] shadow-md transition-all flex items-center justify-center gap-1.5"
@@ -356,6 +375,15 @@ export default function UserBookingsPage() {
                             >
                               <Car size={14} />
                               View Dashboard
+                            </button>
+                         )}
+                         {isCompleted && (
+                           <button 
+                              onClick={() => navigate(`/vehicle-journey/${booking.vehicleId}`, { state: { bookingId: booking.id } })}
+                              className="flex-1 sm:flex-none px-6 py-2.5 bg-gray-600 hover:bg-gray-700 text-white rounded-xl font-bold text-[13px] shadow-md transition-all flex items-center justify-center gap-1.5"
+                            >
+                              <MapPin size={14} />
+                              View Vehicle Journey
                             </button>
                          )}
                        </div>

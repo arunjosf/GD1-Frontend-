@@ -188,6 +188,88 @@ export default function SCDashboardPage() {
               </div>
             ))
           )}
+      </div>
+      </div>
+
+      {/* Completed Bookings - Full Width Short Cards */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-xl font-bold text-gray-900">Recently Completed Services</h3>
+          <button 
+            onClick={() => navigate('/service-center/bookings')}
+            className="text-gray-500 hover:text-gray-900 text-sm font-semibold transition-colors"
+          >
+            View All
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4">
+          {stats?.completedBookings?.length === 0 ? (
+            <div className="bg-white rounded-3xl p-8 text-center border border-gray-100 shadow-sm">
+              <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500 font-medium">No completed bookings at the moment.</p>
+            </div>
+          ) : (
+            stats?.completedBookings?.map((booking) => (
+              <div 
+                key={booking.id} 
+                onClick={() => navigate(`/service-center/bookings/${booking.bookingId}`)}
+                className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer flex flex-col md:flex-row items-center gap-4 md:gap-6 group"
+              >
+                {/* Vehicle Image */}
+                <div className="w-full md:w-32 h-20 bg-gray-100 rounded-xl overflow-hidden shrink-0 relative">
+                  {booking.serviceCenterImage ? (
+                    <img src={booking.serviceCenterImage.startsWith('http') ? booking.serviceCenterImage : `https://localhost:7108${booking.serviceCenterImage}`} className="w-full h-full object-cover" alt="Vehicle" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <Car size={32} className="opacity-50" />
+                    </div>
+                  )}
+                  <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-bold text-emerald-600 shadow-sm">
+                    {booking.status}
+                  </div>
+                </div>
+
+                {/* Details */}
+                <div className="flex-1 min-w-0 flex flex-col gap-2 w-full">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h4 className="text-lg font-bold text-gray-900 leading-tight">
+                        {booking.vehicleBrand} {booking.vehicleModel}
+                      </h4>
+                      <div className="text-sm font-medium text-gray-500 mt-0.5">
+                        {booking.vehicleRegistrationNo}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-100">
+                        <Wrench size={12} />
+                        {booking.serviceType}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-4">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">
+                      <Clock size={14} />
+                      {new Date(booking.updatedAt || booking.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' })}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100">
+                      <MapPin size={14} className="text-gray-400" />
+                      {booking.propertyCity || "Customer Location"}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Button */}
+                <div className="w-full md:w-auto shrink-0 flex items-center justify-end pr-2">
+                  <div className="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                    <ArrowUpRight size={20} />
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

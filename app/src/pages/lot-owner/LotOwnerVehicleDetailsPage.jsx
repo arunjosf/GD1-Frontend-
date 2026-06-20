@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { 
   ArrowLeft, 
   Car, 
@@ -17,7 +17,9 @@ import {
   X,
   MessageCircle,
   Camera,
-  Check
+  Check,
+  AlertTriangle,
+  StopCircle
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getToken } from '../../api/auth';
@@ -25,6 +27,9 @@ import { useCall } from '../../context/CallContext';
 export default function LotOwnerVehicleDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const bookingId = location.state?.bookingId || searchParams.get('bookingId');
   const { startCall } = useCall();
   const [vehicle, setVehicle] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -34,6 +39,10 @@ export default function LotOwnerVehicleDetailsPage() {
   const [recommendRemarks, setRecommendRemarks] = useState('');
   const [isSubmittingRecommend, setIsSubmittingRecommend] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+
+  const [isStopModalOpen, setIsStopModalOpen] = useState(false);
+  const [isStopping, setIsStopping] = useState(false);
+  const [afterServiceEvent, setAfterServiceEvent] = useState(null);
 
   useEffect(() => {
     fetchVehicleDetails();
@@ -53,8 +62,10 @@ export default function LotOwnerVehicleDetailsPage() {
   const fetchVehicleDetails = async () => {
     setLoading(true);
     try {
+      setAfterServiceEvent(null);
       const token = getToken('AccessToken');
-      const res = await fetch(`https://localhost:7108/api/lot-owner/dashboard/vehicles/${id}`, {
+      const queryParams = bookingId ? `?bookingId=${bookingId}` : '';
+      const res = await fetch(`https://localhost:7108/api/lot-owner/dashboard/vehicles/${id}${queryParams}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) {
@@ -71,9 +82,25 @@ export default function LotOwnerVehicleDetailsPage() {
         });
         const sResult = await sRes.json();
         if (sResult.success) {
-            setServices(sResult.data.filter(s => s.vehicleId == result.data.vehicleId));
+            setServices(sResult.data.filter(s => s.bookingId == result.data.bookingId));
         }
       } catch (e) { console.error('Failed to fetch services', e); }
+
+      if (result.data?.vehicleId) {
+        try {
+          const journeyRes = await fetch(`https://localhost:7108/api/Vehicle/${result.data.vehicleId}/lot-owner/manager/vehicle-journey${result.data.bookingId ? `?bookingId=${result.data.bookingId}` : ''}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (journeyRes.ok) {
+            const journeyData = await journeyRes.json();
+            const eventsArray = journeyData.data || journeyData || [];
+            if (Array.isArray(eventsArray)) {
+              const afterService = eventsArray.filter(e => e.eventType === 'After Service Condition').sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+              setAfterServiceEvent(afterService || null);
+            }
+          }
+        } catch(e) { console.error(e) }
+      }
 
     } catch (err) {
       toast.error(err.message || "Error loading vehicle details");
@@ -112,6 +139,31 @@ export default function LotOwnerVehicleDetailsPage() {
       toast.error("Error submitting recommendation");
     } finally {
       setIsSubmittingRecommend(false);
+    }
+  };
+
+  const handleStopStoring = async () => {
+    setIsStopping(true);
+    try {
+      const token = getToken('AccessToken');
+      const response = await fetch(`https://localhost:7108/api/lot-owner/dashboard/vehicles/${vehicle.vehicleId}/stop-storing`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        toast.success("Vehicle storing stopped successfully.");
+        setIsStopModalOpen(false);
+        setVehicle(prev => ({ ...prev, bookingStatus: 'Completed', endDate: new Date().toISOString() }));
+      } else {
+        toast.error(data.message || "Failed to stop vehicle storing.");
+      }
+    } catch (err) {
+      toast.error("Error stopping vehicle storing.");
+    } finally {
+      setIsStopping(false);
     }
   };
 
@@ -158,6 +210,27 @@ export default function LotOwnerVehicleDetailsPage() {
     if (url.startsWith('http') || url.startsWith('data:')) return url;
     return `https://localhost:7108${url.startsWith('/') ? url : `/${url}`}`;
   };
+
+  const getMoveOutAlert = () => {
+    if (!vehicle?.endDate || vehicle.bookingStatus === 'Completed' || vehicle.bookingStatus == 3) return null;
+    const end = new Date(vehicle.endDate);
+    const now = new Date();
+    end.setHours(0,0,0,0);
+    now.setHours(0,0,0,0);
+    const diffTime = end.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays <= 0) {
+      return { type: 'reached', message: 'Move Out Date Reached!', sub: 'Please complete the storage process.' };
+    } else if (diffDays === 1) {
+      return { type: 'warning', message: 'Move out date reaching in 1 day', sub: 'Prepare for vehicle checkout.' };
+    } else if (diffDays === 2) {
+      return { type: 'warning', message: 'Move out date reaching in 2 days', sub: 'Prepare for vehicle checkout.' };
+    }
+    return null;
+  };
+
+  const moveOutAlert = getMoveOutAlert();
 
   if (loading) {
     return (
@@ -210,7 +283,7 @@ export default function LotOwnerVehicleDetailsPage() {
                   </span>
                 </div>
 
-                {upcomingService && (
+                {upcomingService && vehicle.bookingStatus !== 'Completed' && (
                   <div className="mb-4 bg-blue-50 rounded-2xl border border-blue-100 p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 relative">
@@ -223,13 +296,26 @@ export default function LotOwnerVehicleDetailsPage() {
                       </div>
                     </div>
                       <button
-                        onClick={() => navigate(`/lot-manager/services/${upcomingService.id}`)}
+                        onClick={() => navigate(`/lot-owner/services/${upcomingService.id}`)}
                         className="px-4 py-2 bg-blue-600 text-white font-bold text-sm rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
                       >
                         Track
                       </button>
                   </div>
                 )}
+
+                {moveOutAlert && (
+                  <div className={`mb-4 rounded-2xl border p-4 flex items-center gap-3 ${moveOutAlert.type === 'reached' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-orange-50 border-orange-100 text-orange-600'}`}>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${moveOutAlert.type === 'reached' ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600'}`}>
+                      <AlertTriangle size={20} />
+                    </div>
+                    <div>
+                      <p className={`text-xs font-semibold mb-0.5 ${moveOutAlert.type === 'reached' ? 'text-red-600' : 'text-orange-600'}`}>{moveOutAlert.message}</p>
+                      <p className={`text-sm font-bold ${moveOutAlert.type === 'reached' ? 'text-red-900' : 'text-orange-900'}`}>{moveOutAlert.sub}</p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600 shrink-0">
@@ -254,20 +340,73 @@ export default function LotOwnerVehicleDetailsPage() {
             </div>
 
             {/* Last Service Report */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-600 shrink-0">
-                <Wrench size={24} />
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-600 shrink-0">
+                  <Wrench size={24} />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 mb-0.5">Last Service Report</p>
+                  <p className="text-sm font-bold text-gray-900">
+                    {vehicle.lastServiceReportDate ? new Date(vehicle.lastServiceReportDate).toLocaleDateString() : 'No service done yet'}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs font-semibold text-gray-500 mb-0.5">Last Service Report</p>
-                <p className="text-sm font-bold text-gray-900">
-                  {vehicle.lastServiceReportDate ? new Date(vehicle.lastServiceReportDate).toLocaleDateString() : 'No service done yet'}
-                </p>
-              </div>
+
+              {/* Garage Service Report Section */}
+              {vehicle.lastServiceReportDate && (
+                <div className="mt-2 pt-4 border-t border-gray-100 flex flex-col gap-3">
+                  <p className="text-xs font-bold tracking-wider text-blue-600 uppercase flex items-center gap-1.5">
+                    <Wrench size={14} className="text-blue-500" /> Last Service Details
+                  </p>
+
+                  <div className="bg-blue-50/30 p-4 rounded-2xl border border-blue-100/50 flex flex-col gap-1.5 text-xs font-semibold text-gray-700">
+                    {vehicle.lastServiceCenterName && <p><span className="text-gray-400">Garage:</span> {vehicle.lastServiceCenterName}</p>}
+                    {vehicle.lastServiceCost && <p><span className="text-gray-400">Cost:</span> ₹{vehicle.lastServiceCost.toLocaleString()}</p>}
+                    {vehicle.lastServiceNotes && <p className="mt-1 leading-relaxed"><span className="text-gray-400 block mb-0.5">Completion Notes:</span> <span className="font-normal text-gray-800">{vehicle.lastServiceNotes}</span></p>}
+                  </div>
+                </div>
+              )}
+
+              {afterServiceEvent && (
+                <div className="mt-2 pt-4 border-t border-gray-100">
+                  <p className="text-xs font-bold tracking-wider text-green-600 uppercase flex items-center gap-1.5 mb-2">
+                    <Check size={14} className="text-green-500" /> Manager Check
+                  </p>
+                  {afterServiceEvent.description && (
+                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 mb-4">
+                      <p className="text-xs font-bold tracking-widest text-orange-500 uppercase mb-2">Manager's Remark</p>
+                      <p className="text-gray-900 font-medium text-sm italic">"{afterServiceEvent.description}"</p>
+                    </div>
+                  )}
+                  {afterServiceEvent.images && afterServiceEvent.images.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {afterServiceEvent.images.map((img, idx) => (
+                        <div key={idx} className="group relative w-16 h-16 rounded-xl overflow-hidden border border-gray-100 cursor-pointer shrink-0" onClick={() => setSelectedImage({ url: img.imageUrl, label: img.label })}>
+                          <img src={img.imageUrl.startsWith('http') ? img.imageUrl : `https://localhost:7108${img.imageUrl}`} alt={img.label} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                          <div className="absolute inset-0 bg-transparent flex items-end p-1">
+                            <span className="bg-white/90 text-black px-1.5 py-0.5 rounded text-[8px] font-bold shadow-sm">{img.label}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
-
-
+            {vehicle.bookingStatus === 'Completed' || vehicle.bookingStatus == 3 ? (
+              <div className="w-full bg-gray-50 text-gray-500 font-bold py-4 rounded-3xl border border-gray-200 shadow-sm flex items-center justify-center gap-2 mt-4 cursor-not-allowed">
+                <StopCircle size={20} /> Vehicle Storing Stopped
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsStopModalOpen(true)}
+                className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-4 rounded-3xl border border-red-100 transition-colors shadow-sm flex items-center justify-center gap-2 mt-4"
+              >
+                <StopCircle size={20} /> Stop Vehicle Storing
+              </button>
+            )}
 
           </div>
 
@@ -322,7 +461,7 @@ export default function LotOwnerVehicleDetailsPage() {
                   <MessageCircle size={16} /> Message
                 </button>
                 <button 
-                  onClick={() => navigate(`/track-pickup/${vehicle.bookingId}`)}
+                  onClick={() => navigate(`/lot-owner/vehicle-journey/${vehicle.vehicleId}`, { state: { bookingId: vehicle.bookingId } })}
                   className="flex items-center justify-center gap-1.5 py-3 rounded-xl border-2 border-gray-200 text-gray-700 text-sm font-bold hover:bg-gray-50 transition-colors"
                 >
                   <ArrowRight size={16} /> View Journey
@@ -475,6 +614,39 @@ export default function LotOwnerVehicleDetailsPage() {
           </div>
         </div>
       </div>
+
+      {/* Stop Storing Modal */}
+      {isStopModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsStopModalOpen(false)} />
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md mx-auto p-6 sm:p-8 overflow-hidden">
+            <div className="flex flex-col items-center text-center mb-6">
+              <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
+                <AlertTriangle size={32} />
+              </div>
+              <h3 className="text-2xl font-black text-gray-900 mb-2">Stop Storing Vehicle?</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">
+                Are you sure you want to stop storing this vehicle? Pending payments will only be calculated up to today.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
+              <button
+                onClick={() => setIsStopModalOpen(false)}
+                className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleStopStoring}
+                disabled={isStopping}
+                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isStopping ? <Loader2 size={18} className="animate-spin" /> : 'Yes, Stop Storing'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Recommend Service Modal */}
       {isRecommendModalOpen && (

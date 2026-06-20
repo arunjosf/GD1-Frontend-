@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
-import { Search, ChevronRight, ArrowLeft, CheckCircle, XCircle, User, Briefcase, FileText, Image as ImageIcon, MapPin } from 'lucide-react';
+import { Search, ChevronRight, ArrowLeft, CheckCircle, XCircle, User, Briefcase, FileText, Image as ImageIcon, MapPin, Calendar } from 'lucide-react';
 
 export default function AdminApplicationsPage() {
   const [activeTab, setActiveTab] = useState('franchise'); // 'franchise' or 'service-center'
@@ -15,6 +15,13 @@ export default function AdminApplicationsPage() {
   const [detailedApp, setDetailedApp] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Agent Assignment State
+  const [showAgentModal, setShowAgentModal] = useState(false);
+  const [nearbyAgents, setNearbyAgents] = useState([]);
+  const [loadingAgents, setLoadingAgents] = useState(false);
+  const [scheduledDate, setScheduledDate] = useState('');
+  const [assignLoadingId, setAssignLoadingId] = useState(null);
 
   const fetchCounts = useCallback(async () => {
     try {
@@ -84,14 +91,13 @@ export default function AdminApplicationsPage() {
 
       const endpoint = activeTab === 'franchise'
         ? `https://localhost:7108/api/admin/franchise/applications/${id}`
-        : `https://localhost:7108/api/admin/service-centers/applications/${id}`; // NOTE: This endpoint might not exist for detailed SC view if it returns all data in list, but let's assume it does or fallback to the list item
+        : `https://localhost:7108/api/admin/service-centers/applications/${id}`;
 
       const res = await fetch(endpoint, { headers: { 'Authorization': `Bearer ${token}` } });
       if (res.ok) {
         const result = await res.json();
         setDetailedApp(result.data);
       } else {
-        // Fallback to the item from the list if detail endpoint fails
         const appFromList = applications.find(a => a.id === id);
         setDetailedApp(appFromList);
       }
@@ -137,6 +143,64 @@ export default function AdminApplicationsPage() {
       toast.error(err.message || 'Could not update status.');
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const handleOpenAgentModal = async () => {
+    setShowAgentModal(true);
+    setLoadingAgents(true);
+    setScheduledDate('');
+    try {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; AccessToken=`);
+      const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
+      if (!token) return;
+      const res = await fetch(`https://localhost:7108/api/admin/franchise/applications/${detailedApp.id}/nearby-agents`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const result = await res.json();
+      setNearbyAgents(result.data || []);
+    } catch (err) {
+      toast.error('Could not load nearby agents.');
+    } finally {
+      setLoadingAgents(false);
+    }
+  };
+
+  const handleAssignAgent = async (agentId) => {
+    if (!scheduledDate) {
+      toast.error("Please select a scheduled date.");
+      return;
+    }
+    setAssignLoadingId(agentId);
+    try {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; AccessToken=`);
+      const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
+      
+      const res = await fetch(`https://localhost:7108/api/admin/franchise/applications/${detailedApp.id}/assign-agent`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          agentId: agentId,
+          scheduledDate: new Date(scheduledDate).toISOString()
+        })
+      });
+
+      if (!res.ok) throw new Error("Failed to assign agent");
+      toast.success("Agent assigned successfully!");
+      setShowAgentModal(false);
+      
+      setSelectedAppId(null);
+      setDetailedApp(null);
+      fetchApplications();
+    } catch (err) {
+      toast.error(err.message || 'Could not assign agent.');
+    } finally {
+      setAssignLoadingId(null);
     }
   };
 
@@ -292,15 +356,89 @@ export default function AdminApplicationsPage() {
             >
               <XCircle size={20} /> Reject
             </button>
-            <button 
-              onClick={() => handleUpdateStatus('Approved')}
-              disabled={actionLoading}
-              className="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 shadow-md shadow-blue-500/20"
-            >
-              <CheckCircle size={20} /> {activeTab === 'franchise' ? 'Assign Agent / Approve' : 'Approve'}
-            </button>
+            {activeTab === 'franchise' ? (
+               <button 
+                onClick={handleOpenAgentModal}
+                disabled={actionLoading}
+                className="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 shadow-md shadow-blue-500/20"
+              >
+                <User size={20} /> Assign Agent
+              </button>
+            ) : (
+               <button 
+                onClick={() => handleUpdateStatus('Approved')}
+                disabled={actionLoading}
+                className="px-8 py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 shadow-md shadow-green-500/20"
+              >
+                <CheckCircle size={20} /> Approve
+              </button>
+            )}
           </div>
         )}
+
+        {/* Assign Agent Modal */}
+        {showAgentModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="bg-white rounded-3xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
+              <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <User size={24} className="text-blue-600" /> Assign Agent
+                </h3>
+                <button onClick={() => setShowAgentModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <XCircle size={24} />
+                </button>
+              </div>
+              
+              <div className="p-6 flex-1 overflow-y-auto">
+                <div className="mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100">
+                  <label className="block text-sm font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                    <Calendar size={16} /> Select Inspection Date
+                  </label>
+                  <input 
+                    type="date" 
+                    value={scheduledDate}
+                    onChange={(e) => setScheduledDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="w-full p-2 border border-blue-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  />
+                </div>
+
+                <h4 className="font-semibold text-gray-700 mb-4">Nearby Agents</h4>
+                {loadingAgents ? (
+                  <div className="flex justify-center p-8">
+                    <div className="w-8 h-8 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
+                  </div>
+                ) : nearbyAgents.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">No agents found nearby.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {nearbyAgents.map(agent => (
+                      <div key={agent.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:border-blue-200 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-bold">
+                            {agent.fullName?.charAt(0) || 'A'}
+                          </div>
+                          <div>
+                            <p className="font-bold text-gray-900">{agent.fullName}</p>
+                            <p className="text-xs text-gray-500">{agent.email} • {agent.phoneNumber}</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleAssignAgent(agent.id)}
+                          disabled={assignLoadingId === agent.id}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                        >
+                          {assignLoadingId === agent.id ? 'Assigning...' : 'Assign'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     );
   }

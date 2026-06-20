@@ -29,6 +29,11 @@ import PickupOptionsPage from './pages/PickupOptionsPage';
 import AdminLayout from './components/AdminLayout';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminApplicationsPage from './pages/AdminApplicationsPage';
+import AdminBookingsPage from './pages/AdminBookingsPage';
+import AdminPartnersPage from './pages/admin/AdminPartnersPage';
+import AdminGarageDetailsPage from './pages/admin/AdminGarageDetailsPage';
+import AdminServiceCenterDetailsPage from './pages/admin/AdminServiceCenterDetailsPage';
+import AdminUsersPage from './pages/admin/AdminUsersPage';
 import LotOwnerBookingsPage from './pages/lot-owner/LotOwnerBookingsPage';
 import LotOwnerBookingDetailsPage from './pages/lot-owner/LotOwnerBookingDetailsPage';
 import LotOwnerPickupDetailsPage from './pages/lot-owner/LotOwnerPickupDetailsPage';
@@ -46,6 +51,7 @@ import SCDashboardPage from './pages/service-center/SCDashboardPage';
 import SCBookingsPage from './pages/service-center/SCBookingsPage';
 import SCBookingDetailsPage from './pages/service-center/SCBookingDetailsPage';
 import SCMechanicsPage from './pages/service-center/SCMechanicsPage';
+import SCPaymentsPage from './pages/service-center/SCPaymentsPage';
 import SCAssignMechanicPage from './pages/service-center/SCAssignMechanicPage';
 
 import ManagerServicesPage from './pages/lot-manager/ManagerServicesPage';
@@ -60,6 +66,7 @@ import ManagerVehiclesPage from './pages/lot-manager/ManagerVehiclesPage';
 import ManagerVehicleDetailsPage from './pages/lot-manager/ManagerVehicleDetailsPage';
 import ManagerTasksPage from './pages/lot-manager/ManagerTasksPage';
 import ManagerSubmitWeeklyPage from './pages/lot-manager/ManagerSubmitWeeklyPage';
+import ManagerSubmitAfterServicePage from './pages/lot-manager/ManagerSubmitAfterServicePage';
 import ManagerSubmitOnDemandPage from './pages/lot-manager/ManagerSubmitOnDemandPage';
 import ManagerPickupDetailsPage from './pages/lot-manager/ManagerPickupDetailsPage';
 import ManagerArrivedPage from './pages/lot-manager/ManagerArrivedPage';
@@ -216,8 +223,11 @@ export default function App() {
         }>
           <Route path="dashboard" element={<AdminDashboardPage />} />
           <Route path="applications" element={<AdminApplicationsPage />} />
-          <Route path="bookings" element={<LotOwnerBookingsPage />} />
-          <Route path="bookings/:id" element={<LotOwnerBookingDetailsPage />} />
+          <Route path="bookings" element={<AdminBookingsPage />} />
+          <Route path="partners" element={<AdminPartnersPage />} />
+          <Route path="partners/garage/:id" element={<AdminGarageDetailsPage />} />
+          <Route path="partners/service-center/:id" element={<AdminServiceCenterDetailsPage />} />
+          <Route path="users" element={<AdminUsersPage />} />
           <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
         </Route>
 
@@ -262,6 +272,7 @@ export default function App() {
           <Route path="submit-weekly/:id" element={<ManagerSubmitWeeklyPage />} />
           <Route path="submit-weekly/:id/:vehicleId" element={<ManagerSubmitWeeklyPage />} />
           <Route path="submit-ondemand/:id" element={<ManagerSubmitOnDemandPage />} />
+          <Route path="submit-afterservice/:id" element={<ManagerSubmitAfterServicePage />} />
           <Route path="messages" element={<MessagesPage />} />
           <Route path="pickup-details/:id" element={<ManagerPickupDetailsPage />} />
           <Route path="manager-arrived/:id" element={<ManagerArrivedPage />} />
@@ -283,6 +294,7 @@ export default function App() {
           <Route path="bookings/:id" element={<SCBookingDetailsPage />} />
           <Route path="bookings/:id/assign" element={<SCAssignMechanicPage />} />
           <Route path="mechanics" element={<SCMechanicsPage />} />
+          <Route path="payments" element={<SCPaymentsPage />} />
           <Route path="messages" element={<MessagesPage />} />
           <Route path="*" element={<Navigate to="/service-center/dashboard" replace />} />
         </Route>

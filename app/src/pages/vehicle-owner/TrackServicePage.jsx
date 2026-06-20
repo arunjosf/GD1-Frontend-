@@ -207,7 +207,14 @@ export default function TrackServicePage() {
 
   let currentStatusIndex = statusOrder.indexOf(serviceRequest.status);
   if (currentStatusIndex === -1) {
-    currentStatusIndex = 0;
+    if (serviceRequest.status === 'Completed') {
+      currentStatusIndex = 7;
+    } else {
+      currentStatusIndex = 0;
+    }
+  }
+  if (serviceRequest.isPaid) {
+    currentStatusIndex = 7;
   }
 
   const steps = [
@@ -316,11 +323,13 @@ export default function TrackServicePage() {
     },
     {
       id: 7,
-      title: 'Payment',
-      description: 'Payment for the service is pending/completed.',
-      isActive: currentStatusIndex >= 7,
-      isCompleted: currentStatusIndex >= 7,
-      details: serviceRequest.isPaid && (
+      title: (serviceRequest.status === 'Completed' || serviceRequest.isPaid) ? 'Payment Completed' : 'Payment',
+      description: (serviceRequest.status === 'Completed' || serviceRequest.isPaid) 
+        ? 'Payment for the service has been successfully completed.' 
+        : 'Payment for the service is pending/completed.',
+      isActive: currentStatusIndex >= 7 || serviceRequest.status === 'Completed' || serviceRequest.isPaid,
+      isCompleted: currentStatusIndex >= 7 || serviceRequest.status === 'Completed' || serviceRequest.isPaid,
+      details: (serviceRequest.status === 'Completed' || serviceRequest.isPaid) && (
         <div className="mt-4 w-full bg-green-50 text-green-700 font-bold py-3 px-4 rounded-xl border border-green-200 flex items-center justify-center gap-2">
           <CheckCircle2 size={18} />
           Payment Completed
@@ -332,7 +341,7 @@ export default function TrackServicePage() {
   const isCancelled = serviceRequest.status === 'Cancelled';
   
   let canCancel = false;
-  if (!isCancelled && currentStatusIndex < 6 && serviceRequest.scheduledDate) {
+  if (!isCancelled && !serviceRequest.isCompleted && currentStatusIndex < 6 && serviceRequest.scheduledDate) {
     const scheduled = new Date(serviceRequest.scheduledDate);
     const now = new Date();
     const diffTime = Math.abs(scheduled - now);
@@ -342,7 +351,7 @@ export default function TrackServicePage() {
     }
   }
 
-  if (!isCancelled && (!serviceRequest.scheduledDate || currentStatusIndex <= 1)) {
+  if (!isCancelled && !serviceRequest.isCompleted && (!serviceRequest.scheduledDate || currentStatusIndex <= 1)) {
     canCancel = true;
   }
 

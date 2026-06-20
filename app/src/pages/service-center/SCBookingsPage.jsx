@@ -88,18 +88,18 @@ export default function SCBookingsPage() {
           onClick={() => setFilter('Service Completed')}
           className={`px-6 py-2 rounded-lg font-bold text-sm transition-all ${filter === 'Service Completed' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
         >
-          Completed ({bookings.filter(b => b.status === 'Service Completed' || b.status === 'Completed').length})
+          Completed ({bookings.filter(b => b.isCompleted === true || b.status === 'Service Completed' || b.status === 'Completed').length})
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-        {bookings.filter(b => (filter === 'Assigned Mechanic' && ['Assigned', 'Assigned Mechanic', 'Approved', 'Mechanic Arrived Garage', 'OTP Verified'].includes(b.status)) || (filter === 'Service Completed' && (b.status === 'Completed' || b.status === 'Service Completed')) || (filter === 'Pending' && (b.status === 'Pending' || b.status === 'Requested')) || b.status === filter).length === 0 ? (
+        {bookings.filter(b => (filter === 'Assigned Mechanic' && ['Assigned', 'Assigned Mechanic', 'Approved', 'Mechanic Arrived Garage', 'OTP Verified'].includes(b.status)) || (filter === 'Service Completed' && (b.isCompleted === true || b.status === 'Completed' || b.status === 'Service Completed')) || (filter === 'Pending' && (b.status === 'Pending' || b.status === 'Requested')) || b.status === filter).length === 0 ? (
           <div className="col-span-full py-12 text-center text-gray-500 bg-white rounded-[2rem] border border-gray-100">
             No active bookings at the moment.
           </div>
         ) : (
-          bookings.filter(b => (filter === 'Assigned Mechanic' && ['Assigned', 'Assigned Mechanic', 'Approved', 'Mechanic Arrived Garage', 'OTP Verified'].includes(b.status)) || (filter === 'Service Completed' && (b.status === 'Completed' || b.status === 'Service Completed')) || (filter === 'Pending' && (b.status === 'Pending' || b.status === 'Requested')) || b.status === filter).map((booking) => (
+          bookings.filter(b => (filter === 'Assigned Mechanic' && ['Assigned', 'Assigned Mechanic', 'Approved', 'Mechanic Arrived Garage', 'OTP Verified'].includes(b.status)) || (filter === 'Service Completed' && (b.isCompleted === true || b.status === 'Completed' || b.status === 'Service Completed')) || (filter === 'Pending' && (b.status === 'Pending' || b.status === 'Requested')) || b.status === filter).map((booking) => (
             <div key={booking.id} className="bg-white rounded-[2rem] overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col">
               
               <div className="h-40 bg-gray-100 relative">

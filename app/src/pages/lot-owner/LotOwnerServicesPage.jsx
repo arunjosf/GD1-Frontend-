@@ -37,7 +37,7 @@ export default function LotOwnerServicesPage() {
       (service.vehicleModel?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
       (service.vehicleRegistrationNo?.toLowerCase() || '').includes(searchQuery.toLowerCase());
       
-    const isCompletedOrCancelled = service.isCompleted === true || service.status === 'Cancelled';
+    const isCompletedOrCancelled = service.isCompleted === true || service.status === 'Cancelled' || service.status === 'Service Completed' || service.status === 'Completed';
     
     if (activeTab === 'Upcoming') return matchesSearch && !isCompletedOrCancelled;
     if (activeTab === 'Serviced') return matchesSearch && isCompletedOrCancelled;
@@ -140,7 +140,7 @@ export default function LotOwnerServicesPage() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 text-sm text-gray-600">
                     <Wrench size={16} className="text-gray-400 shrink-0" />
-                    <span className="font-medium line-clamp-1">{service.serviceCenterName}</span>
+                    <span className="font-medium line-clamp-1">{service.serviceCenter?.name || service.serviceCenterName || 'Pending Assignment'}</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm text-gray-600">
                     <Calendar size={16} className="text-gray-400 shrink-0" />

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getToken } from '../../api/auth';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
@@ -7,11 +7,12 @@ import {
   ArrowLeft, Calendar, Clock, Image as ImageIcon,
   CheckCircle2, Wrench, Camera, Truck, ShieldCheck,
   Star, AlertTriangle, MapPin, ChevronDown, ChevronUp,
-  Car, Package, Activity, FileText
+  Car, Package, Activity, FileText, StopCircle
 } from 'lucide-react';
 
 // ─── Event type config ──────────────────────────────────────────
 const EVENT_CONFIG = {
+  'Vehicle Added':          { icon: <Car size={16}/>,          color: '#2563eb', bg: '#dbeafe', label: 'Vehicle Added' },
   'Booking Created':        { icon: <Calendar size={16}/>,     color: '#3b82f6', bg: '#eff6ff', label: 'Booking Created' },
   'Vehicle Stored':         { icon: <Package size={16}/>,      color: '#8b5cf6', bg: '#f5f3ff', label: 'Vehicle Stored' },
   'Pickup Requested':       { icon: <Truck size={16}/>,        color: '#f59e0b', bg: '#fffbeb', label: 'Pickup Requested' },
@@ -20,10 +21,15 @@ const EVENT_CONFIG = {
   'Pre-Ride Condition':     { icon: <Camera size={16}/>,       color: '#6366f1', bg: '#eef2ff', label: 'Pre-Ride Inspection' },
   'Lot Arrival Condition':  { icon: <ShieldCheck size={16}/>,  color: '#059669', bg: '#ecfdf5', label: 'Lot Arrival Condition' },
   'Weekly Check':           { icon: <Activity size={16}/>,     color: '#0ea5e9', bg: '#f0f9ff', label: 'Weekly Check' },
+  'WeeklyUpdate':           { icon: <Activity size={16}/>,     color: '#0ea5e9', bg: '#f0f9ff', label: 'Weekly Condition Submitted' },
+  'AdHocMaintenanceUpdate': { icon: <Activity size={16}/>,     color: '#0ea5e9', bg: '#f0f9ff', label: 'Weekly Condition Submitted' },
+  'After Service Condition':{ icon: <ShieldCheck size={16}/>,  color: '#059669', bg: '#ecfdf5', label: 'After Service Condition' },
   'On-Demand Check':        { icon: <Camera size={16}/>,       color: '#7c3aed', bg: '#f5f3ff', label: 'On-Demand Images' },
   'Service Request':        { icon: <Wrench size={16}/>,       color: '#dc2626', bg: '#fef2f2', label: 'Service Requested' },
+  'Service Booked':         { icon: <Wrench size={16}/>,       color: '#dc2626', bg: '#fef2f2', label: 'Service Booked' },
   'Service Completed':      { icon: <CheckCircle2 size={16}/>, color: '#16a34a', bg: '#f0fdf4', label: 'Service Completed' },
   'Inspection':             { icon: <FileText size={16}/>,     color: '#b45309', bg: '#fffbeb', label: 'Inspection' },
+  'Vehicle Storage Stopped':{ icon: <StopCircle size={16}/>,   color: '#dc2626', bg: '#fef2f2', label: 'Storage Stopped' },
   'Released':               { icon: <Star size={16}/>,         color: '#f59e0b', bg: '#fffbeb', label: 'Vehicle Released' },
 };
 
@@ -120,7 +126,7 @@ function EventCard({ event, isLast }) {
               </div>
             </div>
           </div>
-          {(hasDescription || hasImages) && (
+          {(hasDescription || hasImages || event.actionUrl || event.managerName) && (
             <button onClick={() => setExpanded(p => !p)}
               className="w-7 h-7 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors">
               {expanded ? <ChevronUp size={14}/> : <ChevronDown size={14}/>}
@@ -129,10 +135,31 @@ function EventCard({ event, isLast }) {
         </div>
 
         {/* Body (expandable) */}
-        {(hasDescription || hasImages) && expanded && (
+        {(hasDescription || hasImages || event.actionUrl || event.managerName) && expanded && (
           <div className="border-t border-gray-50 px-5 py-4 space-y-4">
+            {event.managerName && (
+              <div className="bg-blue-50/50 rounded-xl p-3 border border-blue-100 flex items-start gap-3">
+                {event.managerAvatarUrl ? (
+                  <img src={event.managerAvatarUrl} alt={event.managerName} className="w-10 h-10 rounded-full border border-blue-200 object-cover" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+                    {event.managerName.charAt(0)}
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">{event.managerName}</p>
+                  <p className="text-xs text-blue-600 font-medium">Assigned Manager</p>
+                  {event.verifiedAt && (
+                    <p className="text-[10px] text-gray-500 mt-0.5">Verified on {new Date(event.verifiedAt).toLocaleString('en-IN')}</p>
+                  )}
+                  {event.managerRemarks && (
+                    <p className="text-xs text-gray-700 mt-1 italic">"{event.managerRemarks}"</p>
+                  )}
+                </div>
+              </div>
+            )}
             {hasDescription && (
-              <p className="text-sm text-gray-600 leading-relaxed">{event.description}</p>
+              <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{event.description}</p>
             )}
             {hasImages && (
               <div>
@@ -156,6 +183,13 @@ function EventCard({ event, isLast }) {
                 </div>
               </div>
             )}
+            {event.actionUrl && (
+              <div className="pt-2">
+                <a href={event.actionUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm font-semibold hover:bg-blue-100 transition-colors shadow-sm">
+                  <FileText size={16} /> {event.actionLabel || "Download Agreement"}
+                </a>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -172,6 +206,10 @@ function EventCard({ event, isLast }) {
 export default function VehicleJourneyPage() {
   const { vehicleId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const bookingId = location.state?.bookingId || searchParams.get('bookingId');
+
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -188,9 +226,10 @@ export default function VehicleJourneyPage() {
   const isLotOwner = role === 2;
   const isManager = role === 4;
 
+  const queryParams = bookingId ? `?bookingId=${bookingId}` : '';
   const journeyEndpoint = isOwner
-    ? `https://localhost:7108/api/vehicle/${vehicleId}/vehicle-owner/vehicle-journey`
-    : `https://localhost:7108/api/vehicle/${vehicleId}/lot-owner/manager/vehicle-journey`;
+    ? `https://localhost:7108/api/vehicle/${vehicleId}/vehicle-owner/vehicle-journey${queryParams}`
+    : `https://localhost:7108/api/vehicle/${vehicleId}/lot-owner/manager/vehicle-journey${queryParams}`;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -210,11 +249,11 @@ export default function VehicleJourneyPage() {
     };
 
     if (vehicleId) fetchData();
-  }, [vehicleId]);
+  }, [journeyEndpoint]);
 
   return (
     <div className="min-h-screen bg-gray-50" style={{ fontFamily: "'Inter', sans-serif" }}>
-      <Navbar />
+      {isOwner && <Navbar />}
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         {/* Back button */}
@@ -236,28 +275,6 @@ export default function VehicleJourneyPage() {
             </div>
           </div>
         </div>
-
-        {/* Stats Row */}
-        {!loading && events.length > 0 && (
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
-              <p className="text-2xl font-bold text-gray-900">{events.length}</p>
-              <p className="text-xs text-gray-500 mt-1">Total Events</p>
-            </div>
-            <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
-              <p className="text-2xl font-bold text-blue-600">
-                {events.filter(e => e.images?.length > 0).length}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">With Photos</p>
-            </div>
-            <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
-              <p className="text-2xl font-bold text-purple-600">
-                {events.reduce((sum, e) => sum + (e.images?.length || 0), 0)}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">Total Photos</p>
-            </div>
-          </div>
-        )}
 
         {/* Loading */}
         {loading && (

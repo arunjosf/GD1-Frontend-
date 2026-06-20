@@ -15,6 +15,12 @@ export default function LotOwnerBookingDetailsPage() {
   const [showRejectInput, setShowRejectInput] = useState(false);
   const [fullScreenImage, setFullScreenImage] = useState(null);
 
+  const getImageUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `https://localhost:7108${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
   const fetchBookingDetail = async () => {
     setLoading(true);
     try {
@@ -141,12 +147,9 @@ export default function LotOwnerBookingDetailsPage() {
     <div className="w-full max-w-[1200px] mx-auto animate-fade-in pt-4 pb-16 space-y-4 relative">
       {/* Full Screen Image Modal */}
       {fullScreenImage && (
-        <div 
-          className="fixed top-0 left-0 w-screen h-screen z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 cursor-zoom-out animate-fade-in"
-          onClick={() => setFullScreenImage(null)}
-        >
+        <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-4" onClick={() => setFullScreenImage(null)}>
           <img 
-            src={fullScreenImage} 
+            src={getImageUrl(fullScreenImage)} 
             alt="Full screen preview" 
             className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl cursor-default" 
             onClick={(e) => e.stopPropagation()} 
@@ -302,9 +305,9 @@ export default function LotOwnerBookingDetailsPage() {
               {/* Top row: Vehicle Image and Details */}
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="w-full md:w-1/2 aspect-video bg-gray-50 rounded-2xl p-2 border border-gray-100 overflow-hidden group relative">
-                  {(booking.vehicleImageUrl || booking.arrivalImages?.frontImageUrl || booking.pickupImages?.frontImageUrl) ? (
-                    <div className="w-full h-full cursor-pointer" onClick={() => setFullScreenImage(booking.vehicleImageUrl || booking.arrivalImages?.frontImageUrl || booking.pickupImages?.frontImageUrl)}>
-                      <img src={booking.vehicleImageUrl || booking.arrivalImages?.frontImageUrl || booking.pickupImages?.frontImageUrl} alt="Vehicle" className="w-full h-full object-contain rounded-xl" />
+                  {booking.vehicleImageUrl ? (
+                    <div className="w-full h-full cursor-pointer" onClick={() => setFullScreenImage(booking.vehicleImageUrl)}>
+                      <img src={getImageUrl(booking.vehicleImageUrl)} alt="Vehicle" className="w-full h-full object-contain rounded-xl" />
                       <div className="absolute inset-0 bg-black/0 hover:bg-black/5 transition-colors flex items-center justify-center">
                         <span className="bg-white/90 text-black px-4 py-2 rounded-full text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm shadow-sm">View Full</span>
                       </div>
@@ -344,7 +347,7 @@ export default function LotOwnerBookingDetailsPage() {
                   <div className="bg-gray-50 rounded-2xl p-2 border border-gray-100 aspect-video overflow-hidden group relative">
                     {booking.vehicleRcUrl ? (
                       <div className="w-full h-full cursor-pointer" onClick={() => setFullScreenImage(booking.vehicleRcUrl)}>
-                        <img src={booking.vehicleRcUrl} alt="Vehicle RC" className="w-full h-full object-cover rounded-xl hover:opacity-90 transition-opacity" />
+                        <img src={getImageUrl(booking.vehicleRcUrl)} alt="Vehicle RC" className="w-full h-full object-cover rounded-xl hover:opacity-90 transition-opacity" />
                         <div className="absolute inset-0 bg-black/0 hover:bg-black/5 transition-colors flex items-center justify-center">
                           <span className="bg-white/90 text-black px-4 py-2 rounded-full text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm shadow-sm">View Full</span>
                         </div>
@@ -363,7 +366,7 @@ export default function LotOwnerBookingDetailsPage() {
                   <div className="bg-gray-50 rounded-2xl p-2 border border-gray-100 aspect-video overflow-hidden group relative">
                     {booking.ownerIdProofUrl ? (
                       <div className="w-full h-full cursor-pointer" onClick={() => setFullScreenImage(booking.ownerIdProofUrl)}>
-                        <img src={booking.ownerIdProofUrl} alt="Owner ID Proof" className="w-full h-full object-cover rounded-xl hover:opacity-90 transition-opacity" />
+                        <img src={getImageUrl(booking.ownerIdProofUrl)} alt="Owner ID Proof" className="w-full h-full object-cover rounded-xl hover:opacity-90 transition-opacity" />
                         <div className="absolute inset-0 bg-black/0 hover:bg-black/5 transition-colors flex items-center justify-center">
                           <span className="bg-white/90 text-black px-4 py-2 rounded-full text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm shadow-sm">View Full</span>
                         </div>
@@ -382,9 +385,9 @@ export default function LotOwnerBookingDetailsPage() {
 
           <Section title="Property Details" icon={<MapPin size={20} />}>
             <div className="flex flex-col md:flex-row gap-4 items-stretch">
-              <div className="w-full md:w-2/5 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
+              <div className="w-24 md:w-32 h-full shrink-0 bg-gray-100 relative group overflow-hidden">
                 {booking.propertyImageUrl ? (
-                   <img src={booking.propertyImageUrl} alt={booking.propertyName} className="w-full h-full object-cover min-h-[160px]" />
+                   <img src={getImageUrl(booking.propertyImageUrl)} alt={booking.propertyName} className="w-full h-full object-cover min-h-[160px]" />
                 ) : (
                    <div className="w-full h-full min-h-[160px] flex items-center justify-center">
                       <MapPin className="text-gray-300" size={32} />
