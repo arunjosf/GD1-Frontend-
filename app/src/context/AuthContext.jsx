@@ -78,6 +78,33 @@ export function AuthProvider({ children }) {
         }
 
         if (res?.userId || res?.email) {
+          const token = getToken('AccessToken');
+          let currentRole = null;
+          if (token) {
+            try {
+              const decoded = JSON.parse(atob(token.split('.')[1]));
+              currentRole = parseInt(decoded.roleId, 10);
+            } catch (e) {}
+          }
+          
+          // Compare using roleId (integer) not role (string) to avoid type mismatch
+          const serverRoleId = res.roleId;
+          if (currentRole !== null && serverRoleId !== undefined && currentRole !== serverRoleId) {
+            // Role changed (e.g. application approved) — silently refresh token.
+            // Mark as newly partnered so dashboards can show a welcome toast.
+            const wasUser = currentRole === 1;
+            const isNowPartner = serverRoleId === 2 || serverRoleId === 6;
+            if (wasUser && isNowPartner) {
+              localStorage.setItem('gd1_newly_partnered', 'true');
+            }
+            await authApi.refresh().catch(() => null);
+            // Re-fetch user info with the potentially new token
+            const updatedRes = await authApi.me().catch(() => null);
+            if (updatedRes?.userId || updatedRes?.email) {
+              res = updatedRes;
+            }
+          }
+
           setUser(res || true);
           localStorage.setItem('isAuthenticated', 'true');
         } else {

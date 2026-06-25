@@ -9,7 +9,8 @@ import {
   Settings,
   LogOut,
   FileText,
-  Truck
+  Truck,
+  UserCheck
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -48,7 +49,7 @@ export default function AdminSidebar({ isMobileOpen, setIsMobileOpen }) {
 
         if (scRes && scRes.ok) {
           const result = await scRes.json();
-          pendingCount += (result.data || []).filter(app => app.status === 'Pending').length;
+          pendingCount += (result.data || []).filter(app => app.status === 'PendingReview' || app.status === 'Pending').length;
         }
 
         setAppCount(pendingCount);
@@ -73,7 +74,8 @@ export default function AdminSidebar({ isMobileOpen, setIsMobileOpen }) {
     { name: 'Bookings', path: '/admin/bookings', icon: <Calendar size={20} />, count: pendingBookingCount },
     { name: 'Applications', path: '/admin/applications', icon: <FileText size={20} />, count: appCount },
     { name: 'Partners', path: '/admin/partners', icon: <Building2 size={20} /> },
-    { name: 'Users', path: '/admin/users', icon: <Users size={20} /> }
+    { name: 'Users', path: '/admin/users', icon: <Users size={20} /> },
+    { name: 'Agents', path: '/admin/agents', icon: <UserCheck size={20} /> }
   ];
 
   return (

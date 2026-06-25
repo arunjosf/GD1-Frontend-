@@ -368,15 +368,6 @@ export default function UserBookingsPage() {
                               Track Service
                             </button>
                          )}
-                         {isInLot && !booking.hasActiveServiceRequest && (
-                           <button 
-                              onClick={() => navigate(`/stored-vehicle/${booking.id}`)}
-                              className="flex-1 sm:flex-none px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[13px] shadow-md transition-all flex items-center justify-center gap-1.5"
-                            >
-                              <Car size={14} />
-                              View Dashboard
-                            </button>
-                         )}
                          {isCompleted && (
                            <button 
                               onClick={() => navigate(`/vehicle-journey/${booking.vehicleId}`, { state: { bookingId: booking.id } })}

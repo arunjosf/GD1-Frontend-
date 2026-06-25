@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   DollarSign, 
   Calendar, 
@@ -27,8 +27,34 @@ export default function SCDashboardPage() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const welcomeShown = useRef(false);
+
   useEffect(() => {
     fetchStats();
+
+    // Show once-only welcome toast after application acceptance
+    if (!welcomeShown.current && localStorage.getItem('gd1_newly_partnered') === 'true') {
+      welcomeShown.current = true;
+      localStorage.removeItem('gd1_newly_partnered');
+      setTimeout(() => {
+        toast.success(
+          '🎉 Congratulations! You are now partnered with GD1. Welcome to your Service Center dashboard!',
+          {
+            duration: 7000,
+            style: {
+              background: 'linear-gradient(135deg, #1e3a5f, #0f6cbd)',
+              color: '#fff',
+              fontWeight: '600',
+              fontSize: '14px',
+              borderRadius: '12px',
+              padding: '16px 20px',
+              maxWidth: '420px',
+            },
+            iconTheme: { primary: '#fbbf24', secondary: '#1e3a5f' },
+          }
+        );
+      }, 800);
+    }
   }, []);
 
   const fetchStats = async () => {

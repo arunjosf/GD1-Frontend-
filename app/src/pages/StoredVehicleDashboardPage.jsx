@@ -78,6 +78,8 @@ export default function StoredVehicleDashboardPage() {
     }
   };
 
+   
+
   const handleRequestImage = async () => {
     try {
       if (!booking?.vehicleId) return;
@@ -295,7 +297,7 @@ export default function StoredVehicleDashboardPage() {
 
                  <div className="flex flex-col gap-3 mt-auto">
                    <button 
-                     onClick={() => navigate(`/track-pickup/${booking.id}`)}
+                      onClick={() => navigate(`/vehicle-journey/${booking.vehicleId}`, { state: { bookingId: booking.id } })}
                      className="w-full py-3.5 bg-gray-100 hover:bg-gray-200 text-[#1d1d1f] rounded-[1rem] font-semibold flex items-center justify-center gap-2 transition-colors border border-transparent text-sm"
                    >
                      View Vehicle Journey <ArrowRight size={18} />
@@ -322,10 +324,12 @@ export default function StoredVehicleDashboardPage() {
                   <p className="text-[13px] font-medium text-[#86868b] mb-2">{booking.lotOwnerPhone || "Contact Not Available"}</p>
                   
                   <div className="flex items-center justify-center gap-3 w-full mt-auto">
-                      <button className="flex-1 py-3 rounded-[1rem] bg-gray-100 hover:bg-gray-200 text-[#1d1d1f] font-semibold flex items-center justify-center transition-colors text-sm gap-2">
+                      <button 
+                      className="flex-1 py-3 rounded-[1rem] bg-gray-100 hover:bg-gray-200 text-[#1d1d1f] font-semibold flex items-center justify-center transition-colors text-sm gap-2">
                           <Phone size={16} /> Call
                       </button>
-                      <button className="flex-1 py-3 rounded-[1rem] bg-gray-100 hover:bg-gray-200 text-[#1d1d1f] font-semibold flex items-center justify-center transition-colors text-sm gap-2">
+                      <button 
+                      className="flex-1 py-3 rounded-[1rem] bg-gray-100 hover:bg-gray-200 text-[#1d1d1f] font-semibold flex items-center justify-center transition-colors text-sm gap-2">
                           <MessageSquare size={16} /> Chat  
                       </button>
                   </div>

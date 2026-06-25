@@ -594,8 +594,8 @@ export default function ManagerPickupDetailsPage() {
                     showArrivalAtVehicle ? 'text-amber-800' : 'text-green-800'
                   }`}>
                     {showArrivalAtVehicle
-                      ? '📍 You\'ve reached the vehicle location!'
-                      : '🏠 You\'ve reached the garage!'}
+                      ? ' You\'ve reached the vehicle location!'
+                      : ' You\'ve reached the garage!'}
                   </p>
                   <p className={`text-[10px] sm:text-xs mt-0.5 font-semibold ${
                     showArrivalAtVehicle ? 'text-amber-600' : 'text-green-600'
@@ -962,8 +962,8 @@ export default function ManagerPickupDetailsPage() {
                       showArrivalAtVehicle ? 'text-amber-800' : 'text-green-800'
                     }`}>
                       {showArrivalAtVehicle
-                        ? '📍 You\'ve reached the vehicle location!'
-                        : '🏠 You\'ve reached the garage!'}
+                        ? ' You\'ve reached the vehicle location!'
+                        : ' You\'ve reached the garage!'}
                     </p>
                     <p className={`text-xs mt-0.5 font-semibold ${
                       showArrivalAtVehicle ? 'text-amber-600' : 'text-green-600'
@@ -988,7 +988,7 @@ export default function ManagerPickupDetailsPage() {
                         className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-md text-sm"
                       >
                         <MapPin size={16} fill="currentColor" />
-                        Manager Arrived at Vehicle / Verify OTP
+                       Arrived at Vehicle & Verify OTP
                       </button>
                       <button
                         onClick={() => startNavigation(pickup)}

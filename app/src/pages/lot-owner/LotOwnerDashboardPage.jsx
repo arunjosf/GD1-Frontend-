@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { TrendingUp, TrendingDown, ArrowUpRight, User, Award, CalendarDays, BarChart2 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
 import { getToken } from '../../api/auth';
 import {
   Chart as ChartJS,
@@ -14,6 +13,7 @@ import {
   Filler,
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
+import { toast } from 'react-hot-toast';
 
 ChartJS.register(
   CategoryScale,
@@ -31,8 +31,34 @@ export default function LotOwnerDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [graphType, setGraphType] = useState('Monthly'); // 'Monthly' or 'Yearly'
 
+  const welcomeShown = useRef(false);
+
   useEffect(() => {
     fetchMetrics();
+
+    // Show once-only welcome toast after garage application acceptance
+    if (!welcomeShown.current && localStorage.getItem('gd1_newly_partnered') === 'true') {
+      welcomeShown.current = true;
+      localStorage.removeItem('gd1_newly_partnered');
+      setTimeout(() => {
+        toast.success(
+          '🎉 Congratulations! Your garage application was accepted. Welcome to GD1 as a Lot Owner!',
+          {
+            duration: 7000,
+            style: {
+              background: 'linear-gradient(135deg, #1a3d2b, #16a34a)',
+              color: '#fff',
+              fontWeight: '600',
+              fontSize: '14px',
+              borderRadius: '12px',
+              padding: '16px 20px',
+              maxWidth: '420px',
+            },
+            iconTheme: { primary: '#fbbf24', secondary: '#1a3d2b' },
+          }
+        );
+      }, 800);
+    }
   }, []);
 
   const fetchMetrics = async () => {

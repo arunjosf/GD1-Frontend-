@@ -36,7 +36,13 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="pt-8 mt-8 border-t border-gray-100">
+            <div className="pt-8 mt-8 border-t border-gray-100 flex flex-col sm:flex-row gap-4">
+              <button 
+                onClick={() => navigate('/track-application')}
+                className="w-full sm:w-auto px-8 py-3 bg-[#111] text-white hover:bg-[#333] rounded-full text-[13px] font-bold tracking-widest uppercase transition-colors"
+              >
+                Track Applications
+              </button>
               <button 
                 onClick={handleLogout}
                 className="w-full sm:w-auto px-8 py-3 bg-red-50 text-red-600 hover:bg-red-100 rounded-full text-[13px] font-bold tracking-widest uppercase transition-colors"

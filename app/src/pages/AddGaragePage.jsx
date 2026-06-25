@@ -3,10 +3,12 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { Maximize2, Loader2, X } from 'lucide-react';
+import { Maximize2, Loader2, X, FileText } from 'lucide-react';
+import { useRazorpay } from 'react-razorpay';
 
 export default function AddGaragePage() {
   const navigate = useNavigate();
+  const { Razorpay } = useRazorpay();
   const [loading, setLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [expandedImage, setExpandedImage] = useState(null);
@@ -120,91 +122,129 @@ export default function AddGaragePage() {
     setShowTerms(true);
   };
 
- const confirmAndSubmit = async () => {
-  if (!termsAccepted) {
-    toast.error('You must accept the Terms and Conditions to proceed.');
-    return;
-  }
+  const confirmAndSubmit = async () => {
+    if (!termsAccepted) {
+      toast.error('You must accept the Terms and Conditions to proceed.');
+      return;
+    }
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    // Map frontend state to backend DTO property names
-    const payload = {
-      ...form,
-      contactEmail: form.email,
-      phoneNumber: form.phone,
-      addressLine: form.address,
-      postalCode: form.zip,
-      country: 'India'
-    };
+      const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('AccessToken='));
+      const token = tokenCookie ? tokenCookie.split('=')[1] : null;
 
-    const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('AccessToken='));
-    const token = tokenCookie ? tokenCookie.split('=')[1] : null;
+      // 1. Fetch Razorpay Config
+      const configRes = await fetch('https://localhost:7108/api/Payment/config');
+      if (!configRes.ok) throw new Error('Could not fetch payment configuration.');
+      const { keyId } = await configRes.json();
 
-    const response = await fetch(
-      'https://localhost:7108/api/Franchise/apply',
-      {
+      // 2. Create Razorpay Order
+      const orderRes = await fetch('https://localhost:7108/api/Franchise/create-application-order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify(payload)
-      }
-    );
+        }
+      });
+      if (!orderRes.ok) throw new Error('Could not create payment order.');
+      const { orderId } = await orderRes.json();
 
-    let data = {};
-    const text = await response.text();
-    if (text) {
-      try {
-        data = JSON.parse(text);
-      } catch {
-        // Not JSON
-      }
-    }
+      // 3. Setup Razorpay Options
+      const options = {
+        key: keyId,
+        amount: 200000, // 2000 INR
+        currency: "INR",
+        name: "Grand Auto Depot",
+        description: "Application Fee",
+        order_id: orderId,
+        handler: async function (response) {
+          try {
+            // Map frontend state to backend DTO property names
+            const payload = {
+              ...form,
+              pricePerDay: Number(form.pricePerDay) || 0,
+              slots: form.slots.map(s => ({
+                ...s,
+                squareFeet: parseFloat(s.squareFeet) || 0,
+                heightFeet: parseFloat(s.heightFeet) || 0
+              })),
+              contactEmail: form.email,
+              phoneNumber: form.phone,
+              addressLine: form.address,
+              postalCode: form.zip,
+              country: 'India',
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature
+            };
 
-    if (!response.ok) {
-      // Try to parse validation errors if any
-      let errorMsg = data.message || 'Submission failed';
-      if (data.errors) {
-         errorMsg = Object.values(data.errors).flat().join(', ');
-      } else if (response.status === 401) {
-         errorMsg = 'Unauthorized: Please log in again.';
-      } else if (response.status === 403) {
-         errorMsg = 'Forbidden: You do not have permission.';
-      }
-      throw new Error(errorMsg);
-    }
+            const applyRes = await fetch('https://localhost:7108/api/Franchise/apply', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+              },
+              body: JSON.stringify(payload)
+            });
 
-    toast((t) => (
-      <div className="flex flex-col gap-3 min-w-[240px]">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5"/></svg>
-          </div>
-          <span className="font-semibold text-[14px] text-gray-900">Application submitted!</span>
-        </div>
-        <button
-          onClick={() => {
-            toast.dismiss(t.id);
+            if (!applyRes.ok) {
+              const errText = await applyRes.text();
+              try {
+                const errData = JSON.parse(errText);
+                throw new Error(errData.message || 'Application submission failed after payment.');
+              } catch {
+                throw new Error(errText || 'Application submission failed after payment.');
+              }
+            }
+
+            const data = await applyRes.json();
+            if (!data.success) {
+              throw new Error(data.message || 'Application submission failed after payment.');
+            }
+
+            toast.success('Application submitted and fee paid successfully!');
             navigate('/track-application');
-          }}
-          className="w-full px-4 py-2 mt-1 bg-[#111] hover:bg-[#222] text-white rounded-lg text-[12px] font-bold tracking-widest uppercase transition-all shadow-md"
-        >
-          Track Application
-        </button>
-      </div>
-    ), { duration: 8000 });
+          } catch (err) {
+            toast.error(err.message || 'An error occurred during submission.');
+            setLoading(false);
+            setShowTerms(false);
+          }
+        },
+        prefill: {
+          name: form.ownerName,
+          email: form.email,
+          contact: form.phone
+        },
+        theme: {
+          color: "#E53E3E",
+        },
+        modal: {
+          ondismiss: function() {
+            setLoading(false);
+            setShowTerms(false);
+            toast.error("Payment was cancelled.");
+          }
+        }
+      };
 
-    navigate('/');
-  } catch (err) {
-    toast.error(err.message);
-  } finally {
-    setLoading(false);
-    setShowTerms(false);
-  }
-};
+      // 4. Open Razorpay Checkout
+      const rzp1 = new Razorpay(options);
+      
+      rzp1.on("payment.failed", function (response) {
+        toast.error("Payment Failed: " + response.error.description);
+        setLoading(false);
+        setShowTerms(false);
+      });
+
+      rzp1.open();
+
+    } catch (err) {
+      toast.error(err.message || 'An error occurred. Please try again.');
+      setLoading(false);
+      setShowTerms(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#ebeced] font-sans">
@@ -354,21 +394,21 @@ export default function AddGaragePage() {
                       <div>
                         <label className="block text-[10px] font-bold tracking-widest text-[#555] mb-1.5 uppercase">Slot Image</label>
                         {slot.imageUrl ? (
-                          <div className="flex items-center justify-between bg-white px-2 py-2 rounded-lg border border-gray-300 shadow-sm truncate">
-                            <span className="text-[11px] font-medium text-gray-700 truncate">Attached</span>
-                            <div className="flex items-center gap-2 ml-2">
-                              <button type="button" onClick={() => setExpandedImage(slot.imageUrl)} className="text-gray-400 hover:text-black transition-colors" title="Preview">
-                                <Maximize2 size={13} />
+                          <div className="relative h-[80px] rounded-lg border border-gray-200 overflow-hidden group">
+                            <img src={slot.imageUrl} alt="Slot" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-3">
+                              <button type="button" onClick={() => setPreviewUrl(slot.imageUrl)} className="text-white hover:text-blue-400 bg-black/50 p-1.5 rounded-full transition-colors" title="Preview">
+                                <Maximize2 size={14} />
                               </button>
-                              <button type="button" onClick={() => updateSlot(idx, 'imageUrl', '')} className="text-gray-400 hover:text-red-500 transition-colors" title="Remove">
-                                <X size={13} />
+                              <button type="button" onClick={() => updateSlot(idx, 'imageUrl', '')} className="text-white hover:text-red-400 bg-black/50 p-1.5 rounded-full transition-colors" title="Remove">
+                                <X size={14} />
                               </button>
                             </div>
                           </div>
                         ) : (
-                          <div className="relative h-[34px]">
+                          <div className="relative h-[80px]">
                             <input type="file" accept="image/*" onChange={e => handleFileUpload(e, `slotImage_${idx}`)} disabled={uploading[`slotImage_${idx}`]} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                            <div className="h-full bg-white border border-gray-200 rounded-lg flex items-center justify-center text-[12px] text-[#555] hover:bg-gray-50 transition-colors">
+                            <div className="h-full bg-white border border-gray-200 border-dashed rounded-lg flex flex-col items-center justify-center text-[12px] text-[#555] hover:bg-gray-50 transition-colors">
                               {uploading[`slotImage_${idx}`] ? (
                                 <Loader2 size={14} className="animate-spin text-gray-400" />
                               ) : 'Upload Image'}
@@ -424,19 +464,26 @@ export default function AddGaragePage() {
                     <label className="text-[11px] font-bold tracking-widest text-[#111] uppercase">{doc.label} *</label>
                     
                     {form[doc.name] ? (
-                      <div className="flex items-center justify-between bg-white px-3 py-2 rounded-lg text-[12px] font-medium border border-gray-300 shadow-sm mt-1">
-                        <div className="flex items-center gap-2 truncate min-w-0">
-                          <span className="truncate text-gray-700">File attached</span>
-                          <button type="button" onClick={() => setExpandedImage(form[doc.name])} className="text-gray-400 hover:text-black transition-colors shrink-0" title="Preview">
-                            <Maximize2 size={14} />
+                      <div className="relative h-[120px] rounded-xl border border-gray-200 overflow-hidden group mt-1">
+                        {form[doc.name].toLowerCase().includes('.pdf') ? (
+                          <div className="w-full h-full bg-gray-50 flex flex-col items-center justify-center">
+                            <FileText size={28} className="text-gray-400 mb-1" />
+                            <span className="text-[11px] font-medium text-gray-500">PDF Document</span>
+                          </div>
+                        ) : (
+                          <img src={form[doc.name]} alt={doc.label} className="w-full h-full object-cover" />
+                        )}
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-4">
+                          <button type="button" onClick={() => setPreviewUrl(form[doc.name])} className="text-white hover:text-blue-400 bg-black/50 p-2 rounded-full transition-colors" title="Expand">
+                            <Maximize2 size={16} />
+                          </button>
+                          <button type="button" onClick={() => setForm(f => ({ ...f, [doc.name]: '' }))} className="text-white hover:text-red-500 bg-black/50 p-2 rounded-full transition-colors" title="Remove">
+                            <X size={16} />
                           </button>
                         </div>
-                        <button type="button" onClick={() => setForm(f => ({ ...f, [doc.name]: '' }))} className="text-gray-400 hover:text-red-500 font-bold ml-2 shrink-0 transition-colors" title="Remove">
-                          <X size={14} />
-                        </button>
                       </div>
                     ) : (
-                      <div className="relative mt-1">
+                      <div className="relative mt-1 h-[120px]">
                         <input 
                           type="file" 
                           accept={doc.accept}
@@ -444,7 +491,7 @@ export default function AddGaragePage() {
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                           disabled={uploading[doc.name]}
                         />
-                        <div className={`flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg px-4 py-6 text-center transition-colors ${uploading[doc.name] ? 'bg-gray-50' : 'hover:bg-gray-50 hover:border-black'}`}>
+                        <div className={`w-full h-full flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg text-center transition-colors ${uploading[doc.name] ? 'bg-gray-50' : 'hover:bg-gray-50 hover:border-black'}`}>
                           {uploading[doc.name] ? (
                             <div className="flex flex-col items-center gap-2">
                               <Loader2 size={18} className="animate-spin text-gray-400" />
@@ -467,7 +514,7 @@ export default function AddGaragePage() {
                     Other Images (Optional)
                     {form.otherImageUrls.length > 0 && <span className="text-[#2563eb]">{form.otherImageUrls.length} uploaded</span>}
                   </label>
-                  <div className="relative mt-1">
+                  <div className="relative mt-1 h-[120px]">
                     <input 
                       type="file" 
                       accept="image/*"
@@ -475,7 +522,7 @@ export default function AddGaragePage() {
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       disabled={uploading['otherImageUrls']}
                     />
-                    <div className={`flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg px-4 py-6 text-center transition-colors ${uploading['otherImageUrls'] ? 'bg-gray-50' : 'hover:bg-gray-50 hover:border-black'}`}>
+                    <div className={`w-full h-full flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg text-center transition-colors ${uploading['otherImageUrls'] ? 'bg-gray-50' : 'hover:bg-gray-50 hover:border-black'}`}>
                       {uploading['otherImageUrls'] ? (
                         <div className="flex flex-col items-center gap-2">
                           <Loader2 size={18} className="animate-spin text-gray-400" />
@@ -491,7 +538,7 @@ export default function AddGaragePage() {
                   {form.otherImageUrls.length > 0 && (
                     <div className="flex gap-2 mt-2 flex-wrap">
                       {form.otherImageUrls.map((url, i) => (
-                         <div key={i} className="w-12 h-12 rounded bg-gray-200 overflow-hidden border border-gray-300 relative group cursor-pointer" onClick={() => setExpandedImage(url)}>
+                         <div key={i} className="w-12 h-12 rounded bg-gray-200 overflow-hidden border border-gray-300 relative group cursor-pointer" onClick={() => setPreviewUrl(url)}>
                            <img src={url} alt={`Extra ${i}`} className="w-full h-full object-cover" />
                            <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                              <span className="text-white text-[9px] font-semibold">View</span>

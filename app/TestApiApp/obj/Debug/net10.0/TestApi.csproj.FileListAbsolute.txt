@@ -1,0 +1,5 @@
+E:\React\GD1(Frontend)\app\TestApiApp\obj\Debug\net10.0\TestApi.GeneratedMSBuildEditorConfig.editorconfig
+E:\React\GD1(Frontend)\app\TestApiApp\obj\Debug\net10.0\TestApi.AssemblyInfoInputs.cache
+E:\React\GD1(Frontend)\app\TestApiApp\obj\Debug\net10.0\TestApi.AssemblyInfo.cs
+E:\React\GD1(Frontend)\app\TestApiApp\obj\Debug\net10.0\TestApi.csproj.CoreCompileInputs.cache
+E:\React\GD1(Frontend)\app\TestApiApp\obj\Debug\net10.0\TestApi.sourcelink.json

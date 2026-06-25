@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { CallProvider } from './context/CallContext';
 import { getToken } from './api/auth';
@@ -9,6 +9,7 @@ import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import HomePage from './pages/HomePage';
 import AddGaragePage from './pages/AddGaragePage';
+import AddServiceCenterPage from './pages/AddServiceCenterPage';
 import ProfilePage from './pages/ProfilePage';
 import AddVehiclePage from './pages/AddVehiclePage';
 import TrackApplicationPage from './pages/TrackApplicationPage';
@@ -34,6 +35,10 @@ import AdminPartnersPage from './pages/admin/AdminPartnersPage';
 import AdminGarageDetailsPage from './pages/admin/AdminGarageDetailsPage';
 import AdminServiceCenterDetailsPage from './pages/admin/AdminServiceCenterDetailsPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
+import AdminAgentsPage from './pages/admin/AdminAgentsPage';
+import AdminGarageApplicationsPage from './pages/admin/AdminGarageApplicationsPage';
+import AdminServiceCenterApplicationsPage from './pages/admin/AdminServiceCenterApplicationsPage';
+import AdminAssignAgentPage from './pages/admin/AdminAssignAgentPage';
 import LotOwnerBookingsPage from './pages/lot-owner/LotOwnerBookingsPage';
 import LotOwnerBookingDetailsPage from './pages/lot-owner/LotOwnerBookingDetailsPage';
 import LotOwnerPickupDetailsPage from './pages/lot-owner/LotOwnerPickupDetailsPage';
@@ -74,6 +79,11 @@ import PreRideConditionPage from './pages/lot-manager/PreRideConditionPage';
 import GarageArrivalConditionPage from './pages/lot-manager/GarageArrivalConditionPage';
 import { NavigationProvider } from './context/NavigationContext';
 import VehicleJourneyPage from './pages/vehicle-owner/VehicleJourneyPage';
+
+import AgentLayout from './components/AgentLayout';
+import AgentAssignmentsPage from './pages/agent/AgentAssignmentsPage';
+import AgentSubmitReportPage from './pages/agent/AgentSubmitReportPage';
+import AgentPropertyDetailsPage from './pages/agent/AgentPropertyDetailsPage';
 
 
 class ErrorBoundary extends Component {
@@ -117,6 +127,7 @@ function getUserRole() {
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
+  const location = useLocation();
   if (loading) return null;
   
   if (!isAuthenticated) return <Navigate to="/login" replace />;
@@ -128,12 +139,16 @@ function ProtectedRoute({ children }) {
   if (role === 2) {
     return <Navigate to="/lot-owner/dashboard" replace />;
   }
-  if (role === 4) {
-    return <Navigate to="/lot-manager/dashboard" replace />;
-  }
   if (role === 6) {
     return <Navigate to="/service-center/dashboard" replace />;
   }
+  if (role === 4) {
+    return <Navigate to="/lot-manager/dashboard" replace />;
+  }
+  if (role === 3) {
+    return <Navigate to="/agent/assignments" replace />;
+  }
+  // Role 1 (User) and 7 (Driver) can proceed
   
   return children;
 }
@@ -178,6 +193,16 @@ function ManagerRoute({ children }) {
   return role === 4 ? children : <Navigate to="/home" replace />;
 }
 
+function AgentRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) return null;
+  
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  
+  const role = getUserRole();
+  return role === 3 ? children : <Navigate to="/home" replace />;
+}
+
 function PublicRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
   if (loading) return null;
@@ -188,6 +213,7 @@ function PublicRoute({ children }) {
     if (role === 2) return <Navigate to="/lot-owner/dashboard" replace />;
     if (role === 4) return <Navigate to="/lot-manager/dashboard" replace />;
     if (role === 6) return <Navigate to="/service-center/dashboard" replace />;
+    if (role === 3) return <Navigate to="/agent/assignments" replace />;
     return <Navigate to="/home" replace />;
   }
   
@@ -223,11 +249,15 @@ export default function App() {
         }>
           <Route path="dashboard" element={<AdminDashboardPage />} />
           <Route path="applications" element={<AdminApplicationsPage />} />
+          <Route path="applications/garage" element={<AdminGarageApplicationsPage />} />
+          <Route path="applications/garage/:id/assign" element={<AdminAssignAgentPage />} />
+          <Route path="applications/service-center" element={<AdminServiceCenterApplicationsPage />} />
           <Route path="bookings" element={<AdminBookingsPage />} />
           <Route path="partners" element={<AdminPartnersPage />} />
           <Route path="partners/garage/:id" element={<AdminGarageDetailsPage />} />
           <Route path="partners/service-center/:id" element={<AdminServiceCenterDetailsPage />} />
           <Route path="users" element={<AdminUsersPage />} />
+          <Route path="agents" element={<AdminAgentsPage />} />
           <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
         </Route>
 
@@ -282,6 +312,18 @@ export default function App() {
           <Route path="*" element={<Navigate to="/lot-manager/dashboard" replace />} />
         </Route>
 
+        {/* Agent Routes */}
+        <Route path="/agent" element={
+          <AgentRoute>
+            <AgentLayout />
+          </AgentRoute>
+        }>
+          <Route path="assignments" element={<AgentAssignmentsPage />} />
+          <Route path="assignments/:id/details" element={<AgentPropertyDetailsPage />} />
+          <Route path="assignments/:id/report" element={<AgentSubmitReportPage />} />
+          <Route path="*" element={<Navigate to="/agent/assignments" replace />} />
+        </Route>
+
 
         {/* Service Center Routes */}
         <Route path="/service-center" element={
@@ -303,6 +345,7 @@ export default function App() {
             <HomePage />
           </ProtectedRoute>
         } />
+
         <Route path="/search" element={
           <ProtectedRoute>
             <SearchPage />
@@ -336,6 +379,11 @@ export default function App() {
         <Route path="/add-garage" element={
           <ProtectedRoute>
             <AddGaragePage />
+          </ProtectedRoute>
+        } />
+        <Route path="/add-service-center" element={
+          <ProtectedRoute>
+            <AddServiceCenterPage />
           </ProtectedRoute>
         } />
         <Route path="/profile" element={

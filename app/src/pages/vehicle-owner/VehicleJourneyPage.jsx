@@ -231,16 +231,58 @@ export default function VehicleJourneyPage() {
     ? `https://localhost:7108/api/vehicle/${vehicleId}/vehicle-owner/vehicle-journey${queryParams}`
     : `https://localhost:7108/api/vehicle/${vehicleId}/lot-owner/manager/vehicle-journey${queryParams}`;
 
-  useEffect(() => {
+    useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        // 1. Fetch Journey Events
         const res = await fetch(journeyEndpoint, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('Failed to load journey events.');
         const result = await res.json();
-        setEvents(result.data || result || []);
+        let fetchedEvents = result.data || result || [];
+
+        // 2. Fetch Booking Data to inject missing Service events
+        if (bookingId) {
+          try {
+             const bRes = await fetch(`https://localhost:7108/${bookingId}booking-By-Id`, {
+               headers: { 'Authorization': `Bearer ${token}` }
+             });
+             if (bRes.ok) {
+                const bResult = await bRes.json();
+                const bData = bResult.data || bResult;
+                
+                // Inject 'Service Recommended' if the manager recommended it
+                if (bData.hasServiceRecommendation) {
+                   fetchedEvents.push({
+                     eventId: 'srv-rec-' + Date.now(),
+                     eventType: 'Service Recommended',
+                     createdAt: bData.updatedAt || new Date().toISOString(),
+                     managerRemarks: bData.managerServiceRemarks,
+                     description: 'A vehicle service has been recommended by the manager.'
+                   });
+                }
+                
+                // Inject 'Service Completed' if there is a last service report
+                if (bData.lastServiceReportDate) {
+                   fetchedEvents.push({
+                     eventId: 'srv-done-' + Date.now(),
+                     eventType: 'Service Completed',
+                     createdAt: bData.lastServiceReportDate,
+                     description: `Garage: ${bData.lastServiceCenterName || 'Unknown'}\nCost: ₹${bData.lastServiceCost || 0}\nNotes: ${bData.lastServiceNotes || 'None'}`
+                   });
+                }
+             }
+          } catch(e) { 
+             console.error("Failed to fetch booking for service details", e); 
+          }
+        }
+
+        // 3. Sort all events chronologically (oldest first) so the injected ones fit perfectly
+        fetchedEvents.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        
+        setEvents(fetchedEvents);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -249,7 +291,7 @@ export default function VehicleJourneyPage() {
     };
 
     if (vehicleId) fetchData();
-  }, [journeyEndpoint]);
+  }, [journeyEndpoint, bookingId, token, vehicleId]);
 
   return (
     <div className="min-h-screen bg-gray-50" style={{ fontFamily: "'Inter', sans-serif" }}>
