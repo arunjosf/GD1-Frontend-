@@ -50,6 +50,8 @@ import OwnerServicesPage from './pages/OwnerServicesPage';
 import MyVehiclesPage from './pages/MyVehiclesPage';
 import LotOwnerVehiclesPage from './pages/lot-owner/LotOwnerVehiclesPage';
 import LotOwnerVehicleDetailsPage from './pages/lot-owner/LotOwnerVehicleDetailsPage';
+import LotOwnerSelfDropsPage from './pages/lot-owner/LotOwnerSelfDropsPage';
+import LotOwnerSelfDropDetailsPage from './pages/lot-owner/LotOwnerSelfDropDetailsPage';
 
 import ServiceCenterLayout from './layouts/ServiceCenterLayout';
 import SCDashboardPage from './pages/service-center/SCDashboardPage';
@@ -77,6 +79,9 @@ import ManagerPickupDetailsPage from './pages/lot-manager/ManagerPickupDetailsPa
 import ManagerArrivedPage from './pages/lot-manager/ManagerArrivedPage';
 import PreRideConditionPage from './pages/lot-manager/PreRideConditionPage';
 import GarageArrivalConditionPage from './pages/lot-manager/GarageArrivalConditionPage';
+import ManagerSelfDropsPage from './pages/lot-manager/ManagerSelfDropsPage';
+import ManagerSelfDropDetailsPage from './pages/lot-manager/ManagerSelfDropDetailsPage';
+import ManagerStartStoringPage from './pages/lot-manager/ManagerStartStoringPage';
 import { NavigationProvider } from './context/NavigationContext';
 import VehicleJourneyPage from './pages/vehicle-owner/VehicleJourneyPage';
 
@@ -273,6 +278,8 @@ export default function App() {
           <Route path="bookings/:id" element={<LotOwnerBookingDetailsPage />} />
           <Route path="pickups" element={<LotOwnerPickupsPage />} />
           <Route path="pickup/:id" element={<LotOwnerPickupDetailsPage />} />
+          <Route path="self-drops" element={<LotOwnerSelfDropsPage />} />
+          <Route path="self-drops/:id" element={<LotOwnerSelfDropDetailsPage />} />
           <Route path="vehicles" element={<LotOwnerVehiclesPage />} />
           <Route path="payments" element={<LotOwnerPaymentsPage />} />
           <Route path="services" element={<LotOwnerServicesPage />} />
@@ -293,6 +300,9 @@ export default function App() {
         }>
           <Route path="dashboard" element={<ManagerDashboardPage />} />
           <Route path="pickups" element={<ManagerPickupsPage />} />
+          <Route path="self-drops" element={<ManagerSelfDropsPage />} />
+          <Route path="self-drops/:id" element={<ManagerSelfDropDetailsPage />} />
+          <Route path="self-drops/:id/start-storing" element={<ManagerStartStoringPage />} />
 
           <Route path="vehicles" element={<ManagerVehiclesPage />} />
           <Route path="services" element={<ManagerServicesPage />} />

@@ -286,7 +286,11 @@ export default function PickupOptionsPage() {
             const verifyData = await verifyRes.json();
             if (verifyRes.ok && verifyData.success) {
               toast.success('Payment successful! Booking confirmed.');
-              setIsSuccess(true);
+              if (selectedOption === 'self') {
+                navigate('/my-bookings');
+              } else {
+                setIsSuccess(true);
+              }
             } else {
               toast.error('Payment verification failed.');
             }

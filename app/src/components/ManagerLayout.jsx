@@ -12,7 +12,8 @@ import {
   X,
   Maximize2,
   Menu,
-  Bell
+  Bell,
+  MapPin
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -187,6 +188,7 @@ export default function ManagerLayout() {
   const menuItems = [
     { path: '/lot-manager/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/lot-manager/pickups', icon: Truck, label: 'Pickups', badge: metrics?.pendingPickupsCount },
+    { path: '/lot-manager/self-drops', icon: MapPin, label: 'Self Drops' },
     { path: '/lot-manager/vehicles', icon: Car, label: 'Vehicles' },
     { path: '/lot-manager/services', icon: Wrench, label: 'Services' },
     { 

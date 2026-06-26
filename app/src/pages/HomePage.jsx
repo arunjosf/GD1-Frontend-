@@ -156,9 +156,32 @@ export default function HomePage() {
   const [isTyping, setIsTyping] = useState(false);
   const isSelecting = useRef(false);
   const cityRef = useRef(null);
+  
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  // Placeholder Typing Effect
+  const fullPlaceholder = "City, area, or location...";
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  
+  useEffect(() => {
+    if (city.length > 0 || isSearchFocused) return;
+    const interval = setInterval(() => {
+      setPlaceholderIndex((prev) => (prev + 1) % (fullPlaceholder.length + 10)); // +10 for pause
+    }, 150);
+    return () => clearInterval(interval);
+  }, [city, isSearchFocused]);
+  
+  const displayPlaceholder = city.length > 0 || isSearchFocused ? fullPlaceholder : fullPlaceholder.slice(0, Math.min(placeholderIndex, fullPlaceholder.length)) + "|";
 
   const [showCal, setShowCal] = useState(false);
   const calRef = useRef(null);
+  
+  const searchBarRef = useRef(null);
+  const handleSearchFocus = () => {
+    if (searchBarRef.current) {
+      searchBarRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
 
   // Intersection observer for steps animation
   const stepsRef = useRef(null);
@@ -414,36 +437,87 @@ export default function HomePage() {
   const formatDate = (d) => d ? `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}` : '';
 
   return (
-    <div className="min-h-screen bg-[#ebeced] font-sans">
+    <div className="min-h-screen bg-[#FFFFFE] font-sans">
       <Navbar />
 
       {/* ── HERO ── */}
-      <section className="relative z-30 w-full min-h-screen flex flex-col items-center justify-center pt-10">
-        {/* Atmospheric gradient background */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-0" style={{
-            background: 'radial-gradient(ellipse 80% 60% at 50% 30%, rgba(37,99,235,0.12) 0%, transparent 70%), #ebeced'
-          }} />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-blue-500/[0.06] rounded-full blur-[120px]" />
+      <section className="relative w-full min-h-[90vh] bg-[#FFFFFE] pt-28 pb-12 px-[4vw] flex flex-col justify-between z-30">
+        
+        {/* Top Header Row */}
+        <div className="relative z-20 flex flex-col lg:flex-row justify-between items-start w-full gap-8 lg:gap-0">
+          
+          {/* Top Left Text & Button */}
+          <div className="max-w-[800px]">
+            <h1 className="text-[32px] sm:text-[40px] lg:text-[32px] leading-[1.25] font-normal text-[#1a1a1a] tracking-loose mb-5">
+              Find your perfect garage space where <br className="hidden md:block" />
+              security, and maintenance come <br className="hidden md:block" />
+              together for your vehicle.
+            </h1>
+            
+            <div className="mt-6 flex flex-col items-start gap-4">
+              <div className="flex items-center -space-x-3">
+                <img src="/user1.png" alt="User" className="w-8 h-8 rounded-full border-2 border-[#FFFFFE] object-cover shadow-sm relative z-30" />
+                <img src="/user2.png" alt="User" className="w-8 h-8 rounded-full border-2 border-[#FFFFFE] object-cover shadow-sm relative z-20" />
+                <img src="/user3.png" alt="User" className="w-8 h-8 rounded-full border-2 border-[#FFFFFE] object-cover shadow-sm relative z-10" />
+              </div>
+              <p className="text-[13px] text-[#888] leading-relaxed max-w-[320px] font-medium">
+                Over 27,000+ Users Count on Us for <br></br>
+                Safe Vehicle Care & Storage
+              </p>
+            </div>
+          </div>
+
+          {/* Top Right Video */}
+          <div className="hidden lg:flex flex-col items-start gap-3 mt-4 mr-10">
+            <div className="relative w-48 h-28 rounded-2xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] cursor-pointer group bg-gray-100 flex-shrink-0">
+              <video src="/hero_video.mp4" className="w-full h-full object-cover" muted loop playsInline autoPlay />
+              {/* Play Button Overlay */}
+              <div className="absolute inset-0 bg-black/5 group-hover:bg-black/15 transition-colors flex items-center justify-center">
+                <div className="w-8 h-8 lg:w-12 lg:h-12 rounded-full bg-white/70 backdrop-blur-md flex items-center justify-center shadow-lg">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="none" className="ml-1 lg:hidden"><path d="M5 3l14 9-14 9V3z"/></svg>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white" stroke="none" className="ml-1 hidden lg:block"><path d="M5 3l14 9-14 9V3z"/></svg>
+                </div>
+              </div>
+            </div>
+            <p className="text-[12px] lg:text-[13px] font-medium text-[#888] max-w-[150px] leading-snug">
+              Your vehicle safe in our hands
+            </p>
+          </div>
         </div>
 
-        <div className="relative z-10 flex flex-col items-center text-center px-[6vw] max-w-4xl mx-auto w-full">
-        
+        {/* Centered Car Image Overlapping */}
+        <div className="absolute top-[55%] lg:top-[45%] left-[4vw] lg:left-1/2 translate-x-0 lg:-translate-x-1/2 -translate-y-1/2 w-[85%] sm:w-[65%] md:w-[50%] max-w-[800px] z-10 pointer-events-none">
+          <img src="/HeroCar.png" alt="Hero Car" className="w-full h-auto object-contain pt-10 pb-16 lg:pt-0 lg:pb-0" />
+        </div>
 
-          <h1 className="text-[clamp(2.8rem,5.5vw,5.5rem)] font-medium leading-[1.04] tracking-[-0.03em] text-[#111] mb-6">
-            Find your perfect<br />
-            garage space.
-          </h1>
+        {/* Bottom Bar: Left Steps & Right Search */}
+        <div className="relative z-20 flex flex-col lg:flex-row justify-between items-end gap-10 mt-auto pt-20">
+          
+          {/* Left Steps Box */}
+          <div className="bg-white/60 backdrop-blur-xl rounded-[20px] p-5 w-full lg:w-[300px] shadow-sm border border-white/40 hidden lg:block">
+            {STEPS.map((s, i) => (
+              <div key={i} className={`flex gap-4 py-3 ${i !== STEPS.length - 1 ? 'border-b border-gray-200/50' : ''} ${i === 0 ? 'pt-0' : ''} ${i === STEPS.length - 1 ? 'pb-0' : ''}`}>
+                <span className="text-[#888] text-[12px] font-medium mt-0.5">({s.n})</span>
+                <div>
+                  <h4 className={`text-[13px] font-medium ${i === 0 ? 'text-[#1a1a1a]' : 'text-[#666]'}`}>{s.title}</h4>
+                  {i === 0 && (
+                    <p className="text-[11px] text-[#666] mt-1.5 leading-[1.6] font-light">
+                      {s.desc}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
 
-          <p className="text-[14px] md:text-[16px] leading-[1.65] text-[#555] max-w-xl mb-12 font-light">
-            Search hundreds of certified, secure facilities across the city. <br className="hidden md:block" /> Book in minutes. Park with confidence.
-          </p>
-
+          {/* Right Search Bar */}
+          <div className="flex flex-col items-end w-full lg:w-[700px] xl:w-[670px]">
+            
           {/* ── SEARCH BAR ── */}
-          <div className="w-full max-w-[1000px] bg-white rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.1)] border border-black/[0.04] p-2 flex flex-col md:flex-row gap-2">
+          <div ref={searchBarRef} className="w-full bg-white rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.15)] border border-black/[0.04] p-1 flex flex-col md:flex-row gap-2">
 
             {/* City Search */}
-            <div ref={cityRef} className="flex-[1.5] flex items-center gap-3 px-1.5 py-3 rounded-xl hover:bg-gray-50 transition-colors relative">
+            <div ref={cityRef} className="flex-[1.5] flex items-center gap-3 px-1.5 py-1 rounded-xl hover:bg-gray-50 transition-colors relative">
               <div className="w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b3b3b" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
               </div>
@@ -451,8 +525,13 @@ export default function HomePage() {
                 <input
                   value={city}
                   onChange={e => { setCity(e.target.value); setShowSuggestions(true); }}
-                  onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
-                  placeholder="City, area, or location..."
+                  onFocus={() => { 
+                    setIsSearchFocused(true);
+                    handleSearchFocus();
+                    if (suggestions.length > 0) setShowSuggestions(true); 
+                  }}
+                  onBlur={() => setIsSearchFocused(false)}
+                  placeholder={displayPlaceholder}
                   className="w-full text-[15px] font-medium text-[#333] bg-transparent outline-none placeholder-[#999]"
                 />
               </div>
@@ -498,7 +577,7 @@ export default function HomePage() {
 
             {/* Date */}
             <div ref={calRef} className="flex-1 relative">
-                          <button onClick={() => setShowCal(true)} className="w-full text-left flex items-center gap-3 bg-transparent hover:bg-gray-50 rounded-xl px-1.5 py-3 transition-colors relative">
+                          <button onClick={() => { setShowCal(true); handleSearchFocus(); }} className="w-full text-left flex items-center gap-3 bg-transparent hover:bg-gray-50 rounded-xl px-1.5 py-0.5 transition-colors relative">
                   <div className="w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b3b3b" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                   </div>
@@ -518,7 +597,7 @@ export default function HomePage() {
                 type="button"
                 onClick={handleSearch}
                 disabled={isFetchingVehicles}
-                className="flex items-center justify-center gap-2 bg-[#2563eb] hover:bg-[#2d6df0] text-white text-[14px] font-semibold rounded-xl px-7 py-3 transition-colors duration-100 whitespace-nowrap disabled:opacity-70"
+                className="flex items-center justify-center gap-2 bg-[#2563eb] hover:bg-[#2d6df0] text-white text-[14px] font-semibold rounded-[23px] px-7 py-2 transition-colors duration-100 whitespace-nowrap disabled:opacity-70"
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                 {isFetchingVehicles ? 'Loading...' : 'Search'}
@@ -526,22 +605,23 @@ export default function HomePage() {
             </div>
 
           {/* Quick chips */}
-          <div className="flex flex-wrap justify-center gap-2 mt-5">
+          <div className="flex flex-wrap justify-end gap-2 mt-5">
             {['Koramangala', 'HSR Layout', 'Indiranagar', 'Whitefield', 'MG Road'].map(place => (
               <button
                 key={place}
                 onClick={() => { setCity(place); if (!date) setShowCal(true); }}
-                className="text-[12px] text-[#555] border border-[#111]/10 rounded-full px-4 py-1.5 hover:border-[#111]/30 hover:text-[#111] transition-all bg-white/50"
+                className="text-[12px] text-[#555] border border-[#111]/10 rounded-full px-4 py-1.5 hover:border-[#111]/30 hover:text-[#111] transition-all bg-white/50 backdrop-blur-sm"
               >
                 {place}
               </button>
             ))}
           </div>
         </div>
+        </div>
       </section>
 
       {/* ── STATS STRIP ── */}
-      <section className="relative w-full px-[6vw] pt-8 pb-10 md:pb-16 overflow-hidden z-20">
+      <section className="relative w-full px-[6vw] pt-18 pb-10 md:pb-16 overflow-hidden z-20">
         <div className="relative z-10 max-w-[1200px] mx-auto py-4 px-4 md:py-6 md:px-8 rounded-2xl md:rounded-[32px] bg-gradient-to-r from-white/60 via-[#bae6fd]/40 to-white/60 backdrop-blur-2xl border border-white/60 shadow-[inset_0_1px_1px_rgba(255,255,255,1),inset_0_-1px_1px_rgba(255,255,255,0.4),0_4px_24px_rgba(0,0,0,0.03)] grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
           {STATS.map(s => (
             <div key={s.label} className="text-center">
@@ -553,7 +633,7 @@ export default function HomePage() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section className="w-full py-12 md:py-24 px-[5vw] bg-gradient-to-b from-[#ebeced] to-white">
+      <section className="w-full py-12 md:py-24 px-[5vw] bg-[#FFFFFE]">
         <div className="max-w-[1200px] mx-auto">
           {/* Header Row */}
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 md:mb-16 gap-6 md:gap-8">
@@ -597,7 +677,7 @@ export default function HomePage() {
       </section>
 
       {/* ── WHY GD1 ── */}
-      <section className="w-full pt-12 md:pt-17 pb-16 md:pb-40 px-[6vw] bg-white">
+      <section className="w-full pt-12 md:pt-17 pb-16 md:pb-40 px-[6vw] bg-[#FFFFFE]">
         <div className="max-w-[1200px] mx-auto">
           <div className="text-center mb-10 md:mb-12">
             <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-[#888] mb-3">Why GD1</p>

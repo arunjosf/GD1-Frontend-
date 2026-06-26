@@ -127,7 +127,8 @@ export default function StoredVehicleDashboardPage() {
     );
   }
 
-  const isMoveOutReached = booking?.endDate && new Date(booking.endDate) <= new Date();
+  const isInLot = booking?.status === 'InLot' || booking?.status == 2;
+  const isMoveOutReached = !isInLot && booking?.endDate && new Date(booking.endDate) <= new Date();
 
   if (booking.status === 'Completed' || booking.status == 3 || isMoveOutReached) {
     return (

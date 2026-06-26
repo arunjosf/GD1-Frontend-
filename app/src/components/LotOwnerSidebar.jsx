@@ -12,7 +12,8 @@ import {
   Truck,
   Wrench,
   CreditCard,
-  Car
+  Car,
+  MapPin
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getToken } from '../api/auth';
@@ -67,6 +68,7 @@ export default function LotOwnerSidebar({ isMobileOpen, setIsMobileOpen }) {
     { name: 'Bookings', path: '/lot-owner/bookings', icon: <Calendar size={20} />, count: pendingCount },
     { name: 'Vehicles', path: '/lot-owner/vehicles', icon: <Car size={20} /> },
     { name: 'Pickups', path: '/lot-owner/pickups', icon: <Truck size={20} />, count: pickupCount },
+    { name: 'Self Drops', path: '/lot-owner/self-drops', icon: <MapPin size={20} /> },
     { name: 'Services', path: '/lot-owner/services', icon: <Wrench size={20} /> },
     { name: 'Payments', path: '/lot-owner/payments', icon: <CreditCard size={20} /> },
     { name: 'Messages', path: '/lot-owner/messages', icon: <FileText size={20} /> },

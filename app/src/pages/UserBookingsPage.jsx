@@ -4,7 +4,7 @@ import Footer from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { Calendar, Car, ArrowRight, CreditCard, XCircle, Clock, BadgeCheck, MapPin, CheckCircle2, X, Truck, Wrench } from 'lucide-react';
+import { Calendar, Car, ArrowRight, CreditCard, XCircle, Clock, BadgeCheck, MapPin, CheckCircle2, X, Truck, Wrench, LayoutDashboard } from 'lucide-react';
 
 export default function UserBookingsPage() {
   const [bookings, setBookings] = useState([]);
@@ -368,6 +368,15 @@ export default function UserBookingsPage() {
                               Track Service
                             </button>
                          )}
+                          {isInLot && (
+                            <button 
+                               onClick={() => navigate(`/stored-vehicle/${booking.id}`)}
+                               className="flex-1 sm:flex-none px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[13px] shadow-md transition-all flex items-center justify-center gap-1.5"
+                             >
+                               <LayoutDashboard size={14} />
+                               View Vehicle Dashboard
+                             </button>
+                          )}
                          {isCompleted && (
                            <button 
                               onClick={() => navigate(`/vehicle-journey/${booking.vehicleId}`, { state: { bookingId: booking.id } })}
