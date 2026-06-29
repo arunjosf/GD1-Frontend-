@@ -441,7 +441,7 @@ export default function HomePage() {
       <Navbar />
 
       {/* ── HERO ── */}
-      <section className="relative w-full min-h-[90vh] bg-[#FFFFFE] pt-10 lg:pt-28 pb:14 lg:pb-12 px-[4vw] flex flex-col justify-between z-30">
+      <section className="relative w-full min-h-[90vh] bg-[#FFFFFE] pt-16 lg:pt-28 pb:14 lg:pb-12 px-[4vw] flex flex-col justify-between z-30">
         
         {/* Top Header Row */}
         <div className="relative z-20 flex flex-col lg:flex-row justify-between items-start w-full gap-8 lg:gap-0">
@@ -454,13 +454,13 @@ export default function HomePage() {
               together for your vehicle.
             </h1>
             
-            <div className="mt-6 flex flex-col items-start gap-4">
+            <div className="mt-4 lg:mt-6 flex flex-col items-start gap-4">
               <div className="flex items-center -space-x-3">
                 <img src="/user1.png" alt="User" className="w-8 h-8 rounded-full border-2 border-[#FFFFFE] object-cover shadow-sm relative z-30" />
                 <img src="/user2.png" alt="User" className="w-8 h-8 rounded-full border-2 border-[#FFFFFE] object-cover shadow-sm relative z-20" />
                 <img src="/user3.png" alt="User" className="w-8 h-8 rounded-full border-2 border-[#FFFFFE] object-cover shadow-sm relative z-10" />
               </div>
-              <p className="text-[13px] text-[#888] leading-relaxed max-w-[320px] font-medium">
+              <p className="text-[12px] lg:text-[13px] text-[#888] leading-relaxed max-w-[320px] font-medium">
                 Over 27,000+ Users Count on Us for <br></br>
                 Safe Vehicle Care & Storage
               </p>
