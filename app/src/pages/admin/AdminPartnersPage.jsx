@@ -101,9 +101,17 @@ export default function AdminPartnersPage() {
         </div>
 
         {/* Bookings Summary */}
-        <div className="lg:w-[200px] shrink-0 bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col justify-center items-center group-hover:bg-blue-50 transition-colors">
-          <div className="text-3xl font-black text-gray-900 group-hover:text-blue-600 transition-colors">{garage.totalBookings}</div>
-          <div className="text-xs font-bold text-gray-500 uppercase tracking-wide">Total Bookings</div>
+        <div className="lg:w-[200px] shrink-0 bg-gray-50 rounded-2xl p-4 border border-gray-100 flex flex-col justify-center items-center group-hover:bg-blue-50 transition-colors">
+          <div className="flex gap-4 mb-1">
+            <div className="text-center">
+              <div className="text-2xl font-black text-gray-900 group-hover:text-blue-600 transition-colors">{garage.totalBookings}</div>
+              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Total</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-black text-blue-500">{garage.activeBookings || 0}</div>
+              <div className="text-[10px] font-bold text-blue-400 uppercase tracking-wide">Active</div>
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center justify-center shrink-0 px-2">
@@ -176,9 +184,17 @@ export default function AdminPartnersPage() {
         </div>
 
         {/* Bookings Summary */}
-        <div className="lg:w-[200px] shrink-0 bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col justify-center items-center group-hover:bg-purple-50 transition-colors">
-          <div className="text-3xl font-black text-gray-900 group-hover:text-purple-600 transition-colors">{sc.totalBookings}</div>
-          <div className="text-xs font-bold text-gray-500 uppercase tracking-wide">Total Requests</div>
+        <div className="lg:w-[200px] shrink-0 bg-gray-50 rounded-2xl p-4 border border-gray-100 flex flex-col justify-center items-center group-hover:bg-purple-50 transition-colors">
+          <div className="flex gap-4 mb-1">
+            <div className="text-center">
+              <div className="text-2xl font-black text-gray-900 group-hover:text-purple-600 transition-colors">{sc.totalBookings}</div>
+              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Total</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-black text-purple-500">{sc.activeBookings || 0}</div>
+              <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wide">Active</div>
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center justify-center shrink-0 px-2">

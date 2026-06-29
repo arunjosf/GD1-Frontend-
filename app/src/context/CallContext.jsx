@@ -2,12 +2,14 @@ import React, { createContext, useContext, useState, useRef, useEffect } from 'r
 import * as signalR from '@microsoft/signalr';
 import { getToken } from '../api/auth';
 import { toast } from 'react-hot-toast';
+import { useAuth } from './AuthContext';
 
 const CallContext = createContext();
 
 export const useCall = () => useContext(CallContext);
 
 export const CallProvider = ({ children }) => {
+    const { user } = useAuth();
     const [callState, setCallState] = useState({
         isActive: false,
         isReceiving: false,
@@ -72,7 +74,7 @@ export const CallProvider = ({ children }) => {
             }
             cleanupCall();
         };
-    }, []);
+    }, [user]);
 
     // Listen to global events to start a call
     useEffect(() => {

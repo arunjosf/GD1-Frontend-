@@ -81,6 +81,18 @@ export default function ManagerDashboardPage() {
         </div>
       </div>
 
+      {metrics?.isPropertyHidden && (
+        <div className="bg-red-50 border border-red-200 p-4 rounded-2xl flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                <span className="text-red-600 font-black">!</span>
+            </div>
+            <div>
+                <h4 className="text-red-800 font-bold">Property Hidden</h4>
+                <p className="text-red-600 text-sm">This property is currently hidden by the administrator. It will not appear in search results for new vehicle owners.</p>
+            </div>
+        </div>
+      )}
+
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         <div className="bg-white rounded-[20px] p-6 border border-gray-100 shadow-sm flex flex-col justify-between h-[130px] hover:shadow-md transition-shadow">

@@ -190,7 +190,7 @@ export default function NearbyServiceCentersPage() {
         const result = await res.json();
         
         const centersData = result.data || result || [];
-        const filteredCenters = centersData.filter(c => !vehicleBrand || (c.supportedBrands && c.supportedBrands.toLowerCase().includes(vehicleBrand.toLowerCase())));
+        const filteredCenters = centersData;
         
         if (mounted) {
           setCenters(filteredCenters);

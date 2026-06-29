@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { TrendingUp, TrendingDown, ArrowUpRight, User, Award, CalendarDays, BarChart2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, ArrowUpRight, User, Award, CalendarDays, BarChart2, Phone } from 'lucide-react';
+import { useCall } from '../../context/CallContext';
 import { getToken } from '../../api/auth';
 import {
   Chart as ChartJS,
@@ -27,6 +28,7 @@ ChartJS.register(
 );
 
 export default function LotOwnerDashboardPage() {
+  const { startCall } = useCall();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [graphType, setGraphType] = useState('Monthly'); // 'Monthly' or 'Yearly'
@@ -144,6 +146,18 @@ export default function LotOwnerDashboardPage() {
   return (
     <div className="w-full max-w-[1600px] mx-auto space-y-6 animate-fade-in pt-4">
       
+      {stats.isPropertyHidden && (
+        <div className="bg-red-50 border border-red-200 p-4 rounded-2xl flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                <span className="text-red-600 font-black">!</span>
+            </div>
+            <div>
+                <h4 className="text-red-800 font-bold">Property Hidden</h4>
+                <p className="text-red-600 text-sm">Your property is currently hidden by the administrator. It will not appear in search results for new vehicle owners.</p>
+            </div>
+        </div>
+      )}
+
       {/* TOP METRICS ROW */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         <TopMetricCard 
@@ -222,6 +236,15 @@ export default function LotOwnerDashboardPage() {
                   <h2 className="text-xl font-bold text-[#111] leading-tight">{stats.bestPerformedManager.name}</h2>
                   <p className="text-xs text-gray-500">Top Performer</p>
                 </div>
+              </div>
+              <div className="mb-6">
+                <button 
+                  onClick={() => startCall(stats.bestPerformedManager.userId, 'manager', stats.bestPerformedManager.name)}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-green-50 text-green-700 rounded-xl font-bold hover:bg-green-100 transition-colors shadow-sm"
+                >
+                  <Phone size={18} />
+                  Call Manager
+                </button>
               </div>
               
               <div className="space-y-4">

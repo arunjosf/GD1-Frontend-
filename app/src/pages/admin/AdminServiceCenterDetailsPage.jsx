@@ -11,6 +11,18 @@ const api = {
     });
     if (!res.ok) throw new Error('API Error');
     return { data: await res.json() };
+  },
+  post: async (url, data) => {
+    const res = await fetch(`https://localhost:7108/api${url}`, {
+      method: 'POST',
+      headers: { 
+        'Authorization': `Bearer ${getToken('AccessToken')}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('API Error');
+    return { data: await res.json() };
   }
 };
 
@@ -37,6 +49,23 @@ export default function AdminServiceCenterDetailsPage() {
     }
   };
 
+  const handleToggle = async (action) => {
+    try {
+      const toastId = toast.loading(`Applying ${action}...`);
+      const res = await api.post(`/admin/partners/service-centers/${id}/toggle-status`, { actionType: action });
+      toast.dismiss(toastId);
+      if (res.data.success) {
+        toast.success(`Successfully applied ${action}`);
+        fetchServiceCenterDetails(); // Refresh details
+      } else {
+        toast.error(res.data.message || 'Operation failed');
+      }
+    } catch (err) {
+      toast.dismiss();
+      toast.error('Operation failed');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center p-8 bg-gray-50">
@@ -56,9 +85,46 @@ export default function AdminServiceCenterDetailsPage() {
           <button onClick={() => navigate('/admin/partners')} className="p-3 bg-white rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">
             <ArrowLeft size={20} className="text-gray-600" />
           </button>
-          <div>
-            <h1 className="text-3xl font-black text-gray-900 tracking-tight">{data.name}</h1>
+          <div className="flex-1">
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-black text-gray-900 tracking-tight">{data.name}</h1>
+              {data.isHidden && <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-full">HIDDEN</span>}
+              {data.isBlocked && <span className="px-3 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full">BLOCKED</span>}
+            </div>
             <p className="text-gray-500 font-medium">Service Center Partner Details</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {!data.isHidden ? (
+              <button 
+                onClick={() => handleToggle('hide')}
+                className="px-4 py-2 bg-yellow-50 text-yellow-700 hover:bg-yellow-100 font-bold rounded-xl transition-colors border border-yellow-200 text-sm"
+              >
+                Hide Property
+              </button>
+            ) : (
+              <button 
+                onClick={() => handleToggle('unhide')}
+                className="px-4 py-2 bg-green-50 text-green-700 hover:bg-green-100 font-bold rounded-xl transition-colors border border-green-200 text-sm"
+              >
+                Unhide Property
+              </button>
+            )}
+            
+            {!data.isBlocked ? (
+              <button 
+                onClick={() => handleToggle('block')}
+                className="px-4 py-2 bg-red-50 text-red-700 hover:bg-red-100 font-bold rounded-xl transition-colors border border-red-200 text-sm"
+              >
+                Block Partner
+              </button>
+            ) : (
+              <button 
+                onClick={() => handleToggle('unblock')}
+                className="px-4 py-2 bg-green-50 text-green-700 hover:bg-green-100 font-bold rounded-xl transition-colors border border-green-200 text-sm"
+              >
+                Unblock Partner
+              </button>
+            )}
           </div>
         </div>
 
@@ -128,6 +194,47 @@ export default function AdminServiceCenterDetailsPage() {
                             )}
                         </div>
                     </div>
+                </div>
+
+                {/* Active Services Section */}
+                <div className="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                            <Wrench size={20} />
+                        </div>
+                        <h2 className="text-xl font-black text-gray-900">Active Services</h2>
+                    </div>
+                    
+                    {data.activeServices?.length > 0 ? (
+                        <div className="space-y-4">
+                            {data.activeServices.map((service) => (
+                                <div key={service.id} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex flex-wrap items-center justify-between gap-4 hover:border-gray-200 transition-colors">
+                                    <div>
+                                        <p className="text-sm font-black text-gray-900">{service.vehicleName}</p>
+                                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">{service.vehicleRegistration}</p>
+                                    </div>
+                                    <div className="flex gap-4">
+                                        <div>
+                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Start Date</p>
+                                            <p className="text-sm font-bold text-gray-800">{service.startDate}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Scheduled Date</p>
+                                            <p className="text-sm font-bold text-gray-800">{service.endDate}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Status</p>
+                                            <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-lg">{service.status}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-6 bg-gray-50 rounded-2xl border border-gray-100">
+                            <p className="text-gray-500 text-sm font-medium">No active service requests at the moment.</p>
+                        </div>
+                    )}
                 </div>
 
             </div>
