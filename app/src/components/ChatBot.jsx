@@ -112,7 +112,7 @@ export default function ChatBot() {
 
       {/* Chat Panel */}
       <div
-        className={`fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-24px)] rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.2)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        className={`fixed bottom-24 z-50 w-[360px] max-w-[calc(100vw-32px)] right-0 left-0 mx-auto sm:left-auto sm:right-6 sm:mx-0 rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.2)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           open ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-6 pointer-events-none'
         }`}
         style={{ background: 'rgba(10,10,15,0.92)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.07)' }}
