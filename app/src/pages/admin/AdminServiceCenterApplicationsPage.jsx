@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { ChevronRight, ArrowLeft, CheckCircle, XCircle, User, Briefcase, FileText, Image as ImageIcon, MapPin, Phone, Mail, Building2, AlertCircle } from 'lucide-react';
 
-const API = 'https://localhost:7108';
+const API = 'https://gd1-grand-auto-depot-one-9ms1.onrender.com';
 
 function getToken() {
   const value = `; ${document.cookie}`;

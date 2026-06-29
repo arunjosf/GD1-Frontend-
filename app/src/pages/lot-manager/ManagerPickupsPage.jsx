@@ -21,10 +21,10 @@ export default function ManagerPickupsPage() {
     try {
       const token = getToken('AccessToken');
       const [pendingRes, completedRes] = await Promise.all([
-        fetch('https://localhost:7108/api/lot-manager/pickups?isCompleted=false', {
+        fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/pickups?isCompleted=false', {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
-        fetch('https://localhost:7108/api/lot-manager/pickups?isCompleted=true', {
+        fetch('hhttps://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/pickups?isCompleted=true', {
           headers: { 'Authorization': `Bearer ${token}` }
         })
       ]);
@@ -85,7 +85,7 @@ export default function ManagerPickupsPage() {
   const getImageUrl = (url) => {
     if (!url) return null;
     if (url.startsWith('http') || url.startsWith('data:')) return url;
-    return `https://localhost:7108${url.startsWith('/') ? url : `/${url}`}`;
+    return `https://gd1-grand-auto-depot-one-9ms1.onrender.com${url.startsWith('/') ? url : `/${url}`}`;
   };
 
   return (

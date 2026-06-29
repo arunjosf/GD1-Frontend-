@@ -19,7 +19,7 @@ export default function LotOwnerPickupsPage() {
 
       if (!token) return;
 
-      const res = await fetch('https://localhost:7108/api/Pickup/lot-owner/all-requests', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Pickup/lot-owner/all-requests', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -39,7 +39,7 @@ export default function LotOwnerPickupsPage() {
     if (!url) return null;
     if (url.startsWith('http') || url.startsWith('data:')) return url;
     const cleanUrl = url.startsWith('/') ? url : `/${url}`;
-    return `https://localhost:7108${cleanUrl}`;
+    return `https://gd1-grand-auto-depot-one-9ms1.onrender.com${cleanUrl}`;
   };
 
   const filteredPickups = pickups.filter(p => {

@@ -51,7 +51,7 @@ export default function StoredVehicleDashboardPage() {
     try {
       setAfterServiceEvent(null);
       const token = getToken('AccessToken');
-      const res = await fetch(`https://localhost:7108/${id}booking-By-Id`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/${id}booking-By-Id`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error("Failed to fetch vehicle details");
@@ -59,7 +59,7 @@ export default function StoredVehicleDashboardPage() {
       setBooking(result.data);
 
       if (result.data?.vehicleId) {
-        const journeyRes = await fetch(`https://localhost:7108/api/Vehicle/${result.data.vehicleId}/vehicle-owner/vehicle-journey?bookingId=${result.data.id}`, {
+        const journeyRes = await fetch(`hhttps://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Vehicle/${result.data.vehicleId}/vehicle-owner/vehicle-journey?bookingId=${result.data.id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (journeyRes.ok) {
@@ -84,7 +84,7 @@ export default function StoredVehicleDashboardPage() {
     try {
       if (!booking?.vehicleId) return;
       const token = getToken('AccessToken');
-      const res = await fetch(`https://localhost:7108/api/Vehicle/${booking.vehicleId}/vehicle-owner/request-images`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Vehicle/${booking.vehicleId}/vehicle-owner/request-images`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -429,7 +429,7 @@ export default function StoredVehicleDashboardPage() {
                     <div className="flex flex-wrap gap-2 justify-start">
                       {afterServiceEvent.images.map((img, i) => (
                         <div key={i} className="group relative w-16 h-16 rounded-xl overflow-hidden cursor-pointer border border-gray-100 shadow-sm shrink-0" onClick={() => setSelectedImage({ label: img.label, url: img.imageUrl })}>
-                          <img src={img.imageUrl.startsWith('http') ? img.imageUrl : `https://localhost:7108${img.imageUrl}`} alt={img.label} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                          <img src={img.imageUrl.startsWith('http') ? img.imageUrl : `https://gd1-grand-auto-depot-one-9ms1.onrender.com${img.imageUrl}`} alt={img.label} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <span className="text-white font-bold text-[8px] uppercase tracking-widest text-center px-0.5">{img.label}</span>
                           </div>
@@ -482,7 +482,7 @@ export default function StoredVehicleDashboardPage() {
                       onClick={() => setSelectedImage(img)}
                     >
                       <img
-                        src={img.url.startsWith('http') ? img.url : `https://localhost:7108${img.url}`}
+                        src={img.url.startsWith('http') ? img.url : `https://gd1-grand-auto-depot-one-9ms1.onrender.com${img.url}`}
                         alt={img.label}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
@@ -552,7 +552,7 @@ export default function StoredVehicleDashboardPage() {
                       { label: 'Odometer', url: booking.weeklyUpdate.odometerImageUrl },
                     ].filter(img => img.url).map((img, i) => (
                       <div key={i} className="group relative aspect-square rounded-2xl overflow-hidden cursor-pointer border border-gray-100/50 shadow-sm" onClick={() => setSelectedImage(img)}>
-                        <img src={img.url.startsWith('http') ? img.url : `https://localhost:7108${img.url}`} alt={img.label} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                        <img src={img.url.startsWith('http') ? img.url : `https://gd1-grand-auto-depot-one-9ms1.onrender.com${img.url}`} alt={img.label} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                         <div className="absolute inset-0 bg-transparent flex items-end p-2.5">
                           <span className="text-white font-bold text-[10px] uppercase tracking-widest">{img.label}</span>
                         </div>
@@ -581,7 +581,7 @@ export default function StoredVehicleDashboardPage() {
             ✕
           </button>
           <img
-            src={selectedImage.url.startsWith('http') ? selectedImage.url : `https://localhost:7108${selectedImage.url}`}
+            src={selectedImage.url.startsWith('http') ? selectedImage.url : `https://gd1-grand-auto-depot-one-9ms1.onrender.com${selectedImage.url}`}
             alt={selectedImage.label}
             className="max-w-[90vw] max-h-[80vh] object-contain rounded-2xl shadow-2xl"
             onClick={e => e.stopPropagation()}

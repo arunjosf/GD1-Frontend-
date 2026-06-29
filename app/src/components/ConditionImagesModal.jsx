@@ -9,7 +9,7 @@ export default function ConditionImagesModal({ images, isOpen, onClose }) {
   const getImageUrl = (url) => {
     if (!url) return null;
     if (url.startsWith('http') || url.startsWith('data:')) return url;
-    return `https://localhost:7108${url.startsWith('/') ? url : `/${url}`}`;
+    return `https://gd1-grand-auto-depot-one-9ms1.onrender.com${url.startsWith('/') ? url : `/${url}`}`;
   };
 
   const imageList = [

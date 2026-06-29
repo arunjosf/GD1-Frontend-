@@ -18,7 +18,7 @@ export default function LotOwnerServicesPage() {
   const fetchServices = async () => {
     try {
       const token = getToken('AccessToken');
-      const res = await fetch(`https://localhost:7108/api/lot-manager/my-services`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/my-services`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Failed to fetch services');

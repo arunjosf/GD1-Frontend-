@@ -44,7 +44,7 @@ export default function ChatBot() {
 
     // Try backend first, fall back to smart mock
     try {
-      const res = await fetch('https://localhost:7108/api/ai/chat', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/ai/chat', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

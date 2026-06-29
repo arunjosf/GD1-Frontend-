@@ -18,7 +18,7 @@ export default function LotOwnerBookingDetailsPage() {
   const getImageUrl = (url) => {
     if (!url) return '';
     if (url.startsWith('http')) return url;
-    return `https://localhost:7108${url.startsWith('/') ? '' : '/'}${url}`;
+    return `https://gd1-grand-auto-depot-one-9ms1.onrender.com${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
   const fetchBookingDetail = async () => {
@@ -30,7 +30,7 @@ export default function LotOwnerBookingDetailsPage() {
       if (!token) throw new Error("No token found");
 
      
-      const res = await fetch(`https://localhost:7108/${id}booking-By-Id`, { 
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/${id}booking-By-Id`, { 
         headers: { 'Authorization': `Bearer ${token}` } 
       });
       if (!res.ok) throw new Error("Failed to fetch booking details");
@@ -66,7 +66,7 @@ export default function LotOwnerBookingDetailsPage() {
          formData.append('rejectionReason', rejectionReason);
       }
 
-      const res = await fetch(`https://localhost:7108/api/LotBooking/${id}/verify`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/LotBooking/${id}/verify`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData

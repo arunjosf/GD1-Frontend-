@@ -55,7 +55,7 @@ export default function AddVehiclePage() {
     
     setIsDecoding(true);
     try {
-      const res = await fetch(`https://localhost:7108/api/Vehicle/decode-vin?vin=${encodeURIComponent(vin)}`);
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Vehicle/decode-vin?vin=${encodeURIComponent(vin)}`);
       if (res.ok) {
         const data = await res.json();
         const vInfo = data.data; // VehicleLookupDto
@@ -94,7 +94,7 @@ export default function AddVehiclePage() {
     const delay = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const res = await fetch(`https://localhost:7108/api/Vehicle/search-vehicle?model=${encodeURIComponent(searchTerm)}`);
+        const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Vehicle/search-vehicle?model=${encodeURIComponent(searchTerm)}`);
         if (res.ok) {
           const data = await res.json();
           // Assuming data is an array or data.data is an array of VehicleCatalogItem
@@ -134,7 +134,7 @@ export default function AddVehiclePage() {
     formData.append('file', file);
 
     try {
-      const res = await fetch('https://localhost:7108/api/Upload/upload-file', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Upload/upload-file', {
         method: 'POST',
         body: formData
       });
@@ -201,7 +201,7 @@ export default function AddVehiclePage() {
     setIsSubmitting(true);
     try {
       const token = getToken('AccessToken');
-      const res = await fetch('https://localhost:7108/api/Vehicle/add-vehicle', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Vehicle/add-vehicle', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

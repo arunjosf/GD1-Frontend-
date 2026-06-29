@@ -30,7 +30,7 @@ export default function LotOwnerSidebar({ isMobileOpen, setIsMobileOpen }) {
         if (!token) return;
 
         // Fetch bookings
-        const resBookings = await fetch('https://localhost:7108/api/LotBooking/bookings', {
+        const resBookings = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/LotBooking/bookings', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (resBookings.ok) {
@@ -41,7 +41,7 @@ export default function LotOwnerSidebar({ isMobileOpen, setIsMobileOpen }) {
         }
 
         // Fetch pickups
-        const resPickups = await fetch('https://localhost:7108/api/Pickup/lot-owner/all-requests', {
+        const resPickups = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Pickup/lot-owner/all-requests', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (resPickups.ok) {

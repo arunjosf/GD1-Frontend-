@@ -18,7 +18,7 @@ export default function OwnerServicesPage() {
   const fetchServices = async () => {
     try {
       const token = getToken('AccessToken');
-      const res = await fetch(`https://localhost:7108/service-center/my-service-requests`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/service-center/my-service-requests`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Failed to fetch services');

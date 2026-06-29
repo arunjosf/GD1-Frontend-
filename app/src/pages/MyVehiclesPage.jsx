@@ -27,7 +27,7 @@ export default function MyVehiclesPage() {
 
         if (!token) throw new Error("No token found");
 
-        const res = await fetch('https://localhost:7108/api/vehicle/my-vehicle', {
+        const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/vehicle/my-vehicle', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -110,7 +110,7 @@ export default function MyVehiclesPage() {
                 const getImageUrl = (url) => {
                   if (!url) return "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&auto=format&fit=crop";
                   if (url.startsWith('http')) return url;
-                  return `https://localhost:7108${url.startsWith('/') ? url : `/${url}`}`;
+                  return `https://gd1-grand-auto-depot-one-9ms1.onrender.com${url.startsWith('/') ? url : `/${url}`}`;
                 };
 
                 return (

@@ -288,7 +288,7 @@ export default function ManagerSubmitOnDemandPage() {
       const token = getToken('AccessToken');
       const data = new FormData();
       data.append('file', file);
-      const res = await fetch('https://localhost:7108/api/Upload/upload-file', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Upload/upload-file', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: data
@@ -311,7 +311,7 @@ export default function ManagerSubmitOnDemandPage() {
     setSubmitting(true);
     try {
       const token = getToken('AccessToken');
-      const res = await fetch('https://localhost:7108/api/lot-manager/submit-ondemand-images', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/submit-ondemand-images', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

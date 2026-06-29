@@ -19,7 +19,7 @@ export default function ServiceCenterLayout() {
 
   const fetchPendingCount = async () => {
     try {
-      const res = await fetch(`https://localhost:7108/api/service-center/bookings`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/service-center/bookings`, {
         headers: { Authorization: `Bearer ${getToken('AccessToken')}` }
       });
       if (res.ok) {
@@ -33,7 +33,7 @@ export default function ServiceCenterLayout() {
 
   const fetchProfile = async () => {
     try {
-      const res = await fetch(`https://localhost:7108/api/service-center/profile`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/service-center/profile`, {
         headers: { Authorization: `Bearer ${getToken('AccessToken')}` }
       });
       if (res.ok) {

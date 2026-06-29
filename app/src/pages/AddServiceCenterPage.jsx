@@ -40,7 +40,7 @@ export default function AddServiceCenterPage() {
     formData.append('file', file);
 
     try {
-      const res = await fetch('https://localhost:7108/api/Upload/upload-file', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Upload/upload-file', {
         method: 'POST',
         body: formData
       });
@@ -81,12 +81,12 @@ export default function AddServiceCenterPage() {
       if (!token) throw new Error('You must be logged in to apply.');
 
       // 1. Fetch Razorpay config (key ID)
-      const configRes = await fetch('https://localhost:7108/api/Payment/config');
+      const configRes = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Payment/config');
       if (!configRes.ok) throw new Error('Could not fetch payment configuration.');
       const { keyId } = await configRes.json();
 
       // 2. Create Razorpay Order for the ₹12,000 application fee
-      const orderRes = await fetch('https://localhost:7108/api/service-center/create-application-order', {
+      const orderRes = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/service-center/create-application-order', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -128,7 +128,7 @@ export default function AddServiceCenterPage() {
               razorpaySignature: response.razorpay_signature
             };
 
-            const applyRes = await fetch('https://localhost:7108/api/service-center/apply', {
+            const applyRes = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/service-center/apply', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

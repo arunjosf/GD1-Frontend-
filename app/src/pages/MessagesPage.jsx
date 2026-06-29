@@ -61,7 +61,7 @@ export default function MessagesPage() {
       const token = getToken('AccessToken');
       if (!token) return;
 
-      const res = await fetch('https://localhost:7108/api/lot-manager/my-owners', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/my-owners', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -81,7 +81,7 @@ export default function MessagesPage() {
       const token = getToken('AccessToken');
       if (!token) return;
 
-      const res = await fetch('https://localhost:7108/api/lot-manager/lot-owners/all-managers', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/lot-owners/all-managers', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -125,7 +125,7 @@ export default function MessagesPage() {
       const parts = value.split(`; AccessToken=`);
       const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
 
-      const response = await fetch('https://localhost:7108/api/Chat/conversations', {
+      const response = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Chat/conversations', {
           headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {

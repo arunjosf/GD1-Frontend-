@@ -115,7 +115,7 @@ export default function AgentSubmitReportPage() {
       const parts = value.split(`; AccessToken=`);
       const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
 
-      const res = await fetch('https://localhost:7108/api/agents/my-inspections', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/agents/my-inspections', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -179,7 +179,7 @@ export default function AgentSubmitReportPage() {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      const res = await fetch('https://localhost:7108/api/upload/upload-file', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/upload/upload-file', {
         method: 'POST',
         body: formData
       });
@@ -230,7 +230,7 @@ export default function AgentSubmitReportPage() {
         slots: finalizedSlots
       };
 
-      const res = await fetch(`https://localhost:7108/api/agents/assignments/${id}/submit-inspection`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/agents/assignments/${id}/submit-inspection`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

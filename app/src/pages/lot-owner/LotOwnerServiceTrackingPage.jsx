@@ -20,7 +20,7 @@ export default function LotOwnerServiceTrackingPage() {
     const fetchServiceRequest = async () => {
       try {
         const token = getToken('AccessToken');
-        const res = await fetch(`https://localhost:7108/api/service-center/request/${id}`, {
+        const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/service-center/request/${id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('Failed to fetch service request details');
@@ -311,7 +311,7 @@ export default function LotOwnerServiceTrackingPage() {
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Service Center</h3>
                 
                 {serviceRequest.serviceCenterImage && (
-                  <img src={serviceRequest.serviceCenterImage.startsWith('http') ? serviceRequest.serviceCenterImage : `https://localhost:7108${serviceRequest.serviceCenterImage}`} alt={serviceRequest.serviceCenterName} className="w-full h-32 object-cover rounded-xl mb-4 border border-gray-100" />
+                  <img src={serviceRequest.serviceCenterImage.startsWith('http') ? serviceRequest.serviceCenterImage : `https://gd1-grand-auto-depot-one-9ms1.onrender.com${serviceRequest.serviceCenterImage}`} alt={serviceRequest.serviceCenterName} className="w-full h-32 object-cover rounded-xl mb-4 border border-gray-100" />
                 )}
                 
                 <h4 className="font-bold text-gray-900 mb-1">{serviceRequest.serviceCenterName}</h4>

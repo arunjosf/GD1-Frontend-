@@ -46,7 +46,7 @@ export default function LotOwnerManagersPage() {
       const token = getToken('AccessToken');
       if (!token) throw new Error("No token found");
 
-      const res = await fetch('https://localhost:7108/api/lot-manager/properties', { 
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/properties', { 
         headers: { 'Authorization': `Bearer ${token}` } 
       });
       if (!res.ok) throw new Error("Failed to fetch properties");
@@ -67,8 +67,8 @@ export default function LotOwnerManagersPage() {
       if (!token) throw new Error("No token found");
 
       const url = property && property.id !== 'all' 
-        ? `https://localhost:7108/api/lot-manager/lot-owners/all-managers?propertyId=${property.id}`
-        : `https://localhost:7108/api/lot-manager/lot-owners/all-managers`;
+        ? `https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/lot-owners/all-managers?propertyId=${property.id}`
+        : `https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/lot-owners/all-managers`;
 
       const res = await fetch(url, { 
         headers: { 'Authorization': `Bearer ${token}` } 
@@ -89,7 +89,7 @@ export default function LotOwnerManagersPage() {
       const token = getToken('AccessToken');
       if (!token) throw new Error("No token found");
 
-      const res = await fetch(`https://localhost:7108/api/lot-manager/managers/${manager.lotManagerRecordId}/toggle-status`, { 
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/managers/${manager.lotManagerRecordId}/toggle-status`, { 
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` } 
       });
@@ -116,7 +116,7 @@ export default function LotOwnerManagersPage() {
     if (!url) return null;
     if (url.startsWith('http') || url.startsWith('data:')) return url;
     const cleanUrl = url.startsWith('/') ? url : `/${url}`;
-    return `https://localhost:7108${cleanUrl}`;
+    return `https://gd1-grand-auto-depot-one-9ms1.onrender.com${cleanUrl}`;
   };
 
   if (loadingProperties) {

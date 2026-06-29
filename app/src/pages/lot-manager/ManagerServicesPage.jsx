@@ -19,7 +19,7 @@ export default function ManagerServicesPage() {
     setOtpLoading(true);
     try {
       const token = getToken('AccessToken');
-      const res = await fetch(`https://localhost:7108/api/lot-manager/bookings/${serviceId}/trigger-otp`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/bookings/${serviceId}/trigger-otp`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -39,7 +39,7 @@ export default function ManagerServicesPage() {
     setOtpLoading(true);
     try {
       const token = getToken('AccessToken');
-      const res = await fetch(`https://localhost:7108/api/lot-manager/bookings/${otpModal.serviceId}/verify-otp`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/bookings/${otpModal.serviceId}/verify-otp`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -65,7 +65,7 @@ export default function ManagerServicesPage() {
   const fetchServices = async () => {
     try {
       const token = getToken('AccessToken');
-      const res = await fetch(`https://localhost:7108/api/lot-manager/my-services`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/my-services`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Failed to fetch services');

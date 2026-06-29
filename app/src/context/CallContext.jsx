@@ -37,7 +37,7 @@ export const CallProvider = ({ children }) => {
 
         const connectSignalR = async () => {
             const connection = new signalR.HubConnectionBuilder()
-                .withUrl("https://localhost:7108/hubs/chat", { accessTokenFactory: () => token })
+                .withUrl("https://gd1-grand-auto-depot-one-9ms1.onrender.com/hubs/chat", { accessTokenFactory: () => token })
                 .withAutomaticReconnect()
                 .build();
 

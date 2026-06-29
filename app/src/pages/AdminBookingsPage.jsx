@@ -6,7 +6,7 @@ import { MapPin, Calendar, Clock, Car, ChevronRight, Wrench, Search, IndianRupee
 
 const api = {
   get: async (url) => {
-    const res = await fetch(`https://localhost:7108/api${url}`, {
+    const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api${url}`, {
       headers: { Authorization: `Bearer ${getToken('AccessToken')}` }
     });
     if (!res.ok) throw new Error('API Error');

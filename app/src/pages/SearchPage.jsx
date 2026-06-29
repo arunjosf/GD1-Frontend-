@@ -166,7 +166,7 @@ export default function SearchPage() {
         queryParams.append('lon', lon);
         queryParams.append('recommend', 'true');
         
-        const url = `https://localhost:7108/api/LotBooking/partnered-lots?${queryParams.toString()}`;
+        const url = `https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/LotBooking/partnered-lots?${queryParams.toString()}`;
         const token = getToken('AccessToken');
         const headers = token ? { "Authorization": `Bearer ${token}` } : {};
         

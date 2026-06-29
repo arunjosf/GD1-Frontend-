@@ -17,7 +17,7 @@ export function AuthProvider({ children }) {
     if (!token) return;
     setVehiclesLoading(true);
     try {
-      const res = await fetch('https://localhost:7108/api/Vehicle/my-vehicle', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Vehicle/my-vehicle', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();

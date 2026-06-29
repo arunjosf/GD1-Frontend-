@@ -147,7 +147,7 @@ export default function NearbyServiceCentersPage() {
     
     try {
       const token = getToken('AccessToken');
-      const response = await fetch('https://localhost:7108/api/service-center/request', {
+      const response = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/service-center/request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -184,7 +184,7 @@ export default function NearbyServiceCentersPage() {
         const token = getToken('AccessToken');
         const headers = token ? { "Authorization": `Bearer ${token}` } : {};
         
-        const nearbyUrl = `https://localhost:7108/api/service-center/nearby/${propertyId}`;
+        const nearbyUrl = `https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/service-center/nearby/${propertyId}`;
         const res = await fetch(nearbyUrl, { headers });
         if (!res.ok) throw new Error('Failed to fetch nearby service centers');
         const result = await res.json();

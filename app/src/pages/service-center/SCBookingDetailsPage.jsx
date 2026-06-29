@@ -7,14 +7,14 @@ import { getToken } from '../../api/auth';
 
 const api = {
   get: async (url) => {
-    const res = await fetch(`https://localhost:7108/api${url}`, {
+    const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api${url}`, {
       headers: { Authorization: `Bearer ${getToken('AccessToken')}` }
     });
     if (!res.ok) throw new Error('API Error');
     return { data: await res.json() };
   },
   post: async (url, body) => {
-    const res = await fetch(`https://localhost:7108/api${url}`, {
+    const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api${url}`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -26,7 +26,7 @@ const api = {
     return { data: await res.json() };
   },
   put: async (url, body) => {
-    const res = await fetch(`https://localhost:7108/api${url}`, {
+    const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api${url}`, {
       method: 'PUT',
       headers: { 
         'Content-Type': 'application/json',
@@ -175,7 +175,7 @@ export default function SCBookingDetailsPage() {
       formData.append('billFile', billFile);
       formData.append('amount', amount);
 
-      const res = await fetch(`https://localhost:7108/api/service-center/bookings/${booking.id}/complete`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/service-center/bookings/${booking.id}/complete`, {
         method: 'POST',
         headers: { 
           Authorization: `Bearer ${getToken('AccessToken')}` 
@@ -272,7 +272,7 @@ export default function SCBookingDetailsPage() {
               <Car size={18} className="text-blue-600"/> Vehicle
             </h3>
             <div className="w-full h-40 bg-gray-100 rounded-xl overflow-hidden mb-4 border border-gray-200">
-              <img src={booking.vehicleLatestConditionImageUrl ? (booking.vehicleLatestConditionImageUrl.startsWith('http') ? booking.vehicleLatestConditionImageUrl : `https://localhost:7108${booking.vehicleLatestConditionImageUrl}`) : 'https://placehold.co/400x300/e2e8f0/64748b?text=No+Image'} className="w-full h-full object-cover" alt="Vehicle" />
+              <img src={booking.vehicleLatestConditionImageUrl ? (booking.vehicleLatestConditionImageUrl.startsWith('http') ? booking.vehicleLatestConditionImageUrl : `https://gd1-grand-auto-depot-one-9ms1.onrender.com${booking.vehicleLatestConditionImageUrl}`) : 'https://placehold.co/400x300/e2e8f0/64748b?text=No+Image'} className="w-full h-full object-cover" alt="Vehicle" />
             </div>
             <div className="space-y-3">
               <div>

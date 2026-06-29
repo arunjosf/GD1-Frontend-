@@ -52,7 +52,7 @@ export default function AdminDashboardPage() {
         const token = getToken('AccessToken');
         if (!token) return;
 
-        const res = await fetch('https://localhost:7108/api/admin/dashboard/stats', {
+        const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/admin/dashboard/stats', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {

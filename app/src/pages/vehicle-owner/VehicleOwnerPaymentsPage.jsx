@@ -21,7 +21,7 @@ export default function VehicleOwnerPaymentsPage() {
     setLoading(true);
     try {
       const token = getToken('AccessToken');
-      const res = await fetch('https://localhost:7108/api/LotBooking/my-payments', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/LotBooking/my-payments', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -48,7 +48,7 @@ export default function VehicleOwnerPaymentsPage() {
       const token = getToken('AccessToken');
 
       // 1. Fetch Razorpay key
-      const keyRes = await fetch('https://localhost:7108/api/payment/config', {
+      const keyRes = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/payment/config', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const keyData = await keyRes.json();
@@ -61,7 +61,7 @@ export default function VehicleOwnerPaymentsPage() {
         razorpayOrderId = null;
       } else {
         // Lot booking / storage cycle / pickup charge — create order on backend
-        const orderRes = await fetch('https://localhost:7108/api/payment/create-cycle-order', {
+        const orderRes = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/payment/create-cycle-order', {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -91,8 +91,8 @@ export default function VehicleOwnerPaymentsPage() {
           try {
             // 3. Verify on backend
             const verifyEndpoint = item.type === 'Service Payment'
-              ? `https://localhost:7108/api/service-center/request/${item.serviceRequestId}/verify-payment`
-              : 'https://localhost:7108/api/payment/verify-cycle';
+              ? `https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/service-center/request/${item.serviceRequestId}/verify-payment`
+              : 'https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/payment/verify-cycle';
 
             const body = item.type === 'Service Payment'
               ? {

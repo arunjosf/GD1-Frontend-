@@ -65,7 +65,7 @@ export default function LotOwnerVehicleDetailsPage() {
       setAfterServiceEvent(null);
       const token = getToken('AccessToken');
       const queryParams = bookingId ? `?bookingId=${bookingId}` : '';
-      const res = await fetch(`https://localhost:7108/api/lot-owner/dashboard/vehicles/${id}${queryParams}`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-owner/dashboard/vehicles/${id}${queryParams}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) {
@@ -77,7 +77,7 @@ export default function LotOwnerVehicleDetailsPage() {
       setVehicle(result.data);
 
       try {
-        const sRes = await fetch('https://localhost:7108/api/lot-manager/my-services', {
+        const sRes = await fetch('hhttps://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/my-services', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const sResult = await sRes.json();
@@ -88,7 +88,7 @@ export default function LotOwnerVehicleDetailsPage() {
 
       if (result.data?.vehicleId) {
         try {
-          const journeyRes = await fetch(`https://localhost:7108/api/Vehicle/${result.data.vehicleId}/lot-owner/manager/vehicle-journey${result.data.bookingId ? `?bookingId=${result.data.bookingId}` : ''}`, {
+          const journeyRes = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Vehicle/${result.data.vehicleId}/lot-owner/manager/vehicle-journey${result.data.bookingId ? `?bookingId=${result.data.bookingId}` : ''}`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (journeyRes.ok) {
@@ -115,7 +115,7 @@ export default function LotOwnerVehicleDetailsPage() {
     setIsSubmittingRecommend(true);
     try {
       const token = getToken('AccessToken');
-      const response = await fetch('https://localhost:7108/api/lot-manager/recommend-service', {
+      const response = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/recommend-service', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -146,7 +146,7 @@ export default function LotOwnerVehicleDetailsPage() {
     setIsStopping(true);
     try {
       const token = getToken('AccessToken');
-      const response = await fetch(`https://localhost:7108/api/lot-owner/dashboard/vehicles/${vehicle.vehicleId}/stop-storing`, {
+      const response = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-owner/dashboard/vehicles/${vehicle.vehicleId}/stop-storing`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -208,7 +208,7 @@ export default function LotOwnerVehicleDetailsPage() {
   const getImageUrl = (url) => {
     if (!url) return null;
     if (url.startsWith('http') || url.startsWith('data:')) return url;
-    return `https://localhost:7108${url.startsWith('/') ? url : `/${url}`}`;
+    return `https://gd1-grand-auto-depot-one-9ms1.onrender.com${url.startsWith('/') ? url : `/${url}`}`;
   };
 
   const getMoveOutAlert = () => {
@@ -383,7 +383,7 @@ export default function LotOwnerVehicleDetailsPage() {
                     <div className="flex flex-wrap gap-2">
                       {afterServiceEvent.images.map((img, idx) => (
                         <div key={idx} className="group relative w-16 h-16 rounded-xl overflow-hidden border border-gray-100 cursor-pointer shrink-0" onClick={() => setSelectedImage({ url: img.imageUrl, label: img.label })}>
-                          <img src={img.imageUrl.startsWith('http') ? img.imageUrl : `https://localhost:7108${img.imageUrl}`} alt={img.label} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                          <img src={img.imageUrl.startsWith('http') ? img.imageUrl : `https://gd1-grand-auto-depot-one-9ms1.onrender.com${img.imageUrl}`} alt={img.label} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                           <div className="absolute inset-0 bg-transparent flex items-end p-1">
                             <span className="bg-white/90 text-black px-1.5 py-0.5 rounded text-[8px] font-bold shadow-sm">{img.label}</span>
                           </div>
@@ -519,7 +519,7 @@ export default function LotOwnerVehicleDetailsPage() {
                           { label: 'Odometer', url: vehicle.recentWeeklyUpdateImages.odometerImageUrl },
                         ].filter(img => img.url).map((img, i) => (
                           <div key={i} className="group relative aspect-square rounded-2xl overflow-hidden cursor-pointer border border-gray-100 shadow-sm" onClick={() => setSelectedImage(img)}>
-                            <img src={img.url.startsWith('http') ? img.url : `https://localhost:7108${img.url}`} alt={img.label} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                            <img src={img.url.startsWith('http') ? img.url : `https://gd1-grand-auto-depot-one-9ms1.onrender.com${img.url}`} alt={img.label} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                             <div className="absolute inset-0 bg-transparent flex items-end p-3">
                               <span className="bg-white/90 text-black px-2 py-1 rounded-md font-bold text-[10px] tracking-wide shadow-sm">{img.label}</span>
                             </div>
@@ -573,7 +573,7 @@ export default function LotOwnerVehicleDetailsPage() {
                         onClick={() => setSelectedImage(img)}
                       >
                         <img
-                          src={img.url.startsWith('http') ? img.url : `https://localhost:7108${img.url}`}
+                          src={img.url.startsWith('http') ? img.url : `https://gd1-grand-auto-depot-one-9ms1.onrender.com${img.url}`}
                           alt={img.label}
                           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         />
@@ -712,7 +712,7 @@ export default function LotOwnerVehicleDetailsPage() {
             <X size={22} />
           </button>
           <img
-            src={selectedImage.url.startsWith('http') ? selectedImage.url : `https://localhost:7108${selectedImage.url}`}
+            src={selectedImage.url.startsWith('http') ? selectedImage.url : `https://gd1-grand-auto-depot-one-9ms1.onrender.com${selectedImage.url}`}
             alt={selectedImage.label}
             className="max-w-[90vw] max-h-[80vh] object-contain rounded-2xl shadow-2xl"
             onClick={e => e.stopPropagation()}

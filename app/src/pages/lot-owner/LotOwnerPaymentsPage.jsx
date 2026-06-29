@@ -17,7 +17,7 @@ export default function LotOwnerPaymentsPage() {
   const fetchPayments = async () => {
     try {
       const token = getToken('AccessToken');
-      const res = await fetch('https://localhost:7108/api/lot-owner/dashboard/payments', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-owner/dashboard/payments', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();

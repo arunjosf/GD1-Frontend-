@@ -4,14 +4,14 @@ import { getToken } from '../../api/auth';
 
 const api = {
   get: async (url) => {
-    const res = await fetch(`https://localhost:7108/api${url}`, {
+    const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api${url}`, {
       headers: { Authorization: `Bearer ${getToken('AccessToken')}` }
     });
     if (!res.ok) throw new Error('API Error');
     return { data: await res.json() };
   },
   post: async (url, body) => {
-    const res = await fetch(`https://localhost:7108/api${url}`, {
+    const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api${url}`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -23,7 +23,7 @@ const api = {
     return { data: await res.json() };
   },
   put: async (url, body) => {
-    const res = await fetch(`https://localhost:7108/api${url}`, {
+    const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api${url}`, {
       method: 'PUT',
       headers: { 
         'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ export default function SCBookingsPage() {
               
               <div className="h-40 bg-gray-100 relative">
                 {booking.serviceCenterImage ? (
-                  <img src={booking.serviceCenterImage ? (booking.serviceCenterImage.startsWith('http') ? booking.serviceCenterImage : `https://localhost:7108${booking.serviceCenterImage}`) : 'https://placehold.co/400x300/e2e8f0/64748b?text=No+Image'} className="w-full h-full object-cover" alt="Vehicle" />
+                  <img src={booking.serviceCenterImage ? (booking.serviceCenterImage.startsWith('http') ? booking.serviceCenterImage : `https://gd1-grand-auto-depot-one-9ms1.onrender.com${booking.serviceCenterImage}`) : 'https://placehold.co/400x300/e2e8f0/64748b?text=No+Image'} className="w-full h-full object-cover" alt="Vehicle" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-300">
                     <Car size={48} />

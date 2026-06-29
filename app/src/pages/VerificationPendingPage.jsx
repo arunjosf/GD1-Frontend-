@@ -17,7 +17,7 @@ export default function VerificationPendingPage() {
     const fetchBooking = async () => {
       try {
         const token = getToken('AccessToken');
-        const res = await fetch(`https://localhost:7108/api/LotBooking/${id}booking-By-Id`, {
+        const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/LotBooking/${id}booking-By-Id`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

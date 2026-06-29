@@ -228,8 +228,8 @@ export default function VehicleJourneyPage() {
 
   const queryParams = bookingId ? `?bookingId=${bookingId}` : '';
   const journeyEndpoint = isOwner
-    ? `https://localhost:7108/api/vehicle/${vehicleId}/vehicle-owner/vehicle-journey${queryParams}`
-    : `https://localhost:7108/api/vehicle/${vehicleId}/lot-owner/manager/vehicle-journey${queryParams}`;
+    ? `https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/vehicle/${vehicleId}/vehicle-owner/vehicle-journey${queryParams}`
+    : `https://gd1-grand-auto-depot-one-9ms1.onrender.com/${vehicleId}/lot-owner/manager/vehicle-journey${queryParams}`;
 
     useEffect(() => {
     const fetchData = async () => {
@@ -246,7 +246,7 @@ export default function VehicleJourneyPage() {
         // 2. Fetch Booking Data to inject missing Service events
         if (bookingId) {
           try {
-             const bRes = await fetch(`https://localhost:7108/${bookingId}booking-By-Id`, {
+             const bRes = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/${bookingId}booking-By-Id`, {
                headers: { 'Authorization': `Bearer ${token}` }
              });
              if (bRes.ok) {

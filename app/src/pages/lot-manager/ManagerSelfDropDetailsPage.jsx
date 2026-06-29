@@ -28,7 +28,7 @@ export default function ManagerSelfDropDetailsPage() {
       const token = getToken('AccessToken');
       if (!token) return;
 
-      const res = await fetch(`https://localhost:7108/api/lot-manager/self-drops/${id}`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/self-drops/${id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -57,7 +57,7 @@ export default function ManagerSelfDropDetailsPage() {
   const getImageUrl = (url) => {
     if (!url) return null;
     if (url.startsWith('http') || url.startsWith('data:')) return url;
-    return `https://localhost:7108${url.startsWith('/') ? url : `/${url}`}`;
+    return `https://gd1-grand-auto-depot-one-9ms1.onrender.com${url.startsWith('/') ? url : `/${url}`}`;
   };
 
   if (loading) {

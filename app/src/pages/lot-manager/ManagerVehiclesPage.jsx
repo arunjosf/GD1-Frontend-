@@ -18,7 +18,7 @@ export default function ManagerVehiclesPage() {
     setLoading(true);
     try {
       const token = getToken('AccessToken');
-      const res = await fetch(`https://localhost:7108/api/lot-manager/vehicles`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/vehicles`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error("Failed to fetch vehicles");
@@ -41,7 +41,7 @@ export default function ManagerVehiclesPage() {
   const getImageUrl = (url) => {
     if (!url) return null;
     if (url.startsWith('http') || url.startsWith('data:')) return url;
-    return `https://localhost:7108${url.startsWith('/') ? url : `/${url}`}`;
+    return `https://gd1-grand-auto-depot-one-9ms1.onrender.com${url.startsWith('/') ? url : `/${url}`}`;
   };
 
   return (

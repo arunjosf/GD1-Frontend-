@@ -28,7 +28,7 @@ export function NavigationProvider({ children }) {
     console.log('[NavCtx] Connecting TrackingHub for bookingId:', pickup.bookingId);
 
     const connection = new HubConnectionBuilder()
-      .withUrl("https://localhost:7108/hubs/tracking", { accessTokenFactory: () => token })
+      .withUrl("https://gd1-grand-auto-depot-one-9ms1.onrender.com/hubs/tracking", { accessTokenFactory: () => token })
       .configureLogging(LogLevel.Warning)
       .withAutomaticReconnect()
       .build();

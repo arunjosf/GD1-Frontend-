@@ -17,7 +17,7 @@ export default function ManagerTasksPage() {
     setLoading(true);
     try {
       const token = getToken('AccessToken');
-      const res = await fetch(`https://localhost:7108/api/lot-manager/pending-maintenance-tasks`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/pending-maintenance-tasks`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error("Failed to fetch tasks");
@@ -61,7 +61,7 @@ export default function ManagerTasksPage() {
           {tasks.map((task) => {
             const info = getTaskInfo(task.type);
             const formattedUrl = task.imageUrl?.startsWith('/') ? task.imageUrl : `/${task.imageUrl}`;
-            const displayImage = task.imageUrl ? (task.imageUrl.startsWith('http') ? task.imageUrl : `https://localhost:7108${formattedUrl}`) : null;
+            const displayImage = task.imageUrl ? (task.imageUrl.startsWith('http') ? task.imageUrl : `https://gd1-grand-auto-depot-one-9ms1.onrender.com${formattedUrl}`) : null;
             return (
               <div key={task.id} className="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex flex-col gap-4">

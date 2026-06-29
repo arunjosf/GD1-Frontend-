@@ -29,13 +29,13 @@ export default function AdminSidebar({ isMobileOpen, setIsMobileOpen }) {
         if (!token) return;
 
         const [franchiseRes, scRes, bookingsRes] = await Promise.all([
-          fetch('https://localhost:7108/api/admin/franchise/applications', {
+          fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/admin/franchise/applications', {
             headers: { 'Authorization': `Bearer ${token}` }
           }).catch(() => null),
-          fetch('https://localhost:7108/api/admin/service-centers/applications', {
+          fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/admin/service-centers/applications', {
             headers: { 'Authorization': `Bearer ${token}` }
           }).catch(() => null),
-          fetch('https://localhost:7108/api/LotBooking/bookings', {
+          fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/LotBooking/bookings', {
             headers: { 'Authorization': `Bearer ${token}` }
           }).catch(() => null)
         ]);

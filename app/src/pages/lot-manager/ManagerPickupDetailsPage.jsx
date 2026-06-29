@@ -184,7 +184,7 @@ export default function ManagerPickupDetailsPage() {
     console.log('[Manager] Connecting to TrackingHub for bookingId:', pickup.bookingId);
 
     const connection = new HubConnectionBuilder()
-      .withUrl("https://localhost:7108/hubs/tracking", { accessTokenFactory: () => token })
+      .withUrl("https://gd1-grand-auto-depot-one-9ms1.onrender.com/hubs/tracking", { accessTokenFactory: () => token })
       .configureLogging(LogLevel.Warning)
       .withAutomaticReconnect()
       .build();
@@ -301,7 +301,7 @@ export default function ManagerPickupDetailsPage() {
       const token = getToken('AccessToken');
       if (!token) return;
 
-      const res = await fetch(`https://localhost:7108/api/Pickup/${id}`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Pickup/${id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error("Failed to fetch pickup details");
@@ -325,7 +325,7 @@ export default function ManagerPickupDetailsPage() {
     const formData = new FormData();
     formData.append('file', file);
 
-    const res = await fetch('https://localhost:7108/api/Upload/upload-file', {
+    const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Upload/upload-file', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: formData
@@ -356,7 +356,7 @@ export default function ManagerPickupDetailsPage() {
           try {
             const token = getToken('AccessToken');
 
-            const res = await fetch('https://localhost:7108/api/Pickup/manager/start-pickup-ride', {
+            const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Pickup/manager/start-pickup-ride', {
               method: 'POST',
               headers: { 
                 'Authorization': `Bearer ${token}`,
@@ -424,7 +424,7 @@ export default function ManagerPickupDetailsPage() {
   const getImageUrl = (url) => {
     if (!url) return null;
     if (url.startsWith('http') || url.startsWith('data:')) return url;
-    return `https://localhost:7108${url.startsWith('/') ? url : `/${url}`}`;
+    return `https://gd1-grand-auto-depot-one-9ms1.onrender.com${url.startsWith('/') ? url : `/${url}`}`;
   };
 
   if (loading) {

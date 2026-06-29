@@ -351,7 +351,7 @@ export default function ManagerStartStoringPage() {
     const token = getToken('AccessToken');
     const formData = new FormData();
     formData.append('file', file);
-    const res = await fetch('https://localhost:7108/api/Upload/upload-file', {
+    const res = await fetch('hhttps://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Upload/upload-file', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: formData
@@ -385,7 +385,7 @@ export default function ManagerStartStoringPage() {
       ]);
       toast.dismiss('upload');
 
-      const res = await fetch(`https://localhost:7108/api/lot-manager/self-drops/${id}/start-storing`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/self-drops/${id}/start-storing`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${getToken('AccessToken')}`,

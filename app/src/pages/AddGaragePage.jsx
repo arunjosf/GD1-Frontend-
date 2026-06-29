@@ -57,7 +57,7 @@ export default function AddGaragePage() {
     formData.append('file', file);
 
     try {
-      const res = await fetch('https://localhost:7108/api/Upload/upload-file', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Upload/upload-file', {
         method: 'POST',
         body: formData
       });
@@ -135,12 +135,12 @@ export default function AddGaragePage() {
       const token = tokenCookie ? tokenCookie.split('=')[1] : null;
 
       // 1. Fetch Razorpay Config
-      const configRes = await fetch('https://localhost:7108/api/Payment/config');
+      const configRes = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Payment/config');
       if (!configRes.ok) throw new Error('Could not fetch payment configuration.');
       const { keyId } = await configRes.json();
 
       // 2. Create Razorpay Order
-      const orderRes = await fetch('https://localhost:7108/api/Franchise/create-application-order', {
+      const orderRes = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Franchise/create-application-order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -179,7 +179,7 @@ export default function AddGaragePage() {
               razorpaySignature: response.razorpay_signature
             };
 
-            const applyRes = await fetch('https://localhost:7108/api/Franchise/apply', {
+            const applyRes = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Franchise/apply', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

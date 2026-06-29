@@ -343,7 +343,7 @@ export default function ManagerArrivedPage() {
     try {
       const token = getToken('AccessToken');
       if (!token) return;
-      const res = await fetch(`https://localhost:7108/api/Pickup/${id}`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Pickup/${id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const result = await res.json();
@@ -378,7 +378,7 @@ export default function ManagerArrivedPage() {
     const token = getToken('AccessToken');
     const formData = new FormData();
     formData.append('file', file);
-    const res = await fetch('https://localhost:7108/api/Upload/upload-file', {
+    const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Upload/upload-file', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: formData
@@ -406,7 +406,7 @@ export default function ManagerArrivedPage() {
       toast.dismiss('upload');
 
       const token = getToken('AccessToken');
-      const res = await fetch('https://localhost:7108/api/Pickup/Manager-arrived/pickup-submission', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Pickup/Manager-arrived/pickup-submission', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -444,7 +444,7 @@ export default function ManagerArrivedPage() {
     setOtpVerifying(true);
     try {
       const token = getToken('AccessToken');
-      const res = await fetch('https://localhost:7108/api/Pickup/manager/verify-otp', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Pickup/manager/verify-otp', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -481,7 +481,7 @@ export default function ManagerArrivedPage() {
       // Re-use the already-submitted pickup — we call the same endpoint but images 
       // are already stored. For simplicity we call a no-op re-trigger by re-submitting.
       // The backend will regenerate the OTP and re-email the owner.
-      const res = await fetch('https://localhost:7108/api/Pickup/Manager-arrived/pickup-submission', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Pickup/Manager-arrived/pickup-submission', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

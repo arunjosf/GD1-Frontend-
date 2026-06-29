@@ -43,7 +43,7 @@ export default function TrackServicePage() {
     try {
       setLoading(true);
       const token = getToken('AccessToken');
-      const keyRes = await fetch('https://localhost:7108/api/payment/config', { headers: { 'Authorization': `Bearer ${token}` } });
+      const keyRes = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/payment/config', { headers: { 'Authorization': `Bearer ${token}` } });
       const keyData = await keyRes.json();
       const totalAmount = (serviceRequest.amount || 0) + (serviceRequest.platformFee || 0);
       const options = {
@@ -54,7 +54,7 @@ export default function TrackServicePage() {
         description: "Service Payment",
         handler: async (response) => {
           try {
-            const verifyRes = await fetch(`https://localhost:7108/api/service-center/request/${id}/verify-payment`, {
+            const verifyRes = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/service-center/request/${id}/verify-payment`, {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${token}`,
@@ -95,7 +95,7 @@ export default function TrackServicePage() {
     const fetchServiceRequest = async () => {
       try {
         const token = getToken('AccessToken');
-        const res = await fetch(`https://localhost:7108/api/service-center/request/${id}`, {
+        const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/service-center/request/${id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('Failed to fetch service request details');
@@ -147,7 +147,7 @@ export default function TrackServicePage() {
     
     try {
       const token = getToken('AccessToken');
-      const res = await fetch(`https://localhost:7108/api/service-center/request/${id}/cancel`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/service-center/request/${id}/cancel`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -165,7 +165,7 @@ export default function TrackServicePage() {
       setCancelModalOpen(false);
       
       // Refresh details
-      const refreshRes = await fetch(`https://localhost:7108/api/service-center/request/${id}`, {
+      const refreshRes = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/service-center/request/${id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (refreshRes.ok) {
@@ -289,7 +289,7 @@ export default function TrackServicePage() {
               <span className="text-gray-500 font-medium">Service Bill</span>
               {serviceRequest.billUrl ? (
                 <button 
-                  onClick={() => handleViewBill(serviceRequest.billUrl.startsWith('http') ? serviceRequest.billUrl : `https://localhost:7108${serviceRequest.billUrl}`)}
+                  onClick={() => handleViewBill(serviceRequest.billUrl.startsWith('http') ? serviceRequest.billUrl : `https://gd1-grand-auto-depot-one-9ms1.onrender.com${serviceRequest.billUrl}`)}
                   className="border border-blue-200 text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-50 font-semibold text-xs transition-colors"
                 >
                   View Bill / Invoice
@@ -486,7 +486,7 @@ export default function TrackServicePage() {
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Service Center</h3>
                 
                 {serviceRequest.serviceCenterImage && (
-                  <img src={serviceRequest.serviceCenterImage.startsWith('http') ? serviceRequest.serviceCenterImage : `https://localhost:7108${serviceRequest.serviceCenterImage}`} alt={serviceRequest.serviceCenterName} className="w-full h-32 object-cover rounded-xl mb-4 border border-gray-100" />
+                  <img src={serviceRequest.serviceCenterImage.startsWith('http') ? serviceRequest.serviceCenterImage : `https://gd1-grand-auto-depot-one-9ms1.onrender.com${serviceRequest.serviceCenterImage}`} alt={serviceRequest.serviceCenterName} className="w-full h-32 object-cover rounded-xl mb-4 border border-gray-100" />
                 )}
                 
                 <h4 className="font-bold text-gray-900 mb-1">{serviceRequest.serviceCenterName}</h4>

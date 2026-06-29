@@ -212,7 +212,7 @@ export default function HomePage() {
     let mounted = true;
     const fetchProps = async (lat, lon) => {
       try {
-        let url = `https://localhost:7108/api/LotBooking/partnered-lots?recommend=true`;
+        let url = `https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/LotBooking/partnered-lots?recommend=true`;
         if (lat && lon) url += `&lat=${lat}&lon=${lon}`;
         
         const token = getToken('AccessToken');
@@ -357,7 +357,7 @@ export default function HomePage() {
         // Wait a tiny bit for the context state to catch up if needed, 
         // or just fetch directly as fallback
         const token = getToken('AccessToken');
-        const res = await fetch('https://localhost:7108/api/Vehicle/my-vehicle', {
+        const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Vehicle/my-vehicle', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.status === 401) {

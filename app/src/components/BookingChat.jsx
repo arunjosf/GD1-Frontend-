@@ -28,7 +28,7 @@ export default function BookingChat({ bookingId, category = "garage", currentUse
       if (!token) return;
 
       newConnection = new HubConnectionBuilder()
-        .withUrl("https://localhost:7108/hubs/chat", { accessTokenFactory: () => token })
+        .withUrl("https://gd1-grand-auto-depot-one-9ms1.onrender.com/hubs/chat", { accessTokenFactory: () => token })
         .configureLogging(LogLevel.Information)
         .build();
 
@@ -61,7 +61,7 @@ export default function BookingChat({ bookingId, category = "garage", currentUse
       const parts = value.split(`; AccessToken=`);
       const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
 
-      const res = await fetch(`https://localhost:7108/api/Chat/history/${category}/${referenceId}`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Chat/history/${category}/${referenceId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();

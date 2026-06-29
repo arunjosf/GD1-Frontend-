@@ -14,7 +14,7 @@ import { toast } from 'react-hot-toast';
 
 const api = {
   get: async (url) => {
-    const res = await fetch(`https://localhost:7108/api${url}`, {
+    const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api${url}`, {
       headers: { Authorization: `Bearer ${getToken('AccessToken')}` }
     });
     if (!res.ok) throw new Error('API Error');
@@ -245,7 +245,7 @@ export default function SCDashboardPage() {
                 {/* Vehicle Image */}
                 <div className="w-full md:w-32 h-20 bg-gray-100 rounded-xl overflow-hidden shrink-0 relative">
                   {booking.serviceCenterImage ? (
-                    <img src={booking.serviceCenterImage.startsWith('http') ? booking.serviceCenterImage : `https://localhost:7108${booking.serviceCenterImage}`} className="w-full h-full object-cover" alt="Vehicle" />
+                    <img src={booking.serviceCenterImage.startsWith('http') ? booking.serviceCenterImage : `https://gd1-grand-auto-depot-one-9ms1.onrender.com${booking.serviceCenterImage}`} className="w-full h-full object-cover" alt="Vehicle" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">
                       <Car size={32} className="opacity-50" />

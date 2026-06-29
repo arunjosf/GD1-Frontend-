@@ -1,4 +1,4 @@
-const BASE = "https://localhost:7108/api/auth";
+const BASE = "https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/auth";
 
 export const getToken = (name) => {
   const value = `; ${document.cookie}`;

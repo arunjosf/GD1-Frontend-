@@ -15,8 +15,8 @@ export default function AdminApplicationsPage() {
         if (!token) return;
 
         const [franchiseRes, scRes] = await Promise.all([
-          fetch('https://localhost:7108/api/admin/franchise/applications', { headers: { 'Authorization': `Bearer ${token}` } }).catch(() => null),
-          fetch('https://localhost:7108/api/admin/service-centers/applications', { headers: { 'Authorization': `Bearer ${token}` } }).catch(() => null)
+          fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/admin/franchise/applications', { headers: { 'Authorization': `Bearer ${token}` } }).catch(() => null),
+          fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/admin/service-centers/applications', { headers: { 'Authorization': `Bearer ${token}` } }).catch(() => null)
         ]);
 
         let fCount = 0;

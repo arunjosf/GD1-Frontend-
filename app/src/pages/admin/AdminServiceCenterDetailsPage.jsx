@@ -6,14 +6,14 @@ import { ArrowLeft, MapPin, Phone, CheckCircle, Image as ImageIcon, Wrench } fro
 
 const api = {
   get: async (url) => {
-    const res = await fetch(`https://localhost:7108/api${url}`, {
+    const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api${url}`, {
       headers: { Authorization: `Bearer ${getToken('AccessToken')}` }
     });
     if (!res.ok) throw new Error('API Error');
     return { data: await res.json() };
   },
   post: async (url, data) => {
-    const res = await fetch(`https://localhost:7108/api${url}`, {
+    const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api${url}`, {
       method: 'POST',
       headers: { 
         'Authorization': `Bearer ${getToken('AccessToken')}`,

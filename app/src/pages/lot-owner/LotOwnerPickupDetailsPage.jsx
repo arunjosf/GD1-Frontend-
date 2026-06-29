@@ -144,7 +144,7 @@ export default function LotOwnerPickupDetailsPage() {
     console.log('[LotOwner] Connecting to TrackingHub for bookingId:', pickup.bookingId);
 
     const connection = new HubConnectionBuilder()
-      .withUrl("https://localhost:7108/hubs/tracking", { accessTokenFactory: () => token })
+      .withUrl("https://gd1-grand-auto-depot-one-9ms1.onrender.com/hubs/tracking", { accessTokenFactory: () => token })
       .configureLogging(LogLevel.Warning)
       .withAutomaticReconnect()
       .build();
@@ -248,7 +248,7 @@ export default function LotOwnerPickupDetailsPage() {
 
       if (!token) return;
 
-      const res = await fetch(`https://localhost:7108/api/Pickup/${id}`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Pickup/${id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -280,7 +280,7 @@ export default function LotOwnerPickupDetailsPage() {
       const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
 
       const checkDateStr = new Date(pickup.bookingStartDate).toISOString().split('T')[0];
-      const res = await fetch(`https://localhost:7108/api/lot-manager/lot-owners/all-managers?propertyId=${pickup.propertyId}&checkDate=${checkDateStr}`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/lot-owners/all-managers?propertyId=${pickup.propertyId}&checkDate=${checkDateStr}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -311,7 +311,7 @@ export default function LotOwnerPickupDetailsPage() {
       const parts = value.split(`; AccessToken=`);
       const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
 
-      const res = await fetch(`https://localhost:7108/api/Pickup/lot-owner/assign-manager`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Pickup/lot-owner/assign-manager`, {
         method: 'POST',
         headers: { 
             'Authorization': `Bearer ${token}`,
@@ -356,7 +356,7 @@ export default function LotOwnerPickupDetailsPage() {
     if (!url) return null;
     if (url.startsWith('http') || url.startsWith('data:')) return url;
     const cleanUrl = url.startsWith('/') ? url : `/${url}`;
-    return `https://localhost:7108${cleanUrl}`;
+    return `https://gd1-grand-auto-depot-one-9ms1.onrender.com${cleanUrl}`;
   };
 
   if (loading) {

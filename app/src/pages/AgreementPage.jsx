@@ -89,7 +89,7 @@ export default function AgreementPage() {
     const fetchAgreement = async () => {
       try {
         const token = getToken('AccessToken');
-        const res = await fetch(`https://localhost:7108/api/Agreement?id=${id}`, {
+        const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Agreement?id=${id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
@@ -118,7 +118,7 @@ export default function AgreementPage() {
     setProcessing(true);
     try {
       const token = getToken('AccessToken');
-      let url = `https://localhost:7108/api/Agreement/${id}/respond?response=${responseType}`;
+      let url = `https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Agreement/${id}/respond?response=${responseType}`;
       if (reason) {
         url += `&rejectionReason=${encodeURIComponent(reason)}`;
       }
@@ -155,7 +155,7 @@ export default function AgreementPage() {
     const toastId = toast.loading('Downloading PDF...');
     try {
       const token = getToken('AccessToken');
-      const res = await fetch(`https://localhost:7108/api/Agreement/${id}/download`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Agreement/${id}/download`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Failed to download PDF');

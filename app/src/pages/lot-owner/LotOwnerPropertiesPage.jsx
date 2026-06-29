@@ -13,7 +13,7 @@ export default function LotOwnerPropertiesPage() {
       const token = getToken('AccessToken');
       if (!token) throw new Error("No token found");
 
-      const res = await fetch('https://localhost:7108/api/lot-manager/properties', { 
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/properties', { 
         headers: { 'Authorization': `Bearer ${token}` } 
       });
       if (!res.ok) throw new Error("Failed to fetch properties");
@@ -57,7 +57,7 @@ export default function LotOwnerPropertiesPage() {
                   <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                       <div className="flex-1 flex gap-5">
                           {property.propertyImages && property.propertyImages.length > 0 ? (
-                            <img src={property.propertyImages[0].startsWith('http') ? property.propertyImages[0] : `https://localhost:7108${property.propertyImages[0].startsWith('/') ? '' : '/'}${property.propertyImages[0]}`} alt={property.name} className="w-24 h-24 rounded-2xl object-cover border border-gray-100 shadow-sm shrink-0 hidden sm:block" />
+                            <img src={property.propertyImages[0].startsWith('http') ? property.propertyImages[0] : `https://gd1-grand-auto-depot-one-9ms1.onrender.com${property.propertyImages[0].startsWith('/') ? '' : '/'}${property.propertyImages[0]}`} alt={property.name} className="w-24 h-24 rounded-2xl object-cover border border-gray-100 shadow-sm shrink-0 hidden sm:block" />
                           ) : (
                             <div className="w-24 h-24 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100 shadow-sm hidden sm:flex">
                               <Building2 size={32} />

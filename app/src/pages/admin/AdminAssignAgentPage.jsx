@@ -20,14 +20,14 @@ export default function AdminAssignAgentPage() {
         if (!token) return;
 
         // Fetch application details to get name/location
-        const appRes = await fetch(`https://localhost:7108/api/admin/franchise/applications/${id}`, {
+        const appRes = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/admin/franchise/applications/${id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const appResult = await appRes.json();
         setAppDetails(appResult.data);
 
         // Fetch nearby agents
-        const agentsRes = await fetch(`https://localhost:7108/api/admin/franchise/applications/${id}/nearby-agents`, {
+        const agentsRes = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/admin/franchise/applications/${id}/nearby-agents`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const agentsResult = await agentsRes.json();
@@ -62,7 +62,7 @@ export default function AdminAssignAgentPage() {
     try {
       const token = getToken('AccessToken');
       
-      const res = await fetch(`https://localhost:7108/api/admin/franchise/applications/${id}/assign-agent`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/admin/franchise/applications/${id}/assign-agent`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,

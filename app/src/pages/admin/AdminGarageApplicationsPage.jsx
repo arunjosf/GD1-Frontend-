@@ -53,7 +53,7 @@ export default function AdminGarageApplicationsPage() {
       const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
       if (!token) throw new Error("No token found");
 
-      const endpoint = 'https://localhost:7108/api/admin/franchise/applications';
+      const endpoint = 'https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/admin/franchise/applications';
 
       const res = await fetch(endpoint, { headers: { 'Authorization': `Bearer ${token}` } });
       if (!res.ok) throw new Error("Failed to fetch applications");
@@ -79,7 +79,7 @@ export default function AdminGarageApplicationsPage() {
       const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
       if (!token) throw new Error("No token found");
 
-      const endpoint = `https://localhost:7108/api/admin/franchise/applications/${id}`;
+      const endpoint = `https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/admin/franchise/applications/${id}`;
 
       const res = await fetch(endpoint, { headers: { 'Authorization': `Bearer ${token}` } });
       if (res.ok) {
@@ -115,7 +115,7 @@ export default function AdminGarageApplicationsPage() {
       const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
       if (!token) throw new Error("No token found");
 
-      const endpoint = `https://localhost:7108/api/admin/franchise/applications/${detailedApp.id}/update-status`;
+      const endpoint = `https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/admin/franchise/applications/${detailedApp.id}/update-status`;
 
       const formData = new FormData();
       formData.append('Decision', decision === 'Approved' ? '1' : '2'); // Enum: Approved=1, Rejected=2
@@ -164,7 +164,7 @@ export default function AdminGarageApplicationsPage() {
       const parts = value.split(`; AccessToken=`);
       const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
       if (!token) return;
-      const res = await fetch(`https://localhost:7108/api/admin/franchise/applications/${detailedApp.id}/nearby-agents`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/admin/franchise/applications/${detailedApp.id}/nearby-agents`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const result = await res.json();
@@ -187,7 +187,7 @@ export default function AdminGarageApplicationsPage() {
       const parts = value.split(`; AccessToken=`);
       const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
       
-      const res = await fetch(`https://localhost:7108/api/admin/franchise/applications/${detailedApp.id}/assign-agent`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/admin/franchise/applications/${detailedApp.id}/assign-agent`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,

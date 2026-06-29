@@ -27,8 +27,8 @@ export default function TrackApplicationPage() {
         if (!token) throw new Error("No token found");
 
         const [franchiseRes, scRes] = await Promise.all([
-          fetch('https://localhost:7108/api/Franchise/my-applications', { headers: { 'Authorization': `Bearer ${token}` } }).catch(() => null),
-          fetch('https://localhost:7108/api/service-center/my-applications', { headers: { 'Authorization': `Bearer ${token}` } }).catch(() => null)
+          fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Franchise/my-applications', { headers: { 'Authorization': `Bearer ${token}` } }).catch(() => null),
+          fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/service-center/my-applications', { headers: { 'Authorization': `Bearer ${token}` } }).catch(() => null)
         ]);
         
         let allApps = [];
@@ -63,8 +63,8 @@ export default function TrackApplicationPage() {
 
       const isServiceCenter = appToCancel.applicationType === 2 || appToCancel.applicationType === 'ServiceCenter';
       const endpoint = isServiceCenter 
-        ? `https://localhost:7108/api/ServiceCenter/applications/${appToCancel.id}/cancel`
-        : `https://localhost:7108/api/Franchise/applications/${appToCancel.id}/cancel`;
+        ? `https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/ServiceCenter/applications/${appToCancel.id}/cancel`
+        : `https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Franchise/applications/${appToCancel.id}/cancel`;
 
       const res = await fetch(endpoint, {
         method: 'POST',

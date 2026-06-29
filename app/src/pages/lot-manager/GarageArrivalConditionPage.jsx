@@ -351,7 +351,7 @@ export default function GarageArrivalConditionPage() {
     const token = getToken('AccessToken');
     const formData = new FormData();
     formData.append('file', file);
-    const res = await fetch('https://localhost:7108/api/Upload/upload-file', {
+    const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Upload/upload-file', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: formData
@@ -385,7 +385,7 @@ export default function GarageArrivalConditionPage() {
       ]);
       toast.dismiss('upload');
 
-      const res = await fetch('https://localhost:7108/api/Pickup/Manager-arrived/lot-submission', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Pickup/Manager-arrived/lot-submission', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${getToken('AccessToken')}`,

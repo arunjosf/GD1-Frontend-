@@ -173,7 +173,7 @@ export default function ManagerSubmitWeeklyPage() {
       const token = getToken('AccessToken');
       const data = new FormData();
       data.append('file', file);
-      const res = await fetch('https://localhost:7108/api/Upload/upload-file', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Upload/upload-file', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: data
@@ -213,7 +213,7 @@ export default function ManagerSubmitWeeklyPage() {
       console.log('Submitting weekly payload:', payload);
 
       const token = getToken('AccessToken');
-      const res = await fetch('https://localhost:7108/api/lot-manager/submit-weekly-check', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/submit-weekly-check', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -21,7 +21,7 @@ export default function AdminLayout() {
           const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
           if (!token) return;
 
-          const res = await fetch('https://localhost:7108/api/notifications', {
+          const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/notifications', {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (res.ok) {
@@ -60,7 +60,7 @@ export default function AdminLayout() {
 
       if (token) {
         unreadNotifs.forEach(notif => {
-          fetch(`https://localhost:7108/api/notifications/${notif.id}/mark-read`, {
+          fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/notifications/${notif.id}/mark-read`, {
             method: 'PATCH',
             headers: { 'Authorization': `Bearer ${token}` }
           }).catch(() => { /* ignore */ });

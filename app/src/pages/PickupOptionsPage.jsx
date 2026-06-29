@@ -33,7 +33,7 @@ export default function PickupOptionsPage() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const res = await fetch('https://localhost:7108/api/Payment/config');
+        const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Payment/config');
         const data = await res.json();
         setRazorpayKeyId(data.keyId);
       } catch (err) {
@@ -243,7 +243,7 @@ export default function PickupOptionsPage() {
       };
 
       // 1. Call Create Order
-      const res = await fetch('https://localhost:7108/api/Payment/create-order', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Payment/create-order', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -270,7 +270,7 @@ export default function PickupOptionsPage() {
         handler: async (response) => {
           // 3. Verify Payment
           try {
-            const verifyRes = await fetch('https://localhost:7108/api/Payment/verify', {
+            const verifyRes = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Payment/verify', {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${token}`,

@@ -193,7 +193,7 @@ export default function PropertyDetailsPage() {
       formData.append('startDate', formatLocalISO(startDate));
       formData.append('endDate', formatLocalISO(endDate));
 
-      const res = await fetch('https://localhost:7108/api/LotBooking/Create-Booking', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/LotBooking/Create-Booking', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

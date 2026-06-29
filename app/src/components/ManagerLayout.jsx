@@ -93,7 +93,7 @@ export default function ManagerLayout() {
         const token = getToken('AccessToken');
         if (!token) return;
 
-        const metricsRes = await fetch('https://localhost:7108/api/lot-manager/dashboard-metrics', {
+        const metricsRes = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/dashboard-metrics', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (metricsRes.ok) {
@@ -101,7 +101,7 @@ export default function ManagerLayout() {
           setMetrics(mData.data);
         }
 
-        const chatRes = await fetch('https://localhost:7108/api/Chat/conversations', {
+        const chatRes = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Chat/conversations', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (chatRes.ok) {
@@ -110,7 +110,7 @@ export default function ManagerLayout() {
           setUnreadMessagesCount(unread);
         }
 
-        const notifRes = await fetch('https://localhost:7108/api/notifications', {
+        const notifRes = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/notifications', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (notifRes.ok) {
@@ -132,7 +132,7 @@ export default function ManagerLayout() {
     let connection = null;
     if (token) {
       connection = new signalR.HubConnectionBuilder()
-        .withUrl('https://localhost:7108/hubs/notification', {
+        .withUrl('https://gd1-grand-auto-depot-one-9ms1.onrender.com/hubs/notification', {
           accessTokenFactory: () => token
         })
         .withAutomaticReconnect()
@@ -166,7 +166,7 @@ export default function ManagerLayout() {
       const token = getToken('AccessToken');
       if (token) {
         unreadNotifs.forEach(notif => {
-          fetch(`https://localhost:7108/api/notifications/${notif.id}/mark-read`, {
+          fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/notifications/${notif.id}/mark-read`, {
             method: 'PATCH',
             headers: { 'Authorization': `Bearer ${token}` }
           }).catch(() => { /* ignore */ });

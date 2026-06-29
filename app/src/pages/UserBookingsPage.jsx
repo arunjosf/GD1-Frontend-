@@ -28,7 +28,7 @@ export default function UserBookingsPage() {
 
         if (!token) throw new Error("No token found");
 
-        const res = await fetch('https://localhost:7108/api/LotBooking/bookings', {
+        const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/LotBooking/bookings', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -72,7 +72,7 @@ export default function UserBookingsPage() {
       const match = document.cookie.match(new RegExp('(^| )AccessToken=([^;]+)'));
       const token = match ? match[2] : null;
 
-      const response = await fetch(`https://localhost:7108/api/LotBooking/${cancelModalBookingId}/cancel?reason=${encodeURIComponent(cancelReason.trim())}`, {
+      const response = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/LotBooking/${cancelModalBookingId}/cancel?reason=${encodeURIComponent(cancelReason.trim())}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -196,7 +196,7 @@ export default function UserBookingsPage() {
                      {/* Left: Slot Image */}
                      <div className={`w-full md:w-72 h-56 md:h-auto rounded-2xl overflow-hidden shrink-0 relative bg-gray-100 ${isInactive ? 'opacity-50 grayscale' : ''}`}>
                        <img 
-                         src={booking.propertyImageUrl ? (booking.propertyImageUrl.startsWith('http') ? booking.propertyImageUrl : `https://localhost:7108${booking.propertyImageUrl.startsWith('/') ? '' : '/'}${booking.propertyImageUrl}`) : "https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?q=80&w=800&auto=format&fit=crop"} 
+                         src={booking.propertyImageUrl ? (booking.propertyImageUrl.startsWith('http') ? booking.propertyImageUrl : `https://gd1-grand-auto-depot-one-9ms1.onrender.com${booking.propertyImageUrl.startsWith('/') ? '' : '/'}${booking.propertyImageUrl}`) : "https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?q=80&w=800&auto=format&fit=crop"} 
                          alt="Parking Slot"
                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                          onError={(e) => { e.target.onerror = null; }}
@@ -244,7 +244,7 @@ export default function UserBookingsPage() {
                          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50/80 rounded-xl border border-gray-100/80">
                            {booking.vehicleImageUrl ? (
                              <img 
-                               src={booking.vehicleImageUrl.startsWith('http') ? booking.vehicleImageUrl : `https://localhost:7108${booking.vehicleImageUrl.startsWith('/') ? '' : '/'}${booking.vehicleImageUrl}`} 
+                               src={booking.vehicleImageUrl.startsWith('http') ? booking.vehicleImageUrl : `https://gd1-grand-auto-depot-one-9ms1.onrender.com${booking.vehicleImageUrl.startsWith('/') ? '' : '/'}${booking.vehicleImageUrl}`} 
                                alt="Vehicle" 
                                className="w-6 h-6 rounded-full object-cover shrink-0 border border-gray-200 shadow-sm"
                                onError={(e) => { e.target.onerror = null; e.target.src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=100&auto=format&fit=crop"; }}

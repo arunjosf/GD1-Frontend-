@@ -127,7 +127,7 @@ export default function TrackPickupPage() {
 
       if (!token) return;
 
-      const res = await fetch(`https://localhost:7108/${id}booking-By-Id`, {
+      const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/${id}booking-By-Id`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -256,7 +256,7 @@ export default function TrackPickupPage() {
     console.log('[TrackPickup] Connecting to TrackingHub for bookingId:', booking.id);
 
     const connection = new HubConnectionBuilder()
-      .withUrl("https://localhost:7108/hubs/tracking", { accessTokenFactory: () => token })
+      .withUrl("https://gd1-grand-auto-depot-one-9ms1.onrender.com/hubs/tracking", { accessTokenFactory: () => token })
       .configureLogging(LogLevel.Warning)
       .withAutomaticReconnect()
       .build();
@@ -297,7 +297,7 @@ export default function TrackPickupPage() {
     if (!url) return null;
     if (url.startsWith('http') || url.startsWith('data:')) return url;
     const cleanUrl = url.startsWith('/') ? url : `/${url}`;
-    return `https://localhost:7108${cleanUrl}`;
+    return `https://gd1-grand-auto-depot-one-9ms1.onrender.com${cleanUrl}`;
   };
 
   if (loading) {

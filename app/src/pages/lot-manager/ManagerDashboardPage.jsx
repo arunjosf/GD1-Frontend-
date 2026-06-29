@@ -24,7 +24,7 @@ export default function ManagerDashboardPage() {
   const fetchMetrics = async () => {
     try {
       const token = getToken('AccessToken');
-      const res = await fetch('https://localhost:7108/api/lot-manager/dashboard-metrics', {
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/dashboard-metrics', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error("Failed to load metrics");
