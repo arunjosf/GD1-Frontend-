@@ -312,7 +312,7 @@ export default function SearchPage() {
                     navigate('/add-vehicle');
                   }
                 }}
-                className="h-full px-4 ml-10 lg:ml-1 text-[12px] font-semibold text-blue-600 bg-white border border-black/[0.04] rounded-full hover:bg-blue-50 transition-colors shadow-sm"
+                className="h-full px-4 ml-30 lg:ml-1 text-[12px] font-semibold text-blue-600 bg-white border border-black/[0.04] rounded-full hover:bg-blue-50 transition-colors shadow-sm"
               >
                 Change
               </button>
