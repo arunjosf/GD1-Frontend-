@@ -441,14 +441,14 @@ export default function HomePage() {
       <Navbar />
 
       {/* ── HERO ── */}
-      <section className="relative w-full min-h-[90vh] bg-[#FFFFFE] pt-28 pb-12 px-[4vw] flex flex-col justify-between z-30">
+      <section className="relative w-full min-h-[90vh] bg-[#FFFFFE] pt:15 lg:pt-28 pb:18 lg:pb-12 px-[4vw] flex flex-col justify-between z-30">
         
         {/* Top Header Row */}
         <div className="relative z-20 flex flex-col lg:flex-row justify-between items-start w-full gap-8 lg:gap-0">
           
           {/* Top Left Text & Button */}
           <div className="max-w-[800px]">
-            <h1 className="text-[32px] sm:text-[40px] lg:text-[32px] leading-[1.25] font-normal text-[#1a1a1a] tracking-loose mb-5">
+            <h1 className="text-[22px] sm:text-[30px] lg:text-[32px] leading-[1.25] font-normal text-[#1a1a1a] tracking-loose mb-5">
               Find your perfect garage space where <br className="hidden md:block" />
               security, and maintenance come <br className="hidden md:block" />
               together for your vehicle.
@@ -491,7 +491,7 @@ export default function HomePage() {
         </div>
 
         {/* Bottom Bar: Left Steps & Right Search */}
-        <div className="relative z-20 flex flex-col lg:flex-row justify-between items-end gap-10 mt-auto pt-20">
+        <div className="relative z-20 flex flex-col lg:flex-row justify-between items-end gap-10 mt-auto pt:15 lg:pt-20">
           
           {/* Left Steps Box */}
           <div className="bg-white/60 backdrop-blur-xl rounded-[20px] p-5 w-full lg:w-[300px] shadow-sm border border-white/40 hidden lg:block">
