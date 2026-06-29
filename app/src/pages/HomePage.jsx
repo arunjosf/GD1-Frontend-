@@ -441,7 +441,7 @@ export default function HomePage() {
       <Navbar />
 
       {/* ── HERO ── */}
-      <section className="relative w-full min-h-[90vh] bg-[#FFFFFE] pt:30 lg:pt-28 pb:18 lg:pb-12 px-[4vw] flex flex-col justify-between z-30">
+      <section className="relative w-full min-h-[90vh] bg-[#FFFFFE] pt:40 lg:pt-28 pb:14 lg:pb-12 px-[4vw] flex flex-col justify-between z-30">
         
         {/* Top Header Row */}
         <div className="relative z-20 flex flex-col lg:flex-row justify-between items-start w-full gap-8 lg:gap-0">
