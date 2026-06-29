@@ -441,7 +441,7 @@ export default function HomePage() {
       <Navbar />
 
       {/* ── HERO ── */}
-      <section className="relative w-full min-h-[90vh] bg-[#FFFFFE] pt:25 lg:pt-28 pb:18 lg:pb-12 px-[4vw] flex flex-col justify-between z-30">
+      <section className="relative w-full min-h-[90vh] bg-[#FFFFFE] pt:30 lg:pt-28 pb:18 lg:pb-12 px-[4vw] flex flex-col justify-between z-30">
         
         {/* Top Header Row */}
         <div className="relative z-20 flex flex-col lg:flex-row justify-between items-start w-full gap-8 lg:gap-0">
@@ -487,7 +487,7 @@ export default function HomePage() {
 
         {/* Centered Car Image Overlapping */}
         <div className="absolute top-[55%] lg:top-[45%] left-[4vw] lg:left-1/2 translate-x-0 lg:-translate-x-1/2 -translate-y-1/2 w-[85%] sm:w-[65%] md:w-[50%] max-w-[800px] z-10 pointer-events-none">
-          <img src="/HeroCar.png" alt="Hero Car" className="w-full h-auto object-contain pt-10 pb-16 lg:pt-0 lg:pb-0" />
+          <img src="/HeroCar.png" alt="Hero Car" className="w-full h-auto object-contain pt-5 pb-16 lg:pt-0 lg:pb-0" />
         </div>
 
         {/* Bottom Bar: Left Steps & Right Search */}
