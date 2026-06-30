@@ -11,7 +11,12 @@ export default function LotOwnerPickupsPage() {
     fetchPickups();
   }, []);
 
-  const fetchPickups = async () => {
+  usePolling(() => {
+    fetchPickups(true);
+  }, 15000);
+
+  const fetchPickups = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const value = `; ${document.cookie}`;
       const parts = value.split(`; AccessToken=`);
@@ -154,3 +159,4 @@ export default function LotOwnerPickupsPage() {
     </div>
   );
 }
+

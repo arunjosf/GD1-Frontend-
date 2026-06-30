@@ -15,7 +15,12 @@ export default function LotOwnerServicesPage() {
     fetchServices();
   }, []);
 
-  const fetchServices = async () => {
+  usePolling(() => {
+    fetchServices(true);
+  }, 15000);
+
+  const fetchServices = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const token = getToken('AccessToken');
       const res = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/lot-manager/my-services`, {
@@ -165,3 +170,4 @@ export default function LotOwnerServicesPage() {
     </div>
   );
 }
+

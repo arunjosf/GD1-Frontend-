@@ -17,8 +17,12 @@ export default function LotOwnerSelfDropsPage() {
     fetchSelfDrops();
   }, [activeTab]);
 
-  const fetchSelfDrops = async () => {
-    setLoading(true);
+  usePolling(() => {
+    fetchSelfDrops(true);
+  }, 15000);
+
+  const fetchSelfDrops = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const token = getToken('AccessToken');
       const [pendingRes, completedRes] = await Promise.all([
@@ -206,3 +210,4 @@ export default function LotOwnerSelfDropsPage() {
     </div>
   );
 }
+
