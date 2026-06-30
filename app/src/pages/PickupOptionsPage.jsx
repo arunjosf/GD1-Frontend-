@@ -164,6 +164,24 @@ export default function PickupOptionsPage() {
     );
   };
 
+  const renderSubmitButton = (className = '') => (
+    <div className={`pt-6 ${className}`}>
+      <button 
+        type="submit" 
+        disabled={isSubmitting || !selectedOption}
+        className={`w-full py-4 rounded-xl text-sm md:text-base font-bold text-white transition-all flex items-center justify-center gap-2 ${
+          isSubmitting || !selectedOption 
+            ? 'bg-gray-300 cursor-not-allowed text-gray-500' 
+            : 'bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer'
+        }`}
+      >
+        {isSubmitting ? 'Processing...' : (
+          <>Pay Advance & Complete Booking <Navigation2 className="w-4 h-4" /></>
+        )}
+      </button>
+    </div>
+  );
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedOption) {
@@ -435,8 +453,9 @@ export default function PickupOptionsPage() {
             </label>
 
             {/* Self Delivery Option */}
+            <div className="order-3 md:order-2 flex flex-col h-full">
             <label 
-              className={`order-3 md:order-2 relative flex flex-col p-6 rounded-3xl border-2 cursor-pointer transition-all duration-300 ${
+              className={`flex-1 relative flex flex-col p-6 rounded-3xl border-2 cursor-pointer transition-all duration-300 ${
                 selectedOption === 'self' 
                   ? 'border-gray-900 bg-gray-50 shadow-[0_10px_40px_rgba(0,0,0,0.08)] -translate-y-1' 
                   : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/50 hover:shadow-md'
@@ -473,10 +492,12 @@ export default function PickupOptionsPage() {
                 </div>
               </div>
             </label>
+            {selectedOption === 'self' && renderSubmitButton('block md:hidden')}
+            </div>
 
           {/* Conditional Address Form for Pickup */}
           <div className={`order-2 md:order-3 md:col-span-2 transition-all duration-500 ease-in-out overflow-hidden ${
-            selectedOption === 'pickup' ? 'max-h-[800px] opacity-100 md:mt-4' : 'max-h-0 opacity-0 mt-0'
+            selectedOption === 'pickup' ? 'max-h-[1200px] opacity-100 md:mt-4' : 'max-h-0 opacity-0 mt-0'
           }`}>
             <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-200 shadow-sm relative">
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-3">
@@ -616,23 +637,10 @@ export default function PickupOptionsPage() {
               </div>
             </div>
           </div>
+          {selectedOption === 'pickup' && renderSubmitButton('block md:hidden')}
           </div>
 
-          <div className="pt-6">
-            <button 
-              type="submit" 
-              disabled={isSubmitting || !selectedOption}
-              className={`w-full py-4 rounded-xl text-sm md:text-base font-bold text-white transition-all flex items-center justify-center gap-2 ${
-                isSubmitting || !selectedOption 
-                  ? 'bg-gray-300 cursor-not-allowed text-gray-500' 
-                  : 'bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer'
-              }`}
-            >
-              {isSubmitting ? 'Processing...' : (
-                <>Pay Advance & Complete Booking <Navigation2 className="w-4 h-4" /></>
-              )}
-            </button>
-          </div>
+          {renderSubmitButton(selectedOption ? 'hidden md:block' : 'block')}
         </form>
 
       </div>
