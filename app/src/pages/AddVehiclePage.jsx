@@ -448,7 +448,7 @@ export default function AddVehiclePage() {
                          ) : (
                            <>
                              <Upload size={20} className="text-gray-400 mb-2" />
-                             <span className="text-[12px] font-medium text-gray-500 text-center px-4">Tap to upload ID (Driving License/Aadhaar)</span>
+                             <span className="block w-full text-[12px] font-medium text-gray-500 text-center px-4">Tap to upload ID (Driving License/Aadhaar)</span>
                            </>
                          )}
                       </div>
@@ -482,7 +482,7 @@ export default function AddVehiclePage() {
                          ) : (
                            <>
                              <Upload size={20} className="text-gray-400 mb-2" />
-                             <span className="text-[12px] font-medium text-gray-500 text-center px-4">Tap to upload Registration Certificate</span>
+                             <span className="block w-full text-[12px] font-medium text-gray-500 text-center px-4">Tap to upload Registration Certificate</span>
                            </>
                          )}
                       </div>
