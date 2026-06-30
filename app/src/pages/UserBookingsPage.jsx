@@ -97,7 +97,7 @@ export default function UserBookingsPage() {
     <div className="min-h-screen bg-[#fafafa] flex flex-col font-sans">
       <Navbar />
 
-      <main className="flex-grow pt-100 lg:pt-[140px] pb-20 px-[6vw]">
+      <main className="flex-grow pt-25 lg:pt-[140px] pb-20 px-[6vw]">
         <div className="max-w-5xl mx-auto">
           
           <div className="mb-10 text-center md:text-left">
