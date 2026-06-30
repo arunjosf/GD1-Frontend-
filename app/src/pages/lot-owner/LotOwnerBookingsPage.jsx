@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import usePolling from '../../hooks/usePolling';
 import { FileText, Car, Calendar, CheckCircle, XCircle, MapPin, Hash, ArrowRight, Search } from 'lucide-react';
 
 export default function LotOwnerBookingsPage() {
@@ -13,8 +14,8 @@ export default function LotOwnerBookingsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
-  const fetchBookings = async () => {
-    setLoading(true);
+  const fetchBookings = async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const value = `; ${document.cookie}`;
       const parts = value.split(`; AccessToken=`);
@@ -37,6 +38,10 @@ export default function LotOwnerBookingsPage() {
   useEffect(() => {
     fetchBookings();
   }, []);
+
+  usePolling(() => {
+    fetchBookings(true);
+  }, 15000);
 
   const handleVerify = async (bookingId, isApproved) => {
     if (!isApproved && !rejectionReason.trim() && rejectingId === bookingId) {
@@ -278,3 +283,4 @@ export default function LotOwnerBookingsPage() {
     </div>
   );
 }
+

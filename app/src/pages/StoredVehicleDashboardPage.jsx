@@ -47,7 +47,11 @@ export default function StoredVehicleDashboardPage() {
     fetchBookingDetail();
   }, [id]);
 
-  const fetchBookingDetail = async () => {
+  usePolling(() => {
+    if (id) fetchBookingDetail(true); // pass true to indicate silent poll
+  }, 15000, !!id);
+
+  const fetchBookingDetail = async (isSilent = false) => {
     try {
       setAfterServiceEvent(null);
       const token = getToken('AccessToken');
@@ -592,3 +596,4 @@ export default function StoredVehicleDashboardPage() {
     </div>
   );
 }
+
