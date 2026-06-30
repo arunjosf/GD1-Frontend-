@@ -302,7 +302,7 @@ export default function SearchPage() {
                 onClick={() => setShowVehiclePreview(true)}
               >
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider leading-none mb-0.5">Parking</p>
-                <p className="text-[13px] font-semibold text-[#111] leading-none">{activeVehicle.brand} {activeVehicle.model}</p>
+                <p className="text-[13px] font-semibold text-[#111] leading-none truncate">{activeVehicle.brand} {activeVehicle.model}</p>
               </div>
               <button 
                 onClick={() => {
@@ -312,7 +312,7 @@ export default function SearchPage() {
                     navigate('/add-vehicle');
                   }
                 }}
-                className="h-full px-4 ml-38 lg:ml-1 text-[12px] font-semibold text-blue-600 bg-white border border-black/[0.04] rounded-full hover:bg-blue-50 transition-colors shadow-sm"
+                className="h-full shrink-0 px-4 ml-2 text-[12px] font-semibold text-blue-600 bg-white border border-black/[0.04] rounded-full hover:bg-blue-50 transition-colors shadow-sm"
               >
                 Change
               </button>
@@ -834,3 +834,4 @@ export default function SearchPage() {
     </div>
   );
 }
+

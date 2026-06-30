@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { getToken } from '../api/auth';
@@ -93,7 +94,9 @@ export default function PropertyDetailsPage() {
   const { id } = useParams();
 
   const property = state?.property;
-  const activeVehicle = state?.activeVehicle;
+    const { userVehicles, fetchUserVehicles, vehiclesLoading } = useAuth();
+    useEffect(() => { if (!vehiclesLoading && userVehicles === null) fetchUserVehicles(); }, [vehiclesLoading, userVehicles, fetchUserVehicles]);
+    const [localFetchedVehicle, setLocalFetchedVehicle] = useState(null);`n    const activeVehicle = state?.activeVehicle || localFetchedVehicle || (userVehicles?.length > 0 ? userVehicles[0] : null);
 
   const [activeImage, setActiveImage] = useState(0);
   const [isMapExpanded, setIsMapExpanded] = useState(false);
@@ -148,11 +151,18 @@ export default function PropertyDetailsPage() {
 
   const selectedSlot = property.slots?.find(s => s.id === selectedSlotId);
 
-  const openBookingModal = () => {
-    if (!activeVehicle) {
-      toast.error('Please select a vehicle to park from the Search page first.');
-      return;
-    }
+  const [showVehicleLoading, setShowVehicleLoading] = useState(false);
+    
+    const openBookingModal = () => {
+      if (!activeVehicle) {
+        if (vehiclesLoading) {
+          setShowVehicleLoading(true);
+        } else {
+          toast.error('No vehicles found. Please add a vehicle first.');
+          navigate('/add-vehicle');
+        }
+        return;
+      }
     if (!endDate) {
       toast.error('Please select a Move-out date first.');
       return;
@@ -530,3 +540,7 @@ export default function PropertyDetailsPage() {
     </div>
   );
 }
+
+
+
+
