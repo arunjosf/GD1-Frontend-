@@ -446,10 +446,10 @@ export default function AddVehiclePage() {
                              <span className="text-[11px] font-semibold text-blue-600">Extracting data...</span>
                            </div>
                          ) : (
-                           <>
+                           <div className="flex flex-col items-center justify-center w-full px-3">
                              <Upload size={20} className="text-gray-400 mb-2" />
-                             <span className="block w-full text-[12px] font-medium text-gray-500 text-center px-4">Tap to upload ID (Driving License/Aadhaar)</span>
-                           </>
+                             <span className="text-[12px] font-medium text-gray-500 text-center leading-snug">Tap to upload ID (Driving License/Aadhaar)</span>
+                           </div>
                          )}
                       </div>
                     </div>
@@ -480,10 +480,10 @@ export default function AddVehiclePage() {
                              <span className="text-[11px] font-semibold text-blue-600">Verifying RC...</span>
                            </div>
                          ) : (
-                           <>
+                           <div className="flex flex-col items-center justify-center w-full px-3">
                              <Upload size={20} className="text-gray-400 mb-2" />
-                             <span className="block w-full text-[12px] font-medium text-gray-500 text-center px-4">Tap to upload Registration Certificate</span>
-                           </>
+                             <span className="text-[12px] font-medium text-gray-500 text-center leading-snug">Tap to upload Registration Certificate</span>
+                           </div>
                          )}
                       </div>
                     </div>
