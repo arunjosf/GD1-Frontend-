@@ -96,7 +96,8 @@ export default function PropertyDetailsPage() {
   const property = state?.property;
     const { userVehicles, fetchUserVehicles, vehiclesLoading } = useAuth();
     useEffect(() => { if (!vehiclesLoading && userVehicles === null) fetchUserVehicles(); }, [vehiclesLoading, userVehicles, fetchUserVehicles]);
-    const [localFetchedVehicle, setLocalFetchedVehicle] = useState(null);`n    const activeVehicle = state?.activeVehicle || localFetchedVehicle || (userVehicles?.length > 0 ? userVehicles[0] : null);
+    const [localFetchedVehicle, setLocalFetchedVehicle] = useState(null);
+    const activeVehicle = state?.activeVehicle || localFetchedVehicle || (userVehicles?.length > 0 ? userVehicles[0] : null);
 
   const [activeImage, setActiveImage] = useState(0);
   const [isMapExpanded, setIsMapExpanded] = useState(false);
