@@ -152,30 +152,54 @@ export default function PropertyDetailsPage() {
 
   const selectedSlot = property.slots?.find(s => s.id === selectedSlotId);
 
-  const [showVehicleLoading, setShowVehicleLoading] = useState(false);
+    const [showVehicleLoading, setShowVehicleLoading] = useState(false);
     
-    const openBookingModal = () => {
+    const openBookingModal = async () => {
       if (!activeVehicle) {
-        if (vehiclesLoading) {
-          setShowVehicleLoading(true);
-        } else {
-          toast.error('No vehicles found. Please add a vehicle first.');
-          navigate('/add-vehicle');
+        setShowVehicleLoading(true);
+        try {
+          const token = getToken('AccessToken');
+          const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Vehicle/my-vehicle', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const data = await res.json();
+          if (res.ok && data.success && data.data && data.data.length > 0) {
+            setLocalFetchedVehicle(data.data[0]);
+            setShowVehicleLoading(false);
+            if (!endDate) {
+              toast.error('Please select a Move-out date first.');
+              return;
+            }
+            const diffTime = endDate - startDate;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if (diffDays < 3) {
+              toast.error('Move-out date must be at least 3 days after move-in date.');
+              return;
+            }
+            setIsModalOpen(true);
+            return;
+          }
+        } catch (err) {
+          console.error(err);
         }
+        setShowVehicleLoading(false);
+        toast.error('No vehicles found. Please add a vehicle first.');
+        navigate('/add-vehicle');
         return;
       }
-    if (!endDate) {
-      toast.error('Please select a Move-out date first.');
-      return;
-    }
-    const diffTime = endDate - startDate;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays < 3) {
-      toast.error('Move-out date must be at least 3 days after move-in date.');
-      return;
-    }
-    setIsModalOpen(true);
-  };
+
+      if (!endDate) {
+        toast.error('Please select a Move-out date first.');
+        return;
+      }
+      const diffTime = endDate - startDate;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays < 3) {
+        toast.error('Move-out date must be at least 3 days after move-in date.');
+        return;
+      }
+      setIsModalOpen(true);
+    };
 
   const submitBooking = async () => {
     if (!selectedSlotId) {
