@@ -17,6 +17,7 @@ export default function UserBookingsPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     if (!isAuthenticated) {
       navigate('/login');
       return;
@@ -56,7 +57,7 @@ export default function UserBookingsPage() {
       const token = match ? match[2] : null;
       if (!token) return;
       const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/LotBooking/bookings', {
-        headers: { 'Authorization': "Bearer " }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
         const data = await res.json();
@@ -358,7 +359,7 @@ export default function UserBookingsPage() {
                          {(isPending || isApproved) && (
                             <button 
                               onClick={() => openCancelModal(booking.id)}
-                              className="flex-1 sm:flex-none px-6 py-5 md:py-2.5 bg-gray-100 hover:bg-red-50 text-black rounded-xl font-bold text-[13px] shadow-sm transition-all"
+                              className="flex-1 sm:flex-none px-6 py-2.5 md:py-2.5 bg-gray-100 hover:bg-red-50 text-black rounded-xl font-bold text-[13px] shadow-sm transition-all"
                             >
                               Cancel Booking
                             </button>
@@ -366,7 +367,7 @@ export default function UserBookingsPage() {
                          {isApproved && (
                             <button 
                               onClick={() => handlePayment(booking.id)}
-                              className="flex-1 sm:flex-none px-8 py-2.5 bg-[#2563eb] hover:bg-blue-700 text-white rounded-xl font-bold text-[13px] shadow-md shadow-black/10 transition-all"
+                              className="flex-1 sm:flex-none px-6 py-2.5 md:py-2.5 bg-[#2563eb] hover:bg-blue-700 text-white rounded-xl font-bold text-[13px] shadow-md shadow-black/10 transition-all"
                             >
                               Continue Booking
                             </button>
@@ -472,4 +473,6 @@ export default function UserBookingsPage() {
     </div>
   );
 }
+
+
 
