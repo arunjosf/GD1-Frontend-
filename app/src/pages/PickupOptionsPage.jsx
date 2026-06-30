@@ -385,10 +385,10 @@ export default function PickupOptionsPage() {
     <div className="min-h-screen bg-[#fafafa] font-sans pb-24 pt-6 md:pt-12 px-4 flex flex-col items-center">
       <div className="w-full max-w-3xl flex items-center justify-between mb-8">
         <button 
-          onClick={() => navigate('/track-application')} 
+          onClick={() => navigate('/agreement/' + id)} 
           className="flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-black transition-colors"
         >
-          <ChevronLeft className="w-4 h-4" /> Go to Dashboard
+          <ChevronLeft className="w-4 h-4" /> Back to Agreement
         </button>
         <span className="text-[11px] font-bold tracking-widest text-blue-600 uppercase bg-blue-50 px-3 py-1 rounded-full">
           Step 2 of 2
@@ -492,9 +492,9 @@ export default function PickupOptionsPage() {
                 </div>
               </div>
             </label>
-            {selectedOption === 'self' && renderSubmitButton('block md:hidden')}
+            {selectedOption === 'self' && renderSubmitButton('block md:hidden mt-4')}
             </div>
-
+            
           {/* Conditional Address Form for Pickup */}
           <div className={`order-2 md:order-3 md:col-span-2 transition-all duration-500 ease-in-out overflow-hidden ${
             selectedOption === 'pickup' ? 'max-h-[1200px] opacity-100 md:mt-4' : 'max-h-0 opacity-0 mt-0'
@@ -635,9 +635,9 @@ export default function PickupOptionsPage() {
                   </div>
                 </div>
               </div>
+              {selectedOption === 'pickup' && renderSubmitButton('block md:hidden mt-6')}
             </div>
           </div>
-          {selectedOption === 'pickup' && renderSubmitButton('block md:hidden')}
           </div>
 
           {renderSubmitButton(selectedOption ? 'hidden md:block' : 'block')}
