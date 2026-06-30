@@ -4,6 +4,7 @@ import { useAuth } from './context/AuthContext';
 import { CallProvider } from './context/CallContext';
 import { getToken } from './api/auth';
 import CallOverlay from './components/CallOverlay';
+import ScrollToTop from './components/ScrollToTop';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
@@ -456,3 +457,4 @@ export default function App() {
     </ErrorBoundary>
   );
 }
+

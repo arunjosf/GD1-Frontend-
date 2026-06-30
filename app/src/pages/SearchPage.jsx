@@ -286,7 +286,7 @@ export default function SearchPage() {
           </div>
 
           {activeVehicle && (
-            <div className="flex items-center bg-gray-50 border border-black/[0.08] rounded-full p-1 shrink-0 h-[46px]">
+            <div className="flex items-center justify-between w-full max-w-[280px] md:max-w-none md:w-auto bg-gray-50 border border-black/[0.08] rounded-full p-1 shrink-0 h-[46px]">
               <div 
                 className="w-9 h-9 rounded-full overflow-hidden bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 cursor-pointer"
                 onClick={() => setShowVehiclePreview(true)}
@@ -298,7 +298,7 @@ export default function SearchPage() {
                 )}
               </div>
               <div 
-                className="px-3 flex flex-col justify-center cursor-pointer"
+                className="px-3 flex flex-col justify-center cursor-pointer min-w-0 flex-1"
                 onClick={() => setShowVehiclePreview(true)}
               >
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider leading-none mb-0.5">Parking</p>
@@ -312,7 +312,7 @@ export default function SearchPage() {
                     navigate('/add-vehicle');
                   }
                 }}
-                className="h-full shrink-0 px-4 ml-2 text-[12px] font-semibold text-blue-600 bg-white border border-black/[0.04] rounded-full hover:bg-blue-50 transition-colors shadow-sm"
+                className="h-full shrink-0 px-4 ml-auto text-[12px] font-semibold text-blue-600 bg-white border border-black/[0.04] rounded-full hover:bg-blue-50 transition-colors shadow-sm"
               >
                 Change
               </button>
