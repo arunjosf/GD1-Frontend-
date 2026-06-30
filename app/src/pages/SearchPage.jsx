@@ -286,7 +286,7 @@ export default function SearchPage() {
           </div>
 
           {activeVehicle && (
-            <div className="flex items-center w-full max-w-full md:w-auto bg-gray-50 border border-black/[0.08] rounded-full p-1 shrink-0 h-[46px] overflow-hidden">
+            <div className="flex items-center w-full max-w-full md:w-auto bg-gray-50 border border-black/[0.08] rounded-full p-1 h-[46px] overflow-hidden min-w-0">
               <div 
                 className="w-9 h-9 rounded-full overflow-hidden bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 cursor-pointer"
                 onClick={() => setShowVehiclePreview(true)}
@@ -298,7 +298,7 @@ export default function SearchPage() {
                 )}
               </div>
               <div 
-                className="px-3 flex flex-col justify-center cursor-pointer min-w-0 flex-1 overflow-hidden"
+                className="px-3 flex flex-col justify-center cursor-pointer flex-1 min-w-0"
                 onClick={() => setShowVehiclePreview(true)}
               >
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider leading-none mb-0.5">Parking</p>

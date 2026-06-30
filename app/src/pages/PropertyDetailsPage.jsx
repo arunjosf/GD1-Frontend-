@@ -415,9 +415,17 @@ export default function PropertyDetailsPage() {
 
               <button
                 onClick={openBookingModal}
-                className={`w-full py-4 rounded-xl text-[15px] font-bold text-white transition-all bg-[#2563eb] hover:bg-blue-600 shadow-lg hover:shadow-xl hover:-translate-y-0.5`}
+                disabled={showVehicleLoading}
+                className={`w-full py-4 rounded-xl text-[15px] font-bold text-white transition-all bg-[#2563eb] hover:bg-blue-600 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 ${showVehicleLoading ? 'opacity-80 cursor-not-allowed' : ''}`}
               >
-                Choose Slot & Book
+                {showVehicleLoading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Loading Vehicle...
+                  </>
+                ) : (
+                  "Choose Slot & Book"
+                )}
               </button>
             </div>
           </div>
