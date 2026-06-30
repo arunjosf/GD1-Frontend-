@@ -4,6 +4,7 @@ import Footer from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
 import usePolling from '../hooks/usePolling';
 import { useNavigate } from 'react-router-dom';
+import { getToken } from '../api/auth';
 import { toast } from 'react-hot-toast';
 import { Calendar, Car, ArrowRight, CreditCard, XCircle, Clock, BadgeCheck, MapPin, CheckCircle2, X, Truck, Wrench, LayoutDashboard } from 'lucide-react';
 
@@ -26,8 +27,7 @@ export default function UserBookingsPage() {
     const fetchBookings = async () => {
       if (!isAuthenticated) return;
       try {
-        const match = document.cookie.match(new RegExp('(^| )AccessToken=([^;]+)'));
-        const token = match ? match[2] : null;
+        const token = getToken('AccessToken');
 
         if (!token) throw new Error("No token found");
 
@@ -53,8 +53,7 @@ export default function UserBookingsPage() {
   // Poll API every 15 seconds
   usePolling(async () => {
     try {
-      const match = document.cookie.match(new RegExp('(^| )AccessToken=([^;]+)'));
-      const token = match ? match[2] : null;
+      const token = getToken('AccessToken');
       if (!token) return;
       const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/LotBooking/bookings', {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -90,8 +89,7 @@ export default function UserBookingsPage() {
 
     setIsCancelling(true);
     try {
-      const match = document.cookie.match(new RegExp('(^| )AccessToken=([^;]+)'));
-      const token = match ? match[2] : null;
+      const token = getToken('AccessToken');
 
       const response = await fetch(`https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/LotBooking/${cancelModalBookingId}/cancel?reason=${encodeURIComponent(cancelReason.trim())}`, {
         method: 'POST',
@@ -473,6 +471,8 @@ export default function UserBookingsPage() {
     </div>
   );
 }
+
+
 
 
 
