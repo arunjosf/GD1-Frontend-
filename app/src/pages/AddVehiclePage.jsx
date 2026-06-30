@@ -439,7 +439,7 @@ export default function AddVehiclePage() {
                   ) : (
                     <div className="relative h-[120px]">
                       <input type="file" accept="image/*,.pdf" onChange={e => handleFileUpload(e, 'ownerIdProofUrl')} disabled={uploading['ownerIdProofUrl']} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                      <div className={`w-full h-full border-2 border-dashed rounded-xl flex flex-col items-center justify-center text-center px-2 transition-colors ${uploading['ownerIdProofUrl'] ? 'border-blue-400 bg-blue-50' : 'border-gray-300 bg-white group-hover:border-[#111]'}`}>
+                      <div className={`w-full h-full border-2 border-dashed rounded-xl flex flex-col items-stretch justify-center text-center px-2 transition-colors ${uploading['ownerIdProofUrl'] ? 'border-blue-400 bg-blue-50' : 'border-gray-300 bg-white group-hover:border-[#111]'}`}>
                          {uploading['ownerIdProofUrl'] ? (
                            <div className="flex flex-col items-center gap-2">
                              <Loader2 size={20} className="animate-spin text-blue-500" />
@@ -473,7 +473,7 @@ export default function AddVehiclePage() {
                   ) : (
                     <div className="relative h-[120px]">
                       <input type="file" accept="image/*,.pdf" onChange={e => handleFileUpload(e, 'vehicleRcUrl')} disabled={uploading['vehicleRcUrl']} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                      <div className={`w-full h-full border-2 border-dashed rounded-xl flex flex-col items-center justify-center text-center px-2 transition-colors ${uploading['vehicleRcUrl'] ? 'border-blue-400 bg-blue-50' : 'border-gray-300 bg-white group-hover:border-[#111]'}`}>
+                      <div className={`w-full h-full border-2 border-dashed rounded-xl flex flex-col items-stretch justify-center text-center px-2 transition-colors ${uploading['vehicleRcUrl'] ? 'border-blue-400 bg-blue-50' : 'border-gray-300 bg-white group-hover:border-[#111]'}`}>
                          {uploading['vehicleRcUrl'] ? (
                            <div className="flex flex-col items-center gap-2">
                              <Loader2 size={20} className="animate-spin text-blue-500" />
