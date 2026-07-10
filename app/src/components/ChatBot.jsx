@@ -35,34 +35,36 @@ export default function ChatBot() {
     if (open) setTimeout(() => inputRef.current?.focus(), 300);
   }, [open]);
 
-  const sendMessage = async () => {
+    const sendMessage = async () => {
     const text = input.trim();
     if (!text) return;
+    
     setInput('');
     setMessages(prev => [...prev, { id: Date.now(), role: 'user', text }]);
     setThinking(true);
 
-    // Try backend first, fall back to smart mock
     try {
-      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/ai/chat', {
+      // Hitting your newly deployed .NET RAG Controller!
+      const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/aichat/ask', {
         method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
         body: JSON.stringify({ message: text }),
       });
+
       if (res.ok) {
         const data = await res.json();
-        setMessages(prev => [...prev, { id: Date.now() + 1, role: 'bot', text: data.reply || data.message }]);
-        setThinking(false);
-        return;
+        setMessages(prev => [...prev, { id: Date.now() + 1, role: 'bot', text: data.reply }]);
+      } else {
+        setMessages(prev => [...prev, { id: Date.now() + 1, role: 'bot', text: "Sorry, I am having trouble connecting to the server right now." }]);
       }
-    } catch {
-      /* ignore */
-    } // Smart mock fallback
-    await new Promise(r => setTimeout(r, 1200));
-    const reply = getMockReply(text);
-    setMessages(prev => [...prev, { id: Date.now() + 1, role: 'bot', text: reply }]);
-    setThinking(false);
+    } catch (error) {
+      console.error("Chat error:", error);
+      setMessages(prev => [...prev, { id: Date.now() + 1, role: 'bot', text: "Sorry, my network connection failed." }]);
+    } finally {
+      setThinking(false);
+    }
   };
 
   const getMockReply = (msg) => {
