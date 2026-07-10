@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { authApi, getToken } from '../../api/auth';
 import { Link, useNavigate } from 'react-router-dom';
@@ -476,7 +476,7 @@ rests in safety.
               <span
                 onClick={handleForgotPassword}
                 className="text-blue-800 hover:text-blue-600 cursor-pointer text-[12px] font-medium ml-51"
-              >Forgot password?</span>
+              >Forgot?</span>
             </div>
 
               {errors.form && (

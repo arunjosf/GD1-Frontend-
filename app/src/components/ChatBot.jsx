@@ -82,7 +82,7 @@ export default function ChatBot() {
     if (m.includes('cancel') || m.includes('refund'))
       return "You can cancel any booking up to 24 hours before the start date for a full refund. Cancellations within 24 hours are eligible for a 50% refund or a free reschedule.";
     if (m.includes('hello') || m.includes('hi') || m.includes('hey'))
-      return "Hello! 👋 Happy to help. Are you looking to book a garage space, partner with us, or need support with an existing booking?";
+      return "Hello! Happy to help. Are you looking to book a garage space, partner with us, or need support with an existing booking?";
     return "That's a great question! Let me connect you with the right information. For the most accurate help, you can also reach our support team at support@gd1.in or use the Help Centre in the footer. Is there anything else I can help you with?";
   };
 
