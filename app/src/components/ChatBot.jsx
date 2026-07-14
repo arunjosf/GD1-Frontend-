@@ -8,23 +8,11 @@ const BOT_INTRO = {
 
 function GirlAvatar() {
   return (
-    <div className="w-8 h-8 rounded-full flex-shrink-0 overflow-hidden" style={{ background: 'linear-gradient(135deg, #ff0a54, #a200ff)' }}>
-      <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" width="32" height="32">
-        {/* Hair */}
-        <path d="M8 15 Q9 6 18 6 Q27 6 28 15 Q26 9 18 10 Q10 9 8 15Z" fill="#3d2000" />
-        {/* Face */}
-        <circle cx="18" cy="17" r="7.5" fill="#FDBCB4" />
-        {/* Hair sides */}
-        <path d="M10.5 14 Q8 18 9 22 Q10 14 10.5 14Z" fill="#3d2000" />
-        <path d="M25.5 14 Q28 18 27 22 Q26 14 25.5 14Z" fill="#3d2000" />
-        {/* Hair top */}
-        <path d="M10 14 Q10 7 18 7 Q26 7 26 14 Q23 10 18 10 Q13 10 10 14Z" fill="#3d2000" />
-        {/* Body / shirt */}
-        <path d="M9 36 Q9 27 18 27 Q27 27 27 36Z" fill="#a200ff" />
-        {/* Neck */}
-        <rect x="15.5" y="23" width="5" height="5" rx="1" fill="#FDBCB4" />
-      </svg>
-    </div>
+    <img
+      src="/lara.png"
+      alt="Lara"
+      className="w-8 h-8 rounded-full flex-shrink-0 object-cover"
+    />
   );
 }
 
