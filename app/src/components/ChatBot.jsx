@@ -3,17 +3,26 @@ import { useState, useRef, useEffect } from 'react';
 const BOT_INTRO = {
   id: 'intro',
   role: 'bot',
-  text: "Hi! I'm GD1 Assistant 👋 I can help you find the perfect garage space, check availability, explain our services, or answer any questions about your booking. What can I help you with today?",
+  text: "Hi! I'm Lara, your GD1 Assistant. I can help you find the perfect garage space, check availability, explain our services, or answer any questions about your booking. What can I help you with today?",
 };
 
-function BotIcon() {
+function GirlAvatar() {
   return (
-    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center flex-shrink-0">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-        <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7H3a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z" />
-        <path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" />
-        <circle cx="9" cy="17" r="1" />
-        <circle cx="15" cy="17" r="1" />
+    <div className="w-8 h-8 rounded-full flex-shrink-0 overflow-hidden" style={{ background: 'linear-gradient(135deg, #ff0a54, #a200ff)' }}>
+      <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+        {/* Hair */}
+        <path d="M8 15 Q9 6 18 6 Q27 6 28 15 Q26 9 18 10 Q10 9 8 15Z" fill="#3d2000" />
+        {/* Face */}
+        <circle cx="18" cy="17" r="7.5" fill="#FDBCB4" />
+        {/* Hair sides */}
+        <path d="M10.5 14 Q8 18 9 22 Q10 14 10.5 14Z" fill="#3d2000" />
+        <path d="M25.5 14 Q28 18 27 22 Q26 14 25.5 14Z" fill="#3d2000" />
+        {/* Hair top */}
+        <path d="M10 14 Q10 7 18 7 Q26 7 26 14 Q23 10 18 10 Q13 10 10 14Z" fill="#3d2000" />
+        {/* Body / shirt */}
+        <path d="M9 36 Q9 27 18 27 Q27 27 27 36Z" fill="#a200ff" />
+        {/* Neck */}
+        <rect x="15.5" y="23" width="5" height="5" rx="1" fill="#FDBCB4" />
       </svg>
     </div>
   );
@@ -35,20 +44,19 @@ export default function ChatBot() {
     if (open) setTimeout(() => inputRef.current?.focus(), 300);
   }, [open]);
 
-    const sendMessage = async () => {
+  const sendMessage = async () => {
     const text = input.trim();
     if (!text) return;
-    
+
     setInput('');
     setMessages(prev => [...prev, { id: Date.now(), role: 'user', text }]);
     setThinking(true);
 
     try {
-      // Hitting your newly deployed .NET RAG Controller!
       const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/aichat/ask', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json' 
+        headers: {
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ message: text }),
       });
@@ -65,25 +73,6 @@ export default function ChatBot() {
     } finally {
       setThinking(false);
     }
-  };
-
-  const getMockReply = (msg) => {
-    const m = msg.toLowerCase();
-    if (m.includes('price') || m.includes('cost') || m.includes('fee'))
-      return "Our pricing starts from ₹2,500/month for standard spaces and ₹6,000/month for climate-controlled premium bays. We offer flexible daily, weekly, and monthly plans. Would you like me to find spaces in your area?";
-    if (m.includes('book') || m.includes('reserve') || m.includes('space'))
-      return "Great! To book a space, use the search bar above — enter your location and preferred date. I can also help narrow down garages based on your vehicle type. What kind of vehicle do you have?";
-    if (m.includes('garage') || m.includes('partner') || m.includes('list'))
-      return "Interested in listing your garage? Head to 'Add your Garage' from the Partner With Us menu. Our team will verify your facility and get you onboarded within 48 hours!";
-    if (m.includes('service') || m.includes('maintenance') || m.includes('repair'))
-      return "GD1 connects you with certified service centers. You can schedule oil changes, detailing, tire rotation, and more directly from your dashboard once you've booked a space.";
-    if (m.includes('safe') || m.includes('secure') || m.includes('camera') || m.includes('surveillance'))
-      return "Every GD1 facility has 24/7 HD surveillance, biometric access control, and a dedicated security team. You'll also receive real-time alerts and can check your vehicle via live feed anytime.";
-    if (m.includes('cancel') || m.includes('refund'))
-      return "You can cancel any booking up to 24 hours before the start date for a full refund. Cancellations within 24 hours are eligible for a 50% refund or a free reschedule.";
-    if (m.includes('hello') || m.includes('hi') || m.includes('hey'))
-      return "Hello! Happy to help. Are you looking to book a garage space, partner with us, or need support with an existing booking?";
-    return "That's a great question! Let me connect you with the right information. For the most accurate help, you can also reach our support team at support@gd1.in or use the Help Centre in the footer. Is there anything else I can help you with?";
   };
 
   return (
@@ -112,93 +101,103 @@ export default function ChatBot() {
         </div>
       </button>
 
-      {/* Chat Panel */}
+      {/* Chat Panel - Gradient border wrapper */}
       <div
-        className={`fixed bottom-24 z-50 w-[360px] max-w-[calc(100vw-32px)] right-0 left-0 mx-auto sm:left-auto sm:right-6 sm:mx-0 rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.2)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        className={`fixed bottom-24 z-50 w-[360px] max-w-[calc(100vw-32px)] right-0 left-0 mx-auto sm:left-auto sm:right-6 sm:mx-0 rounded-2xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-[0_20px_60px_rgba(0,0,0,0.15)] ${
           open ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-6 pointer-events-none'
         }`}
-        style={{ background: 'rgba(10,10,15,0.92)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.07)' }}
+        style={{ padding: '1.5px', background: 'linear-gradient(135deg, #ff0a54, #a200ff, #003cff)', borderRadius: '1rem' }}
       >
-        {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.06]">
-          <BotIcon />
-          <div>
-            <p className="text-[13px] font-semibold text-white m-0 leading-tight">GD1 Assistant</p>
-            <p className="text-[11px] text-green-400 m-0 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
-              Online — powered by AI
-            </p>
-          </div>
-          <button onClick={() => setOpen(false)} className="ml-auto text-white/40 hover:text-white/80 transition-colors">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 6 6 18M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+        {/* White inner panel */}
+        <div style={{ background: 'white', borderRadius: 'calc(1rem - 1.5px)', overflow: 'hidden' }}>
 
-        {/* Messages */}
-        <div className="h-[340px] overflow-y-auto px-4 py-4 flex flex-col gap-3 scrollbar-thin">
-          {messages.map(msg => (
-            <div key={msg.id} className={`flex gap-2.5 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-              {msg.role === 'bot' && <BotIcon />}
-              <div
-                className={`max-w-[82%] px-3.5 py-2.5 rounded-2xl text-[13px] leading-relaxed ${
-                  msg.role === 'user'
-                    ? 'bg-blue-600 text-white rounded-tr-sm'
-                    : 'bg-white/[0.08] text-white/90 rounded-tl-sm'
-                }`}
-              >
-                {msg.text}
-              </div>
+          {/* Header */}
+          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-gray-100">
+            <GirlAvatar />
+            <div>
+              <p className="text-[13px] font-semibold text-black m-0 leading-tight">Lara</p>
+              <p className="text-[11px] text-black m-0 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
+                bot
+              </p>
             </div>
-          ))}
-          {thinking && (
-            <div className="flex gap-2.5 items-end">
-              <BotIcon />
-              <div className="bg-white/[0.08] px-4 py-3 rounded-2xl rounded-tl-sm flex gap-1 items-center">
-                <span className="w-1.5 h-1.5 rounded-full bg-white/40 animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-1.5 h-1.5 rounded-full bg-white/40 animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-1.5 h-1.5 rounded-full bg-white/40 animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
-            </div>
-          )}
-          <div ref={bottomRef} />
-        </div>
-
-        {/* Quick Prompts */}
-        <div className="px-4 pb-2 flex gap-2 flex-wrap">
-          {['Book a space', 'Pricing info', 'Partner with us'].map(q => (
-            <button
-              key={q}
-              onClick={() => { setInput(q); setTimeout(() => inputRef.current?.focus(), 50); }}
-              className="text-[11px] text-white/60 border border-white/10 rounded-full px-3 py-1 hover:border-white/30 hover:text-white/90 transition-all"
-            >
-              {q}
-            </button>
-          ))}
-        </div>
-
-        {/* Input */}
-        <div className="px-4 pb-4 pt-2 border-t border-white/[0.06]">
-          <div className="flex gap-2 items-center bg-white/[0.06] rounded-xl px-3 py-2 focus-within:ring-1 focus-within:ring-blue-500/50">
-            <input
-              ref={inputRef}
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-              placeholder="Ask me anything..."
-              className="flex-1 bg-transparent text-[13px] text-white placeholder-white/30 outline-none"
-            />
-            <button
-              onClick={sendMessage}
-              disabled={!input.trim() || thinking}
-              className="w-7 h-7 rounded-lg bg-blue-600 disabled:opacity-30 flex items-center justify-center hover:bg-blue-500 transition-colors"
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" />
+            <button onClick={() => setOpen(false)} className="ml-auto text-gray-400 hover:text-gray-700 transition-colors">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6 6 18M6 6l12 12" />
               </svg>
             </button>
           </div>
+
+          {/* Messages - scrollbar hidden */}
+          <div
+            className="h-[340px] overflow-y-auto px-4 py-4 flex flex-col gap-3"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            <style>{`.chat-scroll::-webkit-scrollbar { display: none; }`}</style>
+            {messages.map(msg => (
+              <div key={msg.id} className={`flex gap-2.5 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                {msg.role === 'bot' && <GirlAvatar />}
+                <div
+                  className={`max-w-[82%] px-3.5 py-2.5 rounded-2xl text-[13px] leading-relaxed ${
+                    msg.role === 'user'
+                      ? 'bg-gradient-to-br from-[#a200ff] to-[#003cff] text-white rounded-tr-sm'
+                      : 'bg-gray-100 text-gray-800 rounded-tl-sm'
+                  }`}
+                >
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+            {thinking && (
+              <div className="flex gap-2.5 items-end">
+                <GirlAvatar />
+                <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-tl-sm flex gap-1 items-center">
+                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+              </div>
+            )}
+            <div ref={bottomRef} />
+          </div>
+
+          {/* Quick Prompts */}
+          <div className="px-4 pb-2 flex gap-2 flex-wrap">
+            {['Book a space', 'Pricing info', 'Partner with us'].map(q => (
+              <button
+                key={q}
+                onClick={() => { setInput(q); setTimeout(() => inputRef.current?.focus(), 50); }}
+                className="text-[11px] text-gray-500 border border-gray-200 rounded-full px-3 py-1 hover:border-purple-400 hover:text-purple-600 transition-all"
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+
+          {/* Input */}
+          <div className="px-4 pb-4 pt-2 border-t border-gray-100">
+            <div className="flex gap-2 items-center bg-gray-50 rounded-xl px-3 py-2 focus-within:ring-1 focus-within:ring-purple-400">
+              <input
+                ref={inputRef}
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+                placeholder="Ask me anything..."
+                className="flex-1 bg-transparent text-[13px] text-gray-800 placeholder-gray-400 outline-none"
+              />
+              <button
+                onClick={sendMessage}
+                disabled={!input.trim() || thinking}
+                className="w-7 h-7 rounded-lg disabled:opacity-30 flex items-center justify-center transition-colors"
+                style={{ background: 'linear-gradient(135deg, #ff0a54, #a200ff)' }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                  <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
     </>
