@@ -51,7 +51,12 @@ export default function ChatBot() {
 
       if (res.ok) {
         const data = await res.json();
-        setMessages(prev => [...prev, { id: Date.now() + 1, role: 'bot', text: data.reply }]);
+        setMessages(prev => [...prev, { 
+          id: Date.now() + 1, 
+          role: 'bot', 
+          text: data.reply,
+          actions: data.actions || []
+        }]);
       } else {
         setMessages(prev => [...prev, { id: Date.now() + 1, role: 'bot', text: "Sorry, I am having trouble connecting to the server right now." }]);
       }
@@ -133,6 +138,19 @@ export default function ChatBot() {
                   }`}
                 >
                   {msg.text}
+                  {msg.actions && msg.actions.length > 0 && (
+                    <div className="flex flex-col gap-2 mt-3">
+                      {msg.actions.map((action, i) => (
+                        <a 
+                          key={i} 
+                          href={action.url} 
+                          className="block text-center font-medium bg-white text-purple-600 border border-purple-200 rounded-lg px-3 py-1.5 hover:bg-purple-50 hover:border-purple-300 transition-colors shadow-sm"
+                        >
+                          {action.label} &rarr;
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

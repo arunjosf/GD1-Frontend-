@@ -32,9 +32,9 @@ export function AuthProvider({ children }) {
   };
 
   useEffect(() => {
-    if (user && user !== true) {
-      fetchUserVehicles();
-    } else if (!user) {
+    if (user) {
+      fetchUserVehicles(); 
+    } else {
       setUserVehicles(null);
     }
   }, [user]);
@@ -113,7 +113,6 @@ export function AuthProvider({ children }) {
           localStorage.removeItem('isAuthenticated');
         }
       } catch (err) {
-        // Network error (backend offline) — NEVER log the user out
         console.warn('Backend unreachable, preserving session.', err.message);
       } finally {
         setLoading(false);

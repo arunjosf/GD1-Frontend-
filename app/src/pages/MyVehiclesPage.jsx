@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { Car, MapPin, CheckCircle2, Navigation, Search } from 'lucide-react';
+import { getToken } from '../api/auth';
 
 export default function MyVehiclesPage() {
   const [vehicles, setVehicles] = useState([]);
@@ -19,31 +20,31 @@ export default function MyVehiclesPage() {
       return;
     }
 
-    const fetchVehicles = async () => {
+          const fetchVehicles = async () => {
       try {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; AccessToken=`);
-        const token = parts.length === 2 ? parts.pop().split(';').shift() : null;
-
+        const token = getToken('AccessToken');
         if (!token) throw new Error("No token found");
 
-        const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/vehicle/my-vehicle', {
+        const res = await fetch('https://gd1-grand-auto-depot-one-9ms1.onrender.com/api/Vehicle/my-vehicle', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
-        if (!res.ok) throw new Error("Failed to fetch vehicles");
+        if (!res.ok) throw new Error("Backend rejected request");
         
         const data = await res.json();
         
-        // Sort stored vehicles first
-        const sortedVehicles = (data.data || []).sort((a, b) => {
-          if (a.isStored && !b.isStored) return -1;
-          if (!a.isStored && b.isStored) return 1;
-          return 0;
-        });
-
-        setVehicles(sortedVehicles);
-      } catch {
+        if (data.success) {
+            const sortedVehicles = (data.data || []).sort((a, b) => {
+              if (a.isStored && !b.isStored) return -1;
+              if (!a.isStored && b.isStored) return 1;
+              return 0;
+            });
+            setVehicles(sortedVehicles);
+        } else {
+            throw new Error(data.message);
+        }
+      } catch (err) {
+        console.error(err);
         toast.error("Failed to load your vehicles");
       } finally {
         setLoading(false);
