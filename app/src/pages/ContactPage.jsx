@@ -11,29 +11,29 @@ const SUPPORT_CHANNELS = [
   {
     icon: <Phone size={22} />,
     label: 'Call Us',
-    value: '+91 98765 43210',
+    value: '+91 8086699324',
     sub: 'Mon–Sat, 9 AM – 8 PM IST',
-    color: '#4f46e5',
-    bg: '#eef2ff',
-    action: 'tel:+919876543210',
+    color: '#111827',
+    bg: '#f3f4f6',
+    action: 'tel:+918086699324',
   },
   {
     icon: <MessageCircle size={22} />,
     label: 'WhatsApp',
-    value: '+91 98765 43210',
+    value: '+91 8086699324',
     sub: 'Quick replies within minutes',
     color: '#16a34a',
     bg: '#f0fdf4',
-    action: 'https://wa.me/919876543210',
+    action: 'https://wa.me/918086699324',
   },
   {
     icon: <Mail size={22} />,
     label: 'Email Support',
-    value: 'support@gd1.in',
+    value: 'arunjoseph400@gmail.com',
     sub: 'We reply within 24 hours',
-    color: '#0284c7',
-    bg: '#f0f9ff',
-    action: 'mailto:support@gd1.in',
+    color: '#2563eb',
+    bg: '#eff6ff',
+    action: 'mailto:arunjoseph400@gmail.com',
   },
   {
     icon: <MapPin size={22} />,
@@ -61,135 +61,140 @@ export default function ContactPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Simulate submission
+    
+    // Simple mailto trigger for static frontend without backend API
+    const subject = encodeURIComponent(form.subject || 'GD1 Contact Form Inquiry');
+    const body = encodeURIComponent(
+      `Name: ${form.name}\nEmail: ${form.email}\n\nMessage:\n${form.message}`
+    );
+    window.location.href = `mailto:arunjoseph400@gmail.com?subject=${subject}&body=${body}`;
+    
     setSent(true);
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f4f6] font-['Inter',sans-serif] flex flex-col">
+    <div className="min-h-screen bg-gray-50 font-['Inter',sans-serif] flex flex-col selection:bg-gray-900 selection:text-white">
       <Navbar />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden pt-36 pb-20 px-6">
-        <div
-          className="absolute inset-0 z-0"
-          style={{ background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)' }}
-        />
-        {/* Glow orbs */}
-        <div className="absolute top-10 left-1/4 w-72 h-72 rounded-full opacity-20 blur-3xl"
-          style={{ background: 'radial-gradient(circle, #a200ff, transparent)' }} />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full opacity-15 blur-3xl"
-          style={{ background: 'radial-gradient(circle, #003cff, transparent)' }} />
-
-        <div className="relative z-10 max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[12px] font-semibold mb-6 border"
-            style={{ background: 'rgba(255,255,255,0.07)', borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.8)' }}>
+      {/* Hero (Clean Minimal) */}
+      <section className="pt-36 pb-20 px-6 bg-white border-b border-gray-100">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold mb-6 border border-gray-200 text-gray-600 bg-gray-50">
             <Headphones size={13} /> 24/7 Support Available
           </div>
-          <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight mb-5 leading-tight">
-            We're here to <br />
-            <span style={{ background: 'linear-gradient(90deg, #a78bfa, #60a5fa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              help you.
-            </span>
+          <h1 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tight mb-5 leading-tight">
+            We're here to <br className="hidden md:block" />
+            <span className="text-blue-600">help you.</span>
           </h1>
-          <p className="text-white/60 text-[16px] max-w-xl mx-auto leading-relaxed">
+          <p className="text-gray-500 text-[16px] max-w-xl mx-auto leading-relaxed">
             Reach out to the GD1 team for any questions about bookings, partnerships, or your vehicle storage.
           </p>
         </div>
       </section>
 
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-8 -mt-8 pb-24 relative z-10">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12">
 
         {/* Support Channel Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
           {SUPPORT_CHANNELS.map((ch, i) => (
             <a
               key={i}
               href={ch.action}
               target={ch.action.startsWith('http') ? '_blank' : undefined}
               rel="noreferrer"
-              className="group bg-white rounded-2xl p-5 border border-black/[0.04] shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_40px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col gap-3"
+              className="group bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 flex flex-col gap-4"
             >
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center"
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center"
                 style={{ background: ch.bg, color: ch.color }}>
                 {ch.icon}
               </div>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">{ch.label}</p>
-                <p className="text-[14px] font-bold text-[#111]">{ch.value}</p>
-                <p className="text-[12px] text-gray-400 mt-0.5">{ch.sub}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{ch.label}</p>
+                <p className="text-sm font-bold text-gray-900">{ch.value}</p>
+                <p className="text-xs text-gray-500 mt-1">{ch.sub}</p>
               </div>
-              <div className="flex items-center gap-1 text-[12px] font-semibold mt-auto"
+              <div className="flex items-center gap-1 text-xs font-bold mt-auto"
                 style={{ color: ch.color }}>
-                Contact <ChevronRight size={13} className="group-hover:translate-x-1 transition-transform" />
+                Contact <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </div>
             </a>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
           {/* Contact Form */}
-          <div className="bg-white rounded-3xl border border-black/[0.04] shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-8">
-            <div className="flex items-center gap-3 mb-7">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #a200ff, #003cff)', color: 'white' }}>
-                <Send size={16} />
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gray-900 text-white">
+                <Send size={18} />
               </div>
               <div>
-                <h2 className="text-[17px] font-black text-[#111]">Send a Message</h2>
-                <p className="text-[12px] text-gray-400">We'll get back to you shortly</p>
+                <h2 className="text-lg font-bold text-gray-900">Send a Message</h2>
+                <p className="text-sm text-gray-500">We'll get back to you shortly</p>
               </div>
             </div>
 
             {sent ? (
               <div className="text-center py-16">
-                <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
-                  style={{ background: 'linear-gradient(135deg, #a200ff20, #003cff20)' }}>
-                  <Send size={28} className="text-indigo-500" />
+                <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center bg-green-50 border border-green-100">
+                  <Send size={28} className="text-green-600" />
                 </div>
-                <h3 className="text-[18px] font-black text-[#111] mb-2">Message Sent!</h3>
-                <p className="text-gray-400 text-[14px]">We'll reply to <strong>{form.email}</strong> within 24 hours.</p>
-                <button onClick={() => setSent(false)} className="mt-6 text-[13px] font-semibold text-indigo-500 hover:underline">
-                  Send another
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Email Client Opened!</h3>
+                <p className="text-gray-500 text-sm max-w-xs mx-auto">
+                  Your default email app should have opened to send a message to <strong>arunjoseph400@gmail.com</strong>.
+                </p>
+                <button onClick={() => setSent(false)} className="mt-8 text-sm font-bold text-blue-600 hover:underline">
+                  Send another message
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {[
-                  { label: 'Your Name', key: 'name', type: 'text', placeholder: 'Arun Joseph' },
-                  { label: 'Email Address', key: 'email', type: 'email', placeholder: 'you@email.com' },
-                  { label: 'Subject', key: 'subject', type: 'text', placeholder: 'Booking issue, refund, partnership...' },
-                ].map(({ label, key, type, placeholder }) => (
-                  <div key={key}>
-                    <label className="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">{label}</label>
-                    <input
-                      type={type}
-                      required
-                      value={form[key]}
-                      onChange={e => setForm(p => ({ ...p, [key]: e.target.value }))}
-                      placeholder={placeholder}
-                      className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-100 text-[14px] text-[#111] placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all"
-                    />
-                  </div>
-                ))}
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  {[
+                    { label: 'Your Name', key: 'name', type: 'text', placeholder: 'John Doe' },
+                    { label: 'Email Address', key: 'email', type: 'email', placeholder: 'john@example.com' },
+                  ].map(({ label, key, type, placeholder }) => (
+                    <div key={key}>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">{label}</label>
+                      <input
+                        type={type}
+                        required
+                        value={form[key]}
+                        onChange={e => setForm(p => ({ ...p, [key]: e.target.value }))}
+                        placeholder={placeholder}
+                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      />
+                    </div>
+                  ))}
+                </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Message</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Subject</label>
+                  <input
+                    type="text"
+                    required
+                    value={form.subject}
+                    onChange={e => setForm(p => ({ ...p, subject: e.target.value }))}
+                    placeholder="What is this regarding?"
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Message</label>
                   <textarea
                     required
-                    rows={4}
+                    rows={5}
                     value={form.message}
                     onChange={e => setForm(p => ({ ...p, message: e.target.value }))}
                     placeholder="Describe your issue or question..."
-                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-100 text-[14px] text-[#111] placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all resize-none"
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-3.5 rounded-xl text-[14px] font-bold text-white flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all"
-                  style={{ background: 'linear-gradient(135deg, #a200ff, #003cff)' }}
+                  className="w-full py-3.5 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all bg-blue-600 hover:bg-blue-700"
                 >
-                  <Send size={15} /> Send Message
+                  <Send size={16} /> Send via Email
                 </button>
               </form>
             )}
@@ -199,46 +204,45 @@ export default function ContactPage() {
           <div className="flex flex-col gap-6">
 
             {/* Quick Info */}
-            <div className="bg-white rounded-3xl border border-black/[0.04] shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-6 flex flex-col gap-4">
-              <h2 className="text-[15px] font-black text-[#111] mb-1">Quick Info</h2>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 flex flex-col gap-5">
+              <h2 className="text-lg font-bold text-gray-900 mb-2">Quick Info</h2>
               {[
-                { icon: <Clock size={15} />, label: 'Support Hours', val: 'Mon–Sat, 9 AM – 8 PM IST', color: '#4f46e5' },
-                { icon: <Zap size={15} />, label: 'Avg. Response Time', val: 'Under 2 hours', color: '#f59e0b' },
-                { icon: <Shield size={15} />, label: 'Emergency Line', val: '+91 98765 99999 (24/7)', color: '#16a34a' },
+                { icon: <Clock size={16} />, label: 'Support Hours', val: 'Mon–Sat, 9 AM – 8 PM IST', color: 'text-blue-600', bg: 'bg-blue-50' },
+                { icon: <Zap size={16} />, label: 'Avg. Response Time', val: 'Under 2 hours', color: 'text-orange-600', bg: 'bg-orange-50' },
+                { icon: <Shield size={16} />, label: 'Emergency Line', val: '+91 8086699324 (24/7)', color: 'text-green-600', bg: 'bg-green-50' },
               ].map((item, i) => (
-                <div key={i} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                    style={{ background: item.color + '18', color: item.color }}>
+                <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${item.bg} ${item.color}`}>
                     {item.icon}
                   </div>
                   <div>
-                    <p className="text-[11px] text-gray-400 font-semibold">{item.label}</p>
-                    <p className="text-[13px] font-bold text-[#111]">{item.val}</p>
+                    <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-0.5">{item.label}</p>
+                    <p className="text-sm font-bold text-gray-900">{item.val}</p>
                   </div>
                 </div>
               ))}
             </div>
 
             {/* FAQ */}
-            <div className="bg-white rounded-3xl border border-black/[0.04] shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-6">
-              <h2 className="text-[15px] font-black text-[#111] mb-4">FAQs</h2>
-              <div className="space-y-2">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+              <h2 className="text-lg font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
+              <div className="space-y-3">
                 {FAQS.map((faq, i) => (
-                  <div key={i} className="border border-gray-100 rounded-xl overflow-hidden">
+                  <div key={i} className="border border-gray-100 rounded-xl overflow-hidden bg-gray-50">
                     <button
                       onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                      className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-50 transition-colors"
+                      className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-100 transition-colors"
                     >
-                      <span className="text-[13px] font-bold text-[#111]">{faq.q}</span>
+                      <span className="text-sm font-bold text-gray-900 pr-4">{faq.q}</span>
                       <ChevronRight
-                        size={15}
+                        size={16}
                         className="text-gray-400 shrink-0 transition-transform duration-200"
                         style={{ transform: openFaq === i ? 'rotate(90deg)' : 'rotate(0deg)' }}
                       />
                     </button>
                     {openFaq === i && (
-                      <div className="px-4 pb-4 text-[13px] text-gray-500 leading-relaxed border-t border-gray-50">
-                        <div className="pt-3">{faq.a}</div>
+                      <div className="px-5 pb-5 text-sm text-gray-600 leading-relaxed border-t border-gray-100">
+                        <div className="pt-4">{faq.a}</div>
                       </div>
                     )}
                   </div>

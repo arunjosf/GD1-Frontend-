@@ -11,22 +11,22 @@ import {
 
 const API = 'https://gd1-grand-auto-depot-one-9ms1.onrender.com';
 
-function StatusBadge({ status, applicationType }) {
+function StatusBadge({ status }) {
   const isApproved = status === 5 || status === 'Approved';
   const isRejected = status === 4 || status === 'Rejected' || status === 'Cancelled';
   if (isApproved) return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#f0fdf4] text-[#16a34a] border border-[#dcfce7]">
-      <CheckCircle size={12} strokeWidth={2.5} /> Approved
+    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
+      <CheckCircle size={14} /> Approved
     </span>
   );
   if (isRejected) return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#fef2f2] text-[#ef4444] border border-[#fee2e2]">
-      <XCircle size={12} strokeWidth={2.5} /> {status === 'Cancelled' ? 'Cancelled' : 'Rejected'}
+    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">
+      <XCircle size={14} /> {status === 'Cancelled' ? 'Cancelled' : 'Rejected'}
     </span>
   );
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#eff6ff] text-[#3b82f6] border border-[#dbeafe]">
-      <div className="w-1.5 h-1.5 rounded-full bg-[#3b82f6] animate-pulse" /> In Progress
+    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+      <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" /> In Progress
     </span>
   );
 }
@@ -80,125 +80,185 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa] font-['Inter',sans-serif] flex flex-col selection:bg-black selection:text-white">
+    <div className="min-h-screen bg-gray-50 font-['Inter',sans-serif] flex flex-col">
       <Navbar />
 
-      <main className="flex-1 pt-32 pb-24 px-5 sm:px-8 max-w-[1100px] mx-auto w-full">
-
-        {/* Profile Header section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-10 border-b border-black/[0.06]">
-          <div className="flex items-center gap-6">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-[2rem] bg-black text-white flex items-center justify-center text-3xl font-medium tracking-tighter shadow-sm border border-black/5">
+      <main className="flex-1 pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        
+        {/* Profile Header Card */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-10 mb-8 flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left">
+            <div className="w-24 h-24 rounded-full bg-gray-900 text-white flex items-center justify-center text-3xl font-bold shadow-md">
               {initials}
             </div>
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-semibold text-[#111] tracking-tight mb-2">{fullName}</h1>
-              <div className="flex items-center gap-4 text-[14px] text-gray-500 font-medium">
-                <span className="flex items-center gap-1.5"><Mail size={15} /> {email}</span>
-                {phone && <span className="flex items-center gap-1.5"><Phone size={15} /> {phone}</span>}
+            <div className="mt-2">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">{fullName}</h1>
+              <div className="flex flex-col md:flex-row items-center gap-3 md:gap-6 text-sm text-gray-600">
+                <span className="flex items-center gap-2"><Mail size={16} /> {email}</span>
+                {phone && <span className="flex items-center gap-2"><Phone size={16} /> {phone}</span>}
               </div>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="group flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-[13px] font-semibold text-[#111] bg-white border border-black/10 hover:border-black/30 hover:bg-black/5 transition-all w-full md:w-auto"
+            className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 transition-colors w-full md:w-auto"
           >
-            Log Out <LogOut size={14} className="text-gray-400 group-hover:text-[#111] transition-colors" />
+            <LogOut size={16} /> Log Out
           </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-          {/* My Vehicles */}
-          <div className="flex flex-col gap-5">
-            <div className="flex items-center justify-between px-1">
-              <h2 className="text-[17px] font-semibold text-[#111] tracking-tight flex items-center gap-2">
-                Garage <span className="text-gray-400 font-normal">({regularVehicles.length})</span>
+          
+          {/* My Garage */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Car className="text-blue-600" size={20} /> My Garage
               </h2>
-              <button onClick={() => navigate('/my-vehicles')} className="text-[13px] font-medium text-blue-600 hover:text-blue-700 transition-colors">
+              <button onClick={() => navigate('/my-vehicles')} className="text-sm font-bold text-blue-600 hover:underline">
                 View all
               </button>
             </div>
-
-            {vehiclesLoading ? (
-              <div className="h-40 bg-white rounded-3xl border border-black/[0.06] flex items-center justify-center">
-                <Loader2 size={24} className="animate-spin text-gray-300" />
-              </div>
-            ) : regularVehicles.length === 0 ? (
-              <div className="h-40 bg-white rounded-3xl border border-black/[0.06] flex flex-col items-center justify-center text-center p-6">
-                <Car size={28} strokeWidth={1.5} className="text-gray-300 mb-3" />
-                <p className="text-[14px] text-gray-500 font-medium mb-1">No vehicles found</p>
-                <button onClick={() => navigate('/add-vehicle')} className="text-[13px] text-blue-600 font-medium hover:underline">Add your first vehicle</button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {regularVehicles.slice(0, 4).map(v => {
-                  const img = getVehicleImage(v);
-                  return (
-                    <div key={v.id} className="group bg-white p-4 rounded-3xl border border-black/[0.06] hover:border-black/15 transition-all shadow-sm hover:shadow-md cursor-pointer flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-2xl bg-gray-50 border border-black/[0.04] overflow-hidden flex-shrink-0 flex items-center justify-center">
-                        {img ? (
-                          <img src={img} alt={v.model} className="w-full h-full object-cover" />
-                        ) : (
-                          <Car size={20} className="text-gray-400" />
-                        )}
+            <div className="p-6 flex-1">
+              {vehiclesLoading ? (
+                <div className="flex items-center justify-center h-40">
+                  <Loader2 size={32} className="animate-spin text-gray-400" />
+                </div>
+              ) : regularVehicles.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-40 text-center">
+                  <Car size={40} className="text-gray-300 mb-3" />
+                  <p className="text-gray-500 font-medium mb-3">Your garage is empty</p>
+                  <button onClick={() => navigate('/add-vehicle')} className="px-5 py-2 bg-gray-900 text-white rounded-lg text-sm font-bold hover:bg-gray-800">
+                    Add Vehicle
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {regularVehicles.slice(0, 4).map(v => {
+                    const img = getVehicleImage(v);
+                    return (
+                      <div key={v.id} className="group border border-gray-200 rounded-xl overflow-hidden hover:border-blue-300 hover:shadow-md transition-all bg-white flex flex-col">
+                        <div className="aspect-video bg-gray-100 w-full relative overflow-hidden flex items-center justify-center">
+                          {img ? (
+                            <img src={img} alt={v.model} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          ) : (
+                            <Car size={32} className="text-gray-400" />
+                          )}
+                        </div>
+                        <div className="p-4">
+                          <p className="font-bold text-gray-900 truncate">{v.brand} {v.model}</p>
+                          <p className="text-xs text-gray-500 mt-1">{v.registrationNo || 'No Reg'}</p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[14px] font-semibold text-[#111] truncate mb-0.5">{v.brand} {v.model}</p>
-                        <p className="text-[12px] text-gray-500 truncate">{v.registrationNo || 'No Registration'}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Stored Vehicles */}
-          <div className="flex flex-col gap-5">
-            <div className="flex items-center px-1">
-              <h2 className="text-[17px] font-semibold text-[#111] tracking-tight flex items-center gap-2">
-                Stored Vehicles <span className="text-gray-400 font-normal">({storedVehicles.length})</span>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+             <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Warehouse className="text-indigo-600" size={20} /> Stored Vehicles
               </h2>
             </div>
-
-            {vehiclesLoading ? (
-              <div className="h-40 bg-white rounded-3xl border border-black/[0.06] flex items-center justify-center">
-                <Loader2 size={24} className="animate-spin text-gray-300" />
-              </div>
-            ) : storedVehicles.length === 0 ? (
-              <div className="h-40 bg-white rounded-3xl border border-black/[0.06] flex flex-col items-center justify-center text-center p-6">
-                <Warehouse size={28} strokeWidth={1.5} className="text-gray-300 mb-3" />
-                <p className="text-[14px] text-gray-500 font-medium">No vehicles in storage</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {storedVehicles.map(v => {
-                  const img = getVehicleImage(v);
-                  return (
-                    <div 
-                      key={v.id} 
-                      onClick={() => navigate(`/stored-vehicle/${v.id}`)}
-                      className="group bg-[#fafafa] p-4 rounded-3xl border border-black/[0.06] hover:border-black/20 hover:bg-white transition-all shadow-sm hover:shadow-md cursor-pointer flex flex-col"
-                    >
-                      <div className="flex items-start gap-4 mb-4">
-                         <div className="w-14 h-14 rounded-[1rem] bg-white border border-black/[0.04] overflow-hidden flex-shrink-0 flex items-center justify-center">
-                          {img ? (
-                            <img src={img} alt={v.model} className="w-full h-full object-cover" />
+            <div className="p-6 flex-1">
+              {vehiclesLoading ? (
+                 <div className="flex items-center justify-center h-40">
+                  <Loader2 size={32} className="animate-spin text-gray-400" />
+                </div>
+              ) : storedVehicles.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-40 text-center">
+                  <Warehouse size={40} className="text-gray-300 mb-3" />
+                  <p className="text-gray-500 font-medium">No vehicles currently stored</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {storedVehicles.map(v => {
+                    const img = getVehicleImage(v);
+                    return (
+                      <div 
+                        key={v.id} 
+                        onClick={() => navigate(`/stored-vehicle/${v.id}`)}
+                        className="group border border-indigo-100 rounded-xl overflow-hidden hover:border-indigo-400 hover:shadow-md transition-all bg-indigo-50/30 cursor-pointer flex flex-col"
+                      >
+                        <div className="aspect-video bg-gray-200 w-full relative overflow-hidden flex items-center justify-center">
+                           {img ? (
+                            <img src={img} alt={v.model} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           ) : (
-                            <Car size={18} className="text-gray-400" />
+                            <Car size={32} className="text-gray-400" />
                           )}
+                           <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-white uppercase tracking-wider flex items-center gap-1">
+                             <MapPin size={10} /> Stored
+                           </div>
                         </div>
-                        <div className="flex-1 min-w-0 pt-1">
-                          <p className="text-[14px] font-semibold text-[#111] truncate mb-0.5">{v.brand} {v.model}</p>
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/5 text-[10px] font-medium text-black">
-                            <MapPin size={10} /> Stored
-                          </span>
+                        <div className="p-4 flex items-center justify-between">
+                          <div className="min-w-0 flex-1">
+                             <p className="font-bold text-gray-900 truncate">{v.brand} {v.model}</p>
+                          </div>
+                          <ChevronRight size={18} className="text-indigo-400 group-hover:text-indigo-700 transition-colors" />
                         </div>
                       </div>
-                      <div className="mt-auto flex items-center justify-between pt-3 border-t border-black/5">
-                        <span className="text-[12px] font-medium text-gray-500">Manage Storage</span>
-                        <ChevronRight size={14} className="text-gray-400 group-hover:text-black transition-colors" />
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+        </div>
+
+        {/* Applications */}
+        <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Clock className="text-orange-500" size={20} /> Partner Applications
+              </h2>
+              <button onClick={() => navigate('/add-garage')} className="text-sm font-bold text-orange-600 hover:underline">
+                New Application
+              </button>
+          </div>
+          <div className="p-6">
+            {appsLoading ? (
+               <div className="flex items-center justify-center h-32">
+                <Loader2 size={32} className="animate-spin text-gray-400" />
+              </div>
+            ) : applications.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-32 text-center">
+                <p className="text-gray-500 font-medium mb-3">No applications submitted yet.</p>
+                <button
+                  onClick={() => navigate('/add-garage')}
+                  className="px-5 py-2 bg-orange-50 text-orange-600 rounded-lg text-sm font-bold hover:bg-orange-100 transition-colors"
+                >
+                  Apply for Partnership
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {applications.map(app => {
+                  const isSC = app.applicationType === 2 || app.applicationType === 'ServiceCenter';
+                  return (
+                    <div
+                      key={`${app.id}-${app.applicationType}`}
+                      onClick={() => navigate('/track-application')}
+                      className="border border-gray-200 rounded-xl p-5 hover:shadow-md hover:border-gray-300 transition-all cursor-pointer flex items-center justify-between bg-white"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                          <Warehouse size={20} className="text-gray-700" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900 mb-1">{app.businessName}</p>
+                          <p className="text-xs text-gray-500 font-medium">
+                            {isSC ? 'Service Center' : 'Garage'} • {new Date(app.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <StatusBadge status={app.status} />
+                        <ChevronRight size={18} className="text-gray-400" />
                       </div>
                     </div>
                   );
@@ -206,62 +266,6 @@ export default function ProfilePage() {
               </div>
             )}
           </div>
-        </div>
-
-        {/* Applications */}
-        <div className="mt-12 flex flex-col gap-5">
-           <div className="flex items-center px-1">
-              <h2 className="text-[17px] font-semibold text-[#111] tracking-tight">Partner Applications</h2>
-            </div>
-
-          {appsLoading ? (
-            <div className="h-32 bg-white rounded-3xl border border-black/[0.06] flex items-center justify-center">
-              <Loader2 size={24} className="animate-spin text-gray-300" />
-            </div>
-          ) : applications.length === 0 ? (
-            <div className="bg-white rounded-3xl border border-black/[0.06] p-8 flex flex-col items-center justify-center text-center">
-              <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-gray-100">
-                <Clock size={20} strokeWidth={1.5} className="text-gray-400" />
-              </div>
-              <p className="text-[14px] font-medium text-[#111] mb-2">No applications yet</p>
-              <p className="text-[13px] text-gray-500 max-w-sm mb-5">Have a property or service center? Partner with us to grow your business.</p>
-              <button
-                onClick={() => navigate('/add-garage')}
-                className="px-6 py-2.5 rounded-full bg-black text-white text-[13px] font-medium hover:bg-gray-800 transition-colors"
-              >
-                Apply for Partnership
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {applications.map(app => {
-                const isSC = app.applicationType === 2 || app.applicationType === 'ServiceCenter';
-                return (
-                  <div
-                    key={`${app.id}-${app.applicationType}`}
-                    onClick={() => navigate('/track-application')}
-                    className="group bg-white p-5 rounded-3xl border border-black/[0.06] hover:border-black/15 transition-all shadow-sm cursor-pointer flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-[1rem] bg-black/5 flex items-center justify-center shrink-0">
-                        <Warehouse size={18} strokeWidth={1.5} className="text-[#111]" />
-                      </div>
-                      <div>
-                        <p className="text-[15px] font-semibold text-[#111] mb-0.5">{app.businessName}</p>
-                        <p className="text-[13px] text-gray-500">
-                          {isSC ? 'Service Center' : 'Garage'} · {new Date(app.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <StatusBadge status={app.status} applicationType={app.applicationType} />
-                      <ChevronRight size={16} className="text-gray-300 group-hover:text-black transition-colors" />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
         </div>
 
       </main>

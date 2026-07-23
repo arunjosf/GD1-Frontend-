@@ -86,11 +86,7 @@ export default function ChatBot() {
               <path d="M18 6 6 18M6 6l12 12" />
             </svg>
           ) : (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3d3d3d" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m12 3-1.91 5.8a2 2 0 0 1-1.27 1.27L3 12l5.8 1.91a2 2 0 0 1 1.27 1.27L12 21l1.91-5.8a2 2 0 0 1 1.27-1.27L21 12l-5.8-1.91a2 2 0 0 1-1.27-1.27z" />
-              <path d="M5.5 3l.8 2.3a1 1 0 0 0 .6.6L9 6.5l-2.1.7a1 1 0 0 0-.6.6L5.5 10l-.8-2.2a1 1 0 0 0-.6-.6L2 6.5l2.1-.7a1 1 0 0 0 .6-.6z" />
-              <path d="M18.5 14l.8 2.3a1 1 0 0 0 .6.6l2.1.7-2.1.7a1 1 0 0 0-.6.6l-.8 2.2-.8-2.2a1 1 0 0 0-.6-.6l-2.1-.7 2.1-.7a1 1 0 0 0 .6-.6z" />
-            </svg>
+            <img src="/lara.png" alt="Lara" className="w-[32px] h-[32px] object-cover rounded-full" />
           )}
           {!open && (
             <span className="absolute -top-[2px] -right-[2px] w-[14px] h-[14px] rounded-full bg-[#ff0a54] border-2 border-white animate-pulse" />
