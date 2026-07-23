@@ -92,7 +92,7 @@ import AgentLayout from './components/AgentLayout';
 import AgentAssignmentsPage from './pages/agent/AgentAssignmentsPage';
 import AgentSubmitReportPage from './pages/agent/AgentSubmitReportPage';
 import AgentPropertyDetailsPage from './pages/agent/AgentPropertyDetailsPage';
-import ContactPage from './pages/ContactPage';
+
 
 class ErrorBoundary extends Component {
   constructor(props) {
