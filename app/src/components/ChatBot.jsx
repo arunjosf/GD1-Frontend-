@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+
 
 const BOT_INTRO = {
   id: 'intro',
@@ -137,8 +139,8 @@ export default function ChatBot() {
                       : 'bg-gray-100 text-gray-800 rounded-tl-sm'
                   }`}
                 >
-                  {msg.text}
-                  {msg.actions && msg.actions.length > 0 && (
+                   <ReactMarkdown>{msg.text}</ReactMarkdown>                 
+                   {msg.actions && msg.actions.length > 0 && (
                     <div className="flex flex-col gap-2 mt-3">
                       {msg.actions.map((action, i) => (
                         <a 
