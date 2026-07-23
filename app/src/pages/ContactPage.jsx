@@ -56,21 +56,43 @@ const FAQS = [
 export default function ContactPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Simple mailto trigger for static frontend without backend API
-    const subject = encodeURIComponent(form.subject || 'GD1 Contact Form Inquiry');
-    const body = encodeURIComponent(
-      `Name: ${form.name}\nEmail: ${form.email}\n\nMessage:\n${form.message}`
-    );
-    window.location.href = `mailto:arunjoseph400@gmail.com?subject=${subject}&body=${body}`;
-    
-    // Reset form immediately
-    setForm({ name: '', email: '', subject: '', message: '' });
+    setSending(true);
+
+    try {
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          access_key: "8667caca-17eb-4558-a428-8242a4954013",
+          name: form.name,
+          email: form.email,
+          subject: form.subject,
+          message: form.message,
+        }),
+      });
+      
+      const result = await res.json();
+      if (result.success) {
+        setSent(true);
+        setForm({ name: '', email: '', subject: '', message: '' });
+      } else {
+        alert("Failed to send message. Please make sure you added a valid Web3Forms access key.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Network error occurred.");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -136,6 +158,20 @@ export default function ContactPage() {
               </div>
             </div>
 
+            {sent ? (
+              <div className="text-center py-16">
+                <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center bg-green-50 border border-green-100">
+                  <Shield size={28} className="text-green-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Message Sent!</h3>
+                <p className="text-gray-500 text-sm max-w-xs mx-auto">
+                  Thank you for reaching out. Our support team will get back to you at <strong>{form.email || 'your email'}</strong> within 24 hours.
+                </p>
+                <button onClick={() => setSent(false)} className="mt-8 text-sm font-bold text-blue-600 hover:underline">
+                  Send another message
+                </button>
+              </div>
+            ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   {[
@@ -179,11 +215,13 @@ export default function ContactPage() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-3.5 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all bg-blue-600 hover:bg-blue-700"
+                  disabled={sending}
+                  className="w-full py-3.5 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all bg-blue-600 hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  <Send size={16} /> Send via Email
+                  <Send size={16} className={sending ? "animate-pulse" : ""} /> {sending ? 'Sending...' : 'Send Message'}
                 </button>
               </form>
+            )}
           </div>
 
           {/* FAQ + Info */}

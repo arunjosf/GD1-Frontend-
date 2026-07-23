@@ -24,6 +24,7 @@ import LotOwnerDashboardPage from './pages/lot-owner/LotOwnerDashboardPage';
 import LotOwnerPropertiesPage from './pages/lot-owner/LotOwnerPropertiesPage';
 import LotOwnerLayout from './components/LotOwnerLayout';
 import ContactPage from './pages/ContactPage';
+import AboutPage from './pages/AboutPage';
 import ChatBot from './components/ChatBot';
 import PropertyDetailsPage from './pages/PropertyDetailsPage';
 import NearbyServiceCentersPage from './pages/vehicle-owner/NearbyServiceCentersPage';
@@ -255,6 +256,7 @@ export default function App() {
             <RegisterPage />
           </PublicRoute>
         } />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         
         {/* Admin Routes */}
