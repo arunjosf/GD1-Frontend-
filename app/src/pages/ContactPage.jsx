@@ -69,7 +69,8 @@ export default function ContactPage() {
     );
     window.location.href = `mailto:arunjoseph400@gmail.com?subject=${subject}&body=${body}`;
     
-    setSent(true);
+    // Reset form immediately
+    setForm({ name: '', email: '', subject: '', message: '' });
   };
 
   return (
@@ -84,7 +85,7 @@ export default function ContactPage() {
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tight mb-5 leading-tight">
             We're here to <br className="hidden md:block" />
-            <span className="text-blue-600">help you.</span>
+            <span className="text-blue-700">help you.</span>
           </h1>
           <p className="text-gray-500 text-[16px] max-w-xl mx-auto leading-relaxed">
             Reach out to the GD1 team for any questions about bookings, partnerships, or your vehicle storage.
@@ -135,20 +136,6 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {sent ? (
-              <div className="text-center py-16">
-                <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center bg-green-50 border border-green-100">
-                  <Send size={28} className="text-green-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Email Client Opened!</h3>
-                <p className="text-gray-500 text-sm max-w-xs mx-auto">
-                  Your default email app should have opened to send a message to <strong>arunjoseph400@gmail.com</strong>.
-                </p>
-                <button onClick={() => setSent(false)} className="mt-8 text-sm font-bold text-blue-600 hover:underline">
-                  Send another message
-                </button>
-              </div>
-            ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   {[
@@ -197,7 +184,6 @@ export default function ContactPage() {
                   <Send size={16} /> Send via Email
                 </button>
               </form>
-            )}
           </div>
 
           {/* FAQ + Info */}
