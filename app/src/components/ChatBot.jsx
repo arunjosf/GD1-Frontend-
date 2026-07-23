@@ -143,14 +143,19 @@ export default function ChatBot() {
                 >
                    <ReactMarkdown
                    components={{
-                    a: ({ href, children }) => (
-                      <span
-                        className="text-purple-600 underline cursor-pointer"
-                        onClick={() => { navigate(href); setOpen(false); }}
-                      >
-                        {children}
-                      </span>
-                    )
+                     a: ({ href, children }) => {
+                      const path = href?.startsWith('/property/') 
+                        ? href.replace('/property/', '/garage/') 
+                        : href;
+                      return (
+                        <span
+                          className="cursor-pointer font-semibold hover:underline"
+                          onClick={() => { navigate(path); setOpen(false); }}
+                        >
+                          {children}
+                        </span>
+                      );
+                    }
                   }}
                   >
                 {msg.text}
