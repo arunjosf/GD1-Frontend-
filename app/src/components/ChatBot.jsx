@@ -139,7 +139,13 @@ export default function ChatBot() {
                       : 'bg-gray-100 text-gray-800 rounded-tl-sm'
                   }`}
                 >
-                   <ReactMarkdown>{msg.text}</ReactMarkdown>                 
+                   <ReactMarkdown
+                   components={{
+                  a: ({ href, children }) => <Link to={href}>{children}</Link>
+                  }}
+                  >
+                {msg.text}
+                  </ReactMarkdown>                 
                    {msg.actions && msg.actions.length > 0 && (
                     <div className="flex flex-col gap-2 mt-3">
                       {msg.actions.map((action, i) => (
