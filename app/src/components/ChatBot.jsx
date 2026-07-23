@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 
 
@@ -20,6 +20,7 @@ function GirlAvatar() {
 }
 
 export default function ChatBot() {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([BOT_INTRO]);
   const [input, setInput] = useState('');
@@ -142,7 +143,14 @@ export default function ChatBot() {
                 >
                    <ReactMarkdown
                    components={{
-                  a: ({ href, children }) => <Link to={href}>{children}</Link>
+                    a: ({ href, children }) => (
+                      <span
+                        className="text-purple-600 underline cursor-pointer"
+                        onClick={() => { navigate(href); setOpen(false); }}
+                      >
+                        {children}
+                      </span>
+                    )
                   }}
                   >
                 {msg.text}
