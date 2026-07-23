@@ -14,11 +14,8 @@ export default function Navbar() {
 
   const handleOpenNotifications = () => {
     setIsNotificationOpen(true);
-    setUnreadCount(0); // Immediately hide the count badge on the bell
+    setUnreadCount(0); 
 
-    // Mark unread notifications as read in the backend so the count doesn't return on next fetch,
-    // BUT do NOT update local state 'isRead: true' immediately, so the user can still see 
-    // the blue dots on the new notifications while the bar is open!
     const unreadNotifs = notifications.filter(n => !n.isRead);
     if (unreadNotifs.length > 0) {
       const value = `; ${document.cookie}`;
@@ -66,7 +63,7 @@ export default function Navbar() {
 
   return (
     <nav className="fixed top-0 left-0 w-full z-[100]">
-      {/* Expandable Glass Background */}
+
       <div 
         className={`absolute top-0 left-0 w-full bg-white/40 backdrop-blur-2xl border-b border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.05)] transition-all duration-300 -z-10 ${
           isHovered ? 'h-[120px]' : 'h-12'
@@ -75,14 +72,12 @@ export default function Navbar() {
 
       <div className="w-full px-[6vw] md:px-0 h-12 flex items-center justify-between md:justify-center md:gap-16">
         
-        {/* Logo / Brand */}
         <div className="flex-shrink-0 flex items-center relative z-[110]">
           <Link to="/" className="flex items-center outline-none">
             <img src="/GD1 Logo.png" alt="GD1 Logo" className="h-[24px] md:h-[27px] w-auto object-contain" />
           </Link>
         </div>  
 
-        {/* Center Nav Links */}
         <div className="hidden md:flex items-center justify-center gap-10 whitespace-nowrap">
           {['Home', 'About', 'Contact'].map((item) => (
             <Link 
@@ -94,7 +89,6 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {/* Dropdown for Partner With Us */}
           <div 
             className="relative h-full flex items-center"
             onMouseEnter={() => setIsHovered(true)}
@@ -104,7 +98,6 @@ export default function Navbar() {
               Partner With Us
             </button>
             
-            {/* Dropdown Menu */}
             <div className={`absolute top-12  left-0 w-[220px] transition-all duration-300 flex flex-col pt-1 pb-4 z-50 ${isHovered ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
               <Link to="/add-garage" className="py-1.5 text-[12px] font-medium text-[#111]/70 hover:text-[#111] transition-colors no-underline">
                 Add your Garage

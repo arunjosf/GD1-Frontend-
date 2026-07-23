@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import ChatBot from '../components/ChatBot';
 import { useAuth } from '../context/AuthContext';
 import { getToken } from '../api/auth';
 
@@ -783,7 +782,6 @@ export default function HomePage() {
       )}
 
       <Footer />
-      <ChatBot />
     </div>
   );
 }

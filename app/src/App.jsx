@@ -23,6 +23,8 @@ import LotOwnerPickupsPage from './pages/lot-owner/LotOwnerPickupsPage';
 import LotOwnerDashboardPage from './pages/lot-owner/LotOwnerDashboardPage';
 import LotOwnerPropertiesPage from './pages/lot-owner/LotOwnerPropertiesPage';
 import LotOwnerLayout from './components/LotOwnerLayout';
+import ContactPage from './pages/ContactPage';
+import ChatBot from './components/ChatBot';
 import PropertyDetailsPage from './pages/PropertyDetailsPage';
 import NearbyServiceCentersPage from './pages/vehicle-owner/NearbyServiceCentersPage';
 import VehicleOwnerPaymentsPage from './pages/vehicle-owner/VehicleOwnerPaymentsPage';
@@ -90,7 +92,7 @@ import AgentLayout from './components/AgentLayout';
 import AgentAssignmentsPage from './pages/agent/AgentAssignmentsPage';
 import AgentSubmitReportPage from './pages/agent/AgentSubmitReportPage';
 import AgentPropertyDetailsPage from './pages/agent/AgentPropertyDetailsPage';
-
+import ContactPage from './pages/ContactPage';
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -226,6 +228,13 @@ function PublicRoute({ children }) {
   return children;
 }
 
+function VehicleOwnerChatBot() {
+  const { isAuthenticated } = useAuth();
+  const role = getUserRole();
+  if (!isAuthenticated || role !== 1) return null;
+  return <ChatBot />;
+}
+
 export default function App() {
   return (
     <ErrorBoundary>
@@ -246,6 +255,7 @@ export default function App() {
             <RegisterPage />
           </PublicRoute>
         } />
+        <Route path="/contact" element={<ContactPage />} />
         
         {/* Admin Routes */}
         <Route path="/admin" element={
@@ -289,6 +299,7 @@ export default function App() {
           <Route path="vehicle-journey/:vehicleId" element={<VehicleJourneyPage />} />
           <Route path="messages" element={<MessagesPage />} />
           <Route path="*" element={<Navigate to="/lot-owner/dashboard" replace />} />
+          <Route path="/contact" element={<ContactPage />} />
         </Route>
 
         {/* Manager Routes */}
@@ -454,6 +465,7 @@ export default function App() {
         } />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <VehicleOwnerChatBot />
     </ErrorBoundary>
   );
 }
