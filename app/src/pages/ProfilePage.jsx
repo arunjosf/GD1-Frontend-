@@ -60,46 +60,25 @@ export default function ProfilePage() {
       <main className="pt-32 px-6 md:px-12 max-w-[1200px] mx-auto w-full">
         
         {/* Profile Hero Header */}
-        <div className="relative mb-24 overflow-hidden rounded-[2rem] bg-gray-50 border border-gray-100 p-8 md:p-12 flex flex-col md:flex-row md:items-center justify-between gap-8">
-          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-100 rounded-full blur-[80px] -z-10 opacity-50 translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-purple-100 rounded-full blur-[60px] -z-10 opacity-40 -translate-x-1/2 translate-y-1/2" />
-
-          <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 z-10 text-center md:text-left">
-            <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-[#111] text-white flex items-center justify-center text-3xl md:text-4xl font-semibold shadow-[0_8px_30px_rgba(0,0,0,0.12)] shrink-0">
-              {initials}
-            </div>
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-[#1d1d1f] tracking-tight mb-2 md:mb-3">
-                {fullName}
-              </h1>
-              <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-5 text-sm text-gray-500 font-medium">
-                <span className="flex items-center gap-2"><Mail size={16} /> {user?.email || '—'}</span>
-                {user?.phone && <span className="flex items-center gap-2"><Phone size={16} /> {user.phone}</span>}
-              </div>
-            </div>
+        <div className="flex flex-col items-center justify-center text-center mb-24">
+          <div className="w-24 h-24 rounded-full bg-[#111] text-white flex items-center justify-center text-3xl font-semibold mb-6 shadow-md">
+            {initials}
           </div>
-          
-          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 z-10">
-            <div className="flex items-center gap-8 bg-white px-8 py-4 rounded-3xl shadow-sm border border-gray-100/50">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-[#1d1d1f]">{vehicles.length}</p>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Vehicles</p>
-              </div>
-              <div className="w-px h-10 bg-gray-200"></div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-[#1d1d1f]">{applications.length}</p>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Applications</p>
-              </div>
-            </div>
-            
-            <button
-              onClick={handleLogout}
-              className="flex items-center justify-center gap-2 w-12 h-12 rounded-full text-gray-500 bg-white hover:bg-gray-100 hover:text-red-600 border border-gray-200 shadow-sm transition-colors shrink-0"
-              title="Sign out"
-            >
-              <LogOut size={18} />
-            </button>
+          <h1 className="text-4xl md:text-5xl font-semibold text-[#1d1d1f] tracking-tight mb-3">
+            Welcome, {fullName.split(' ')[0]}
+          </h1>
+          <div className="text-[15px] text-gray-500 mb-8 max-w-md flex flex-col items-center gap-2">
+            <span className="font-medium text-gray-700 bg-gray-100 px-3 py-1 rounded-full flex items-center gap-2">
+              <Mail size={14} /> {user?.email || '—'}
+            </span>
+            <span>Manage your registered vehicles, track storage locations, and monitor your partner applications.</span>
           </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-6 py-2 rounded-full text-[13px] font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+          >
+            <LogOut size={14} /> Sign out
+          </button>
         </div>
 
         {/* Section: Stored Vehicles */}
