@@ -299,7 +299,6 @@ export default function App() {
           <Route path="vehicle-journey/:vehicleId" element={<VehicleJourneyPage />} />
           <Route path="messages" element={<MessagesPage />} />
           <Route path="*" element={<Navigate to="/lot-owner/dashboard" replace />} />
-          <Route path="/contact" element={<ContactPage />} />
         </Route>
 
         {/* Manager Routes */}
