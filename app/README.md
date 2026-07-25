@@ -4,6 +4,10 @@ GD1 is a premium digital platform designed to revolutionize urban parking and ve
 
 **[Looking for the Backend API Repository? Click Here](https://github.com/arunjosf/GD1-Grand-Auto-Depot-One-)** 
 
+## Live Demo
+The frontend is deployed and running live on Vercel: 
+** [Visit GD1 Platform](https://gd-1-frontend-a7n8.vercel.app/)**
+
 ## Tech Stack
 - **Framework:** React 18 with Vite
 - **Styling:** Tailwind CSS & Vanilla CSS
