@@ -4,9 +4,6 @@ GD1 is a premium digital platform designed to revolutionize urban parking and ve
 
 **[Looking for the Backend API Repository? Click Here](https://github.com/arunjosf/GD1-Grand-Auto-Depot-One-)** 
 
-## Live Demo
-The frontend is deployed and running live on Vercel: 
-** [Visit GD1 Platform](https://gd-1-frontend-a7n8.vercel.app/)**
 
 ## Tech Stack
 - **Framework:** React 18 with Vite
@@ -20,6 +17,15 @@ The frontend is deployed and running live on Vercel:
 - **Role-Based Access:** Dedicated portals for Vehicle Owners, Garage Managers, and Admins.
 - **Smart AI Chatbot (Lara):** A built-in AI assistant to help users navigate the platform and book spaces.
 - **Real-Time Booking:** Instantly book verified garages and track live statuses of stored vehicles.
+
+## Screenshots
+Here is a visual overview of the application in action:
+
+![Screenshot 1](public/gr1.png)
+![Screenshot 2](public/gr3.png)
+![Screenshot 3](public/gr2.png)
+![Screenshot 4](public/gr4.png)
+![Screenshot 5](public/gr5.png)
 
 ## Local Setup
 
