@@ -21,11 +21,11 @@ GD1 is a premium digital platform designed to revolutionize urban parking and ve
 ## Screenshots
 Here is a visual overview of the application in action:
 
-![Screenshot 1](public/gr1.png)
-![Screenshot 2](public/gr3.png)
-![Screenshot 3](public/gr2.png)
-![Screenshot 4](public/gr4.png)
-![Screenshot 5](public/gr5.png)
+![Screenshot 1](./app/public/gr1.png)
+![Screenshot 2](./app/public/gr3.png)
+![Screenshot 3](./app/public/gr2.png)
+![Screenshot 4](./app/public/gr4.png)
+![Screenshot 5](./app/public/gr5.png)
 
 ## Local Setup
 
